@@ -8,4 +8,4 @@ __pycache__/
 data/*.sqlite
 data/*.sqlite-*
 exports/*.csv
-logs/*.log
+logs/

@@ -9,6 +9,7 @@ from crypto_signal_autopsy.daemon import configure_logging, run_daemon
 from crypto_signal_autopsy.db import connect, init_db
 from crypto_signal_autopsy.export import export_all
 from crypto_signal_autopsy.scan import run_scan
+from crypto_signal_autopsy.static_site import build_static_site
 from crypto_signal_autopsy.track import run_tracking
 
 
@@ -20,6 +21,7 @@ def main(argv: list[str] | None = None) -> int:
     subparsers.add_parser("track", help="Track due delayed entries and 1h/24h outcomes.")
     subparsers.add_parser("run-once", help="Run scan, tracking, and CSV export.")
     subparsers.add_parser("export", help="Export CSV files.")
+    subparsers.add_parser("static-site", help="Build the static GitHub Pages dashboard.")
     dashboard_parser = subparsers.add_parser("dashboard", help="Start the Streamlit dashboard.")
     dashboard_parser.add_argument("--port", type=int, default=8501, help="Local Streamlit port.")
     daemon_parser = subparsers.add_parser("daemon", help="Run scan, track, and export on a local interval.")
@@ -61,6 +63,11 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "export":
         counts = export_all(conn, settings.export_dir)
         print(_format_stats("export", counts))
+        return 0
+
+    if args.command == "static-site":
+        out_path = build_static_site(conn, settings)
+        print(f"static-site: {out_path}")
         return 0
 
     if args.command == "dashboard":

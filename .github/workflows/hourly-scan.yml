@@ -57,6 +57,7 @@ jobs:
           mkdir -p data exports
           python -m crypto_signal_autopsy.cli init-db
           python -m crypto_signal_autopsy.cli run-once
+          python -m crypto_signal_autopsy.cli static-site
           python - <<'PY'
           import sqlite3
           conn = sqlite3.connect("data/autopsy.sqlite")
@@ -69,7 +70,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f data/autopsy.sqlite exports/*.csv
+          git add -f data/autopsy.sqlite exports/*.csv docs/index.html docs/.nojekyll
           if git diff --cached --quiet; then
             echo "No data changes to commit."
           else
