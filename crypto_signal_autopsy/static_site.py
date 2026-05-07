@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from html import escape
 from pathlib import Path
 import json
+import shutil
 import sqlite3
 from statistics import mean, median
 from typing import Any
@@ -18,6 +19,11 @@ def build_static_site(conn: sqlite3.Connection, settings: Settings, out_dir: Pat
     init_db(conn)
     target_dir = out_dir or settings.project_root / "docs"
     target_dir.mkdir(parents=True, exist_ok=True)
+    asset_dir = target_dir / "assets"
+    asset_dir.mkdir(parents=True, exist_ok=True)
+    header_asset = settings.project_root / "assets" / "dashboard-header.png"
+    if header_asset.exists():
+        shutil.copyfile(header_asset, asset_dir / "dashboard-header.png")
     (target_dir / ".nojekyll").write_text("", encoding="utf-8")
 
     payload = _build_payload(conn, settings)
@@ -141,7 +147,7 @@ def _render_html(payload: dict[str, Any]) -> str:
       justify-content: flex-end;
       background:
         linear-gradient(90deg, rgba(255,255,255,.95), rgba(255,255,255,.72)),
-        url("../assets/dashboard-header.png") center / cover no-repeat,
+        url("assets/dashboard-header.png") center / cover no-repeat,
         #fff;
       box-shadow: 0 18px 45px rgba(18,53,59,.10);
     }}
