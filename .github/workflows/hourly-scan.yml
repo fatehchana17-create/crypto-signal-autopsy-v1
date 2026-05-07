@@ -1,0 +1,78 @@
+name: Hourly crypto scan
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 * * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: hourly-crypto-scan
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .
+
+      - name: Run scan, tracking, and export
+        env:
+          CSA_DB_PATH: data/autopsy.sqlite
+          CSA_EXPORT_DIR: exports
+          CSA_DEX_CHAIN: base
+          CSA_GOPLUS_CHAIN_ID: "8453"
+          CSA_CEX_TOP_N: "100"
+          COINGECKO_DEMO_API_KEY: ${{ secrets.COINGECKO_DEMO_API_KEY }}
+          COINGECKO_PRO_API_KEY: ${{ secrets.COINGECKO_PRO_API_KEY }}
+          GOPLUS_ACCESS_TOKEN: ${{ secrets.GOPLUS_ACCESS_TOKEN }}
+          CSA_REQUIRE_GOPLUS: "false"
+          CSA_MIN_LIQUIDITY_USD: "500000"
+          CSA_MIN_VOLUME_24H_USD: "100000"
+          CSA_MIN_PAIR_AGE_HOURS: "6"
+          CSA_MAX_PRICE_CHANGE_H1_PCT: "75"
+          CSA_MAX_BUY_TAX_PCT: "10"
+          CSA_MAX_SELL_TAX_PCT: "10"
+          CSA_VOLUME_SPIKE_MULTIPLE: "3"
+          CSA_CLEAN_MOMENTUM_MIN_H1_PCT: "3"
+          CSA_LIQUIDITY_EXPANSION_MIN_PCT: "5"
+          CSA_DELAYED_ENTRY_MINUTES: "5"
+          CSA_ESTIMATED_COST_PCT: "0.5"
+        run: |
+          mkdir -p data exports
+          python -m crypto_signal_autopsy.cli init-db
+          python -m crypto_signal_autopsy.cli run-once
+          python - <<'PY'
+          import sqlite3
+          conn = sqlite3.connect("data/autopsy.sqlite")
+          conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+          conn.close()
+          PY
+          rm -f data/autopsy.sqlite-wal data/autopsy.sqlite-shm
+
+      - name: Commit updated research data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f data/autopsy.sqlite exports/*.csv
+          if git diff --cached --quiet; then
+            echo "No data changes to commit."
+          else
+            git commit -m "Update hourly crypto scan data"
+            git push
+          fi
