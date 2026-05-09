@@ -1,4 +1,6 @@
 lesson_type,token_address,pair_id,label_at_scan,horizon,return_pct,reject_reasons,became_illiquid,rugged,volume_disappeared
+blocked_or_watchlisted_winner,0x2A9c1C9325fEcd37bE10F9C1082192E955D54b07,base:0x643dca507ad4c13e58601f44ba4ec9b58cd1a66568cf3d65f25aa43e3ee2d272,Reject,15m,299.4424,"[""pair_age_below_10_minutes""]",0,0,0
+blocked_or_watchlisted_winner,0x2A9c1C9325fEcd37bE10F9C1082192E955D54b07,base:0x643dca507ad4c13e58601f44ba4ec9b58cd1a66568cf3d65f25aa43e3ee2d272,Reject,1h,299.4424,"[""pair_age_below_10_minutes""]",0,0,0
 blocked_or_watchlisted_winner,0xA74f7dad0b4c603adA798E2FeE76bD8D6aDfe8ee,base:0x039b7089b25349f52fe75bd32db237b4c237fa7347c0cbedb494d507b7da9727,Watchlist,15m,152.9155,[],0,0,0
 blocked_or_watchlisted_winner,0xA74f7dad0b4c603adA798E2FeE76bD8D6aDfe8ee,base:0x039b7089b25349f52fe75bd32db237b4c237fa7347c0cbedb494d507b7da9727,Watchlist,1h,152.9155,[],0,0,0
 blocked_or_watchlisted_winner,0xA74f7dad0b4c603adA798E2FeE76bD8D6aDfe8ee,base:0x039b7089b25349f52fe75bd32db237b4c237fa7347c0cbedb494d507b7da9727,Watchlist,4h,152.9155,[],0,0,0

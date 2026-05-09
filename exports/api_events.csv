@@ -8,3 +8,4 @@ id,observed_at,provider,endpoint,status,message,request_url
 7,2026-05-09T13:54:47+00:00,dexscreener,candidate_discovery,empty,no base token profiles/boosts found,
 8,2026-05-09T15:24:38+00:00,wallet_module,status,disabled,Wallet module inactive: missing MORALIS_API_KEY.,
 9,2026-05-09T16:11:19+00:00,wallet_module,status,disabled,Wallet module inactive: missing MORALIS_API_KEY.,
+10,2026-05-09T17:14:39+00:00,wallet_module,status,disabled,Wallet module inactive: missing MORALIS_API_KEY.,

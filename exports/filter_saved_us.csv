@@ -40,6 +40,7 @@ saved_from_bad_token,0x5473bC1d0C564EB9db1391b195Fc0A5007Db5073,base:0x52316a2ec
 saved_from_bad_token,0x5473bC1d0C564EB9db1391b195Fc0A5007Db5073,base:0x52316a2ec4f71d0e5e67498966053d9331b775d82496447d95fd1620b0896c4d,Reject,1h,-1.9066,"[""score_below_v2_thresholds""]",0,0,1
 saved_from_bad_token,0x5473bC1d0C564EB9db1391b195Fc0A5007Db5073,base:0x52316a2ec4f71d0e5e67498966053d9331b775d82496447d95fd1620b0896c4d,Reject,24h,-1.9066,"[""score_below_v2_thresholds""]",0,0,1
 saved_from_bad_token,0x5473bC1d0C564EB9db1391b195Fc0A5007Db5073,base:0x52316a2ec4f71d0e5e67498966053d9331b775d82496447d95fd1620b0896c4d,Reject,4h,-1.9066,"[""score_below_v2_thresholds""]",0,0,1
+saved_from_bad_token,0x9f7161Cd6bDceD685585797708c62Af25173ae89,base:0x8453e8a37505e6172b00Ef2878A5869c313F3e7D,Reject,24h,-0.7637,"[""liquidity_below_10000"",""unique_buyers_below_10"",""volume_24h_below_15000""]",1,0,0
 saved_from_bad_token,0x9f7161Cd6bDceD685585797708c62Af25173ae89,base:0x8453e8a37505e6172b00Ef2878A5869c313F3e7D,Reject,15m,3.0037,"[""liquidity_below_10000"",""unique_buyers_below_10"",""volume_24h_below_15000""]",1,0,0
 saved_from_bad_token,0x9f7161Cd6bDceD685585797708c62Af25173ae89,base:0x8453e8a37505e6172b00Ef2878A5869c313F3e7D,Reject,1h,3.0037,"[""liquidity_below_10000"",""unique_buyers_below_10"",""volume_24h_below_15000""]",1,0,0
 saved_from_bad_token,0x9f7161Cd6bDceD685585797708c62Af25173ae89,base:0x8453e8a37505e6172b00Ef2878A5869c313F3e7D,Reject,4h,3.0037,"[""liquidity_below_10000"",""unique_buyers_below_10"",""volume_24h_below_15000""]",1,0,0
