@@ -2,3 +2,4 @@ id,observed_at,provider,endpoint,status,message,request_url
 1,2026-05-08T20:17:42+00:00,dexscreener,candidate_discovery,empty,no base token profiles/boosts found,
 2,2026-05-08T22:12:15+00:00,dexscreener,candidate_discovery,empty,no base token profiles/boosts found,
 3,2026-05-09T03:58:19+00:00,dexscreener,candidate_discovery,empty,no base token profiles/boosts found,
+4,2026-05-09T08:53:37+00:00,dexscreener,candidate_discovery,empty,no base token profiles/boosts found,
