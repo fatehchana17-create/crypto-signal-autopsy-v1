@@ -8,6 +8,7 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
+from crypto_signal_autopsy.analysis_tables import build_analysis_payload
 from crypto_signal_autopsy.config import Settings, load_settings
 from crypto_signal_autopsy.db import connect, init_db
 from crypto_signal_autopsy.review import (
@@ -62,12 +63,14 @@ def main() -> None:
     col4.metric("API Events", len(api_events))
     st.markdown("</div>", unsafe_allow_html=True)
 
-    tab_overview, tab_manual, tab_signals, tab_outcomes, tab_rejected_audit, tab_raw, tab_config = st.tabs(
-        ["Overview", "Manual Review", "Signals", "Outcomes", "Rejected Audit", "Raw Tables", "Config"]
+    tab_overview, tab_analysis, tab_manual, tab_signals, tab_outcomes, tab_rejected_audit, tab_raw, tab_config = st.tabs(
+        ["Overview", "Analysis", "Manual Review", "Signals", "Outcomes", "Rejected Audit", "Raw Tables", "Config"]
     )
 
     with tab_overview:
         _overview(signals, outcomes, rejected_outcomes, evaluations, api_events, rejected_records, settings)
+    with tab_analysis:
+        _analysis_workspace(conn, settings)
     with tab_manual:
         _manual_review(rejected_records, settings)
     with tab_signals:
@@ -270,6 +273,173 @@ def _rejected_audit(rejected_outcomes: pd.DataFrame) -> None:
         empty_message="No rejected outcome rows yet.",
     )
     st.dataframe(rejected_outcomes, use_container_width=True, hide_index=True)
+
+
+def _analysis_workspace(conn: sqlite3.Connection, settings: Settings) -> None:
+    analysis = build_analysis_payload(conn, settings)
+
+    st.markdown('<div class="section-title">Performance Analysis</div>', unsafe_allow_html=True)
+    st.caption(
+        "These tables separate accepted and rejected tokens, then show what happened after 1h and 24h."
+    )
+
+    top_left, top_right = st.columns(2)
+    with top_left:
+        st.subheader("1h After Rejection")
+        _render_analysis_table(analysis["tables"]["rejected_1h"], analysis["summaries"]["rejected_1h"])
+    with top_right:
+        st.subheader("1h After Acceptance")
+        _render_analysis_table(
+            analysis["tables"]["accepted_1h"],
+            analysis["summaries"]["accepted_1h"],
+            empty_message="No accepted signals have matured to 1h yet.",
+        )
+
+    bottom_left, bottom_right = st.columns(2)
+    with bottom_left:
+        st.subheader("24h After Rejection")
+        _render_analysis_table(analysis["tables"]["rejected_24h"], analysis["summaries"]["rejected_24h"])
+    with bottom_right:
+        st.subheader("24h After Acceptance")
+        _render_analysis_table(
+            analysis["tables"]["accepted_24h"],
+            analysis["summaries"]["accepted_24h"],
+            empty_message="No accepted signals have matured to 24h yet.",
+        )
+
+    st.divider()
+    st.markdown('<div class="section-title">Best And Worst Tables</div>', unsafe_allow_html=True)
+    best_left, best_right = st.columns(2)
+    with best_left:
+        st.subheader("Best After Rejection")
+        _render_extreme_table(analysis["extremes"]["rejected_best"])
+        st.subheader("Worst After Rejection")
+        _render_extreme_table(analysis["extremes"]["rejected_worst"])
+    with best_right:
+        st.subheader("Best After Acceptance")
+        _render_extreme_table(
+            analysis["extremes"]["accepted_best"],
+            empty_message="No accepted winners yet because no token has passed the filters.",
+        )
+        st.subheader("Worst After Acceptance")
+        _render_extreme_table(
+            analysis["extremes"]["accepted_worst"],
+            empty_message="No accepted losers yet because no token has passed the filters.",
+        )
+
+    st.divider()
+    st.markdown('<div class="section-title">Acceptance And Rejection Filter Rules</div>', unsafe_allow_html=True)
+    st.caption("This is the manual checklist: what a token needs to be accepted, and what makes it rejected.")
+    _render_filter_rules(analysis["filter_rules"])
+
+
+def _render_analysis_table(
+    rows: list[dict],
+    summary: dict[str, str],
+    empty_message: str = "No matured rows yet.",
+) -> None:
+    summary_html = (
+        "<div class='analysis-summary'>"
+        f"<span>Rows <strong>{escape(summary.get('count', '0'))}</strong></span>"
+        f"<span>Priced <strong>{escape(summary.get('priced', '0'))}</strong></span>"
+        f"<span>Median <strong>{escape(summary.get('median', 'No data'))}</strong></span>"
+        f"<span>Average <strong>{escape(summary.get('average', 'No data'))}</strong></span>"
+        f"<span>Positive <strong>{escape(summary.get('positive_rate', 'No data'))}</strong></span>"
+        "</div>"
+    )
+    st.html(summary_html)
+    if not rows:
+        st.info(empty_message)
+        return
+
+    body = []
+    for row in rows[:12]:
+        body.append(_analysis_row_html(row, include_horizon=False))
+    _render_table(
+        headers=["Token", "Net", "Liquidity", "24h Vol", "Age", "Why", "What it means", "DEX"],
+        body="".join(body),
+        min_width=1100,
+    )
+
+
+def _render_extreme_table(rows: list[dict], empty_message: str = "No rows yet.") -> None:
+    if not rows:
+        st.info(empty_message)
+        return
+    body = []
+    for row in rows[:10]:
+        body.append(_analysis_row_html(row, include_horizon=True, compact=True))
+    _render_table(
+        headers=["Token", "Horizon", "Net", "Liquidity", "Why", "What it means", "DEX"],
+        body="".join(body),
+        min_width=980,
+    )
+
+
+def _render_filter_rules(rows: list[dict[str, str]]) -> None:
+    body = []
+    for row in rows:
+        body.append(
+            f"""
+            <tr>
+              <td><strong>{escape(row.get("Rule", ""))}</strong></td>
+              <td>{escape(row.get("Accept needs", ""))}</td>
+              <td>{escape(row.get("Rejects when", ""))}</td>
+              <td>{escape(row.get("Why it matters", ""))}</td>
+            </tr>
+            """
+        )
+    _render_table(
+        headers=["Rule", "Accept needs", "Rejects when", "Why it matters"],
+        body="".join(body),
+        min_width=1000,
+    )
+
+
+def _analysis_row_html(row: dict, include_horizon: bool, compact: bool = False) -> str:
+    net_value = row.get("net", "")
+    net_class = _return_class(row.get("net_return_pct"))
+    link = ""
+    if row.get("url"):
+        link = f'<a class="table-action" href="{escape(str(row["url"]))}" target="_blank">Open</a>'
+    token = (
+        f"<strong>{escape(str(row.get('symbol') or 'UNKNOWN'))}</strong>"
+        f"<br><span class='muted-cell'>{escape(str(row.get('name') or row.get('kind') or ''))}</span>"
+    )
+    cells = [f"<td>{token}</td>"]
+    if include_horizon:
+        cells.append(f"<td><span class='muted-cell'>{escape(str(row.get('horizon') or ''))}</span></td>")
+    cells.extend(
+        [
+            f"<td class='num {net_class}'>{escape(str(net_value))}</td>",
+            f"<td class='num'>{escape(str(row.get('liquidity') or ''))}</td>",
+        ]
+    )
+    if not compact:
+        cells.extend(
+            [
+                f"<td class='num'>{escape(str(row.get('volume24h') or ''))}</td>",
+                f"<td class='num'>{escape(str(row.get('age') or ''))}</td>",
+            ]
+        )
+    cells.extend(
+        [
+            f"<td>{escape(str(row.get('reason') or ''))}</td>",
+            f"<td class='diagnosis-cell'>{escape(str(row.get('diagnosis') or ''))}</td>",
+            f"<td>{link}</td>",
+        ]
+    )
+    return f"<tr>{''.join(cells)}</tr>"
+
+
+def _return_class(value: float | None) -> str:
+    if value is None:
+        return ""
+    if value > 0:
+        return "return-good"
+    if value < 0:
+        return "return-bad"
+    return ""
 
 
 def _config_panel(settings: Settings, accepted_count: int) -> None:
@@ -637,6 +807,29 @@ def _style(header_uri: str) -> None:
           line-height: 1.25;
           font-weight: 760;
         }
+        .analysis-summary {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin: 2px 0 10px;
+        }
+        .analysis-summary span {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          min-height: 30px;
+          padding: 5px 9px;
+          border: 1px solid #d8dee8;
+          border-radius: 8px;
+          background: #ffffff;
+          color: #536174;
+          font-size: 12px;
+          font-weight: 700;
+        }
+        .analysis-summary strong {
+          color: #111827;
+          font-variant-numeric: tabular-nums;
+        }
         .reason-wrap {
           min-height: 70px;
           padding: 12px 14px;
@@ -804,6 +997,19 @@ def _style(header_uri: str) -> None:
         }
         .table-action:hover {
           background: #ccfbf1;
+        }
+        .return-good {
+          color: #0f766e !important;
+          font-weight: 800;
+        }
+        .return-bad {
+          color: #b42318 !important;
+          font-weight: 800;
+        }
+        .diagnosis-cell {
+          min-width: 260px;
+          color: #374151;
+          line-height: 1.45;
         }
         .status-pill {
           display: inline-flex;

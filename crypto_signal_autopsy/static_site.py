@@ -10,6 +10,7 @@ import sqlite3
 from statistics import mean, median
 from typing import Any
 
+from crypto_signal_autopsy.analysis_tables import build_analysis_payload
 from crypto_signal_autopsy.config import Settings
 from crypto_signal_autopsy.db import from_json, init_db
 from crypto_signal_autopsy.review import build_rejection_record, humanize_reason, money, pct
@@ -70,6 +71,7 @@ def _build_payload(conn: sqlite3.Connection, settings: Settings) -> dict[str, An
         "reason_counts": reason_counts.most_common(8),
         "outcome_summary": outcome_summary,
         "latest_rejections": [_public_record(record) for record in records[:80]],
+        "analysis": build_analysis_payload(conn, settings),
     }
 
 
@@ -156,6 +158,7 @@ def _render_html(payload: dict[str, Any]) -> str:
     .meta {{ display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }}
     .pill {{ border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.78); padding: 8px 12px; color: var(--muted); font-weight: 700; font-size: 13px; }}
     .grid {{ display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin: 20px 0; }}
+    .four {{ display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 16px; }}
     .card {{ background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 18px; box-shadow: 0 12px 30px rgba(18,53,59,.07); }}
     .metric {{ font-size: 31px; font-weight: 800; margin-top: 6px; }}
     .label {{ color: var(--muted); font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }}
@@ -167,12 +170,17 @@ def _render_html(payload: dict[str, Any]) -> str:
     tr:hover td {{ background: var(--soft); }}
     a {{ color: var(--accent); font-weight: 800; text-decoration: none; }}
     .reason {{ color: var(--warn); font-weight: 700; }}
+    .good {{ color: #16745c; font-weight: 800; }}
+    .bad {{ color: #9b3d2f; font-weight: 800; }}
+    .scroll {{ overflow-x: auto; }}
+    .section-title {{ margin: 28px 0 12px; font-size: 28px; }}
+    .summary-line {{ color: var(--muted); margin: -2px 0 14px; }}
     .tools {{ display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }}
     input, select {{ border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; min-height: 40px; background: #fff; color: var(--ink); }}
     input {{ flex: 1 1 260px; }}
     .small {{ color: var(--muted); font-size: 13px; line-height: 1.5; }}
     @media (max-width: 880px) {{
-      .grid, .two {{ grid-template-columns: 1fr; }}
+      .grid, .two, .four {{ grid-template-columns: 1fr; }}
       h1 {{ font-size: 33px; }}
       header {{ padding: 24px; }}
       th:nth-child(4), td:nth-child(4), th:nth-child(5), td:nth-child(5) {{ display: none; }}
@@ -212,6 +220,30 @@ def _render_html(payload: dict[str, Any]) -> str:
       </div>
       <div id="table"></div>
     </section>
+
+    <h2 class="section-title">Four Core Analysis Tables</h2>
+    <p class="summary-line">Separate views for what happened after rejection and acceptance at 1h and 24h.</p>
+    <section class="four">
+      <div class="card"><h2>1h After Rejection</h2><div id="rejected1h"></div></div>
+      <div class="card"><h2>1h After Acceptance</h2><div id="accepted1h"></div></div>
+      <div class="card"><h2>24h After Rejection</h2><div id="rejected24h"></div></div>
+      <div class="card"><h2>24h After Acceptance</h2><div id="accepted24h"></div></div>
+    </section>
+
+    <h2 class="section-title">Best And Worst Performance</h2>
+    <p class="summary-line">These tables show what worked, what failed, and the reason behind each result.</p>
+    <section class="four">
+      <div class="card"><h2>Best After Rejection</h2><div id="rejectedBest"></div></div>
+      <div class="card"><h2>Worst After Rejection</h2><div id="rejectedWorst"></div></div>
+      <div class="card"><h2>Best After Acceptance</h2><div id="acceptedBest"></div></div>
+      <div class="card"><h2>Worst After Acceptance</h2><div id="acceptedWorst"></div></div>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <h2>Acceptance And Rejection Filter Rules</h2>
+      <p class="small">This is the manual checklist. A token must pass hard filters and show at least one signal pattern before it can be accepted.</p>
+      <div id="filterRules"></div>
+    </section>
   </main>
 
   <script id="payload" type="application/json">{safe_data}</script>
@@ -230,7 +262,55 @@ def _render_html(payload: dict[str, Any]) -> str:
 
     function table(headers, rows) {{
       if (!rows.length) return '<p class="small">No rows yet.</p>';
-      return `<table><thead><tr>${{headers.map(h => `<th>${{h}}</th>`).join("")}}</tr></thead><tbody>${{rows.join("")}}</tbody></table>`;
+      return `<div class="scroll"><table><thead><tr>${{headers.map(h => `<th>${{h}}</th>`).join("")}}</tr></thead><tbody>${{rows.join("")}}</tbody></table></div>`;
+    }}
+
+    const cellClass = (value) => {{
+      const parsed = Number(String(value || "").replace("%", ""));
+      if (Number.isNaN(parsed)) return "";
+      if (parsed > 0) return "good";
+      if (parsed < 0) return "bad";
+      return "";
+    }};
+
+    function auditRows(rows, limit = 12) {{
+      return rows.slice(0, limit).map(row => `<tr>
+        <td><strong>${{row.symbol}}</strong><br><span class="small">${{row.name || ""}}</span></td>
+        <td>${{row.horizon}}</td>
+        <td class="${{cellClass(row.net)}}">${{row.net}}</td>
+        <td>${{row.liquidity}}</td>
+        <td>${{row.volume24h}}</td>
+        <td>${{row.age}}</td>
+        <td>${{row.reason}}</td>
+        <td>${{row.diagnosis}}</td>
+        <td>${{row.url ? `<a href="${{row.url}}" target="_blank" rel="noreferrer">Open</a>` : ""}}</td>
+      </tr>`);
+    }}
+
+    function summaryLabel(summary) {{
+      return `<p class="small">Rows: ${{summary.count}} | Priced: ${{summary.priced}} | Median: ${{summary.median}} | Average: ${{summary.average}} | Positive: ${{summary.positive_rate}}</p>`;
+    }}
+
+    function renderAuditTable(id, rows, summary) {{
+      document.getElementById(id).innerHTML = summaryLabel(summary) + table(
+        ["Token", "Horizon", "Net", "Liquidity", "24h Vol", "Age", "Why", "What it means", "Link"],
+        auditRows(rows)
+      );
+    }}
+
+    function renderExtremeTable(id, rows) {{
+      document.getElementById(id).innerHTML = table(
+        ["Token", "Horizon", "Net", "Liquidity", "Why", "What it means", "Link"],
+        rows.slice(0, 10).map(row => `<tr>
+          <td><strong>${{row.symbol}}</strong><br><span class="small">${{row.name || ""}}</span></td>
+          <td>${{row.horizon}}</td>
+          <td class="${{cellClass(row.net)}}">${{row.net}}</td>
+          <td>${{row.liquidity}}</td>
+          <td>${{row.reason}}</td>
+          <td>${{row.diagnosis}}</td>
+          <td>${{row.url ? `<a href="${{row.url}}" target="_blank" rel="noreferrer">Open</a>` : ""}}</td>
+        </tr>`)
+      );
     }}
 
     document.getElementById("outcomes").innerHTML = table(
@@ -241,6 +321,20 @@ def _render_html(payload: dict[str, Any]) -> str:
     document.getElementById("reasons").innerHTML = table(
       ["Reason", "Count"],
       payload.reason_counts.map(([reason, count]) => `<tr><td class="reason">${{reason}}</td><td>${{count}}</td></tr>`)
+    );
+
+    const analysis = payload.analysis;
+    renderAuditTable("rejected1h", analysis.tables.rejected_1h, analysis.summaries.rejected_1h);
+    renderAuditTable("accepted1h", analysis.tables.accepted_1h, analysis.summaries.accepted_1h);
+    renderAuditTable("rejected24h", analysis.tables.rejected_24h, analysis.summaries.rejected_24h);
+    renderAuditTable("accepted24h", analysis.tables.accepted_24h, analysis.summaries.accepted_24h);
+    renderExtremeTable("rejectedBest", analysis.extremes.rejected_best);
+    renderExtremeTable("rejectedWorst", analysis.extremes.rejected_worst);
+    renderExtremeTable("acceptedBest", analysis.extremes.accepted_best);
+    renderExtremeTable("acceptedWorst", analysis.extremes.accepted_worst);
+    document.getElementById("filterRules").innerHTML = table(
+      ["Rule", "Accept needs", "Rejects when", "Why it matters"],
+      analysis.filter_rules.map(row => `<tr><td><strong>${{row.Rule}}</strong></td><td>${{row["Accept needs"]}}</td><td>${{row["Rejects when"]}}</td><td>${{row["Why it matters"]}}</td></tr>`)
     );
 
     const reasonFilter = document.getElementById("reasonFilter");
