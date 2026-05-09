@@ -49,3 +49,4 @@ id,token_address,pair_id,scan_time,hard_reject,qualifies_high_risk_momentum,reje
 48,0x4FeC17D74Fa249D00B26f16a0934A99D983ab82C,base:0x10c468342db55a8d80ad1451e08e8a85458cef209b7b4739cf6d7f9de09ab562,2026-05-09T00:11:11+00:00,0,0,"[""score_below_v2_thresholds""]",43.0,44.0,Reject,Medium Risk,Weak Opportunity,V2
 49,0xcEecb3d02b0839ed9f7688679276F523a11f955f,base:0x3307a8dd3c868a6e3d72aaa59565b4c983f011c80f80a2803d157603fa3b8367,2026-05-09T06:28:20+00:00,0,0,[],30.0,56.0,Watchlist,Medium Risk,Moderate Opportunity,V2
 50,0x3de12fF28AdA220dE1981F5Fc5E7B445d496Fb07,base:0x699959bec2c935037fbbefae6994e8ab299d5f87669ba3f290c40a02596b1c51,2026-05-09T06:28:20+00:00,0,0,"[""score_below_v2_thresholds""]",30.0,35.0,Reject,Medium Risk,Weak Opportunity,V2
+51,0xD9123E1C3e1cb83be8154543779Ab3134E0E39C7,base:0xa24c1c57f4d0f949be52f6ac32cbe5c13c89b405c776b2c63c4db98850ce6ebb,2026-05-09T15:15:04+00:00,1,0,"[""volume_24h_below_15000""]",50.0,39.0,Reject,Medium Risk,Weak Opportunity,V2

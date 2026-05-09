@@ -34,3 +34,4 @@ token_address,chain,symbol,name,decimals,created_at_scan,first_seen_at,source
 0x4FeC17D74Fa249D00B26f16a0934A99D983ab82C,base,SCL,ShadowCombat League,,2026-05-09T00:11:11+00:00,2026-05-09T00:11:11+00:00,profile_latest
 0xcEecb3d02b0839ed9f7688679276F523a11f955f,base,XONA,Xona Ai Agent,,2026-05-09T06:28:20+00:00,2026-05-09T06:28:20+00:00,profile_latest
 0x3de12fF28AdA220dE1981F5Fc5E7B445d496Fb07,base,EverSwap,EverSwap,,2026-05-09T06:28:20+00:00,2026-05-09T06:28:20+00:00,profile_latest
+0xD9123E1C3e1cb83be8154543779Ab3134E0E39C7,base,AGENTIFY,Agentify Protocol,,2026-05-09T15:15:04+00:00,2026-05-09T15:15:04+00:00,profile_latest

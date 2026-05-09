@@ -9,6 +9,7 @@ blocked_or_watchlisted_winner,0x0d04cF3D85854C28CBC751CcAd5eDc8F75875CF7,base:0x
 blocked_or_watchlisted_winner,0x4FeC17D74Fa249D00B26f16a0934A99D983ab82C,base:0x10c468342db55a8d80ad1451e08e8a85458cef209b7b4739cf6d7f9de09ab562,Reject,15m,93.2063,"[""score_below_v2_thresholds""]",0,0,0
 blocked_or_watchlisted_winner,0x4FeC17D74Fa249D00B26f16a0934A99D983ab82C,base:0x10c468342db55a8d80ad1451e08e8a85458cef209b7b4739cf6d7f9de09ab562,Reject,1h,93.2063,"[""score_below_v2_thresholds""]",0,0,0
 blocked_or_watchlisted_winner,0x4FeC17D74Fa249D00B26f16a0934A99D983ab82C,base:0x10c468342db55a8d80ad1451e08e8a85458cef209b7b4739cf6d7f9de09ab562,Reject,4h,93.2063,"[""score_below_v2_thresholds""]",0,0,0
+blocked_or_watchlisted_winner,0xd7FD18D4052787FF52fb75FCb9bD3E39eDeb5d4C,base:0x96cecf7c29f1a31ea23f431440c8fea82a6c1d0497a3cbc9bfc678ee28bca99e,Reject,24h,67.9956,"[""score_below_v2_thresholds""]",0,0,0
 blocked_or_watchlisted_winner,0xcEecb3d02b0839ed9f7688679276F523a11f955f,base:0x3307a8dd3c868a6e3d72aaa59565b4c983f011c80f80a2803d157603fa3b8367,Watchlist,15m,65.2022,[],0,0,0
 blocked_or_watchlisted_winner,0xcEecb3d02b0839ed9f7688679276F523a11f955f,base:0x3307a8dd3c868a6e3d72aaa59565b4c983f011c80f80a2803d157603fa3b8367,Watchlist,1h,65.2022,[],0,0,0
 blocked_or_watchlisted_winner,0xcEecb3d02b0839ed9f7688679276F523a11f955f,base:0x3307a8dd3c868a6e3d72aaa59565b4c983f011c80f80a2803d157603fa3b8367,Watchlist,4h,65.2022,[],0,0,0
