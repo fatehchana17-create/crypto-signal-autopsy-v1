@@ -2,6 +2,7 @@ lesson_type,token_address,pair_id,label_at_scan,horizon,return_pct,reject_reason
 saved_from_bad_token,0x3de12fF28AdA220dE1981F5Fc5E7B445d496Fb07,base:0x699959bec2c935037fbbefae6994e8ab299d5f87669ba3f290c40a02596b1c51,Reject,15m,-92.6168,"[""score_below_v2_thresholds""]",1,1,0
 saved_from_bad_token,0x3de12fF28AdA220dE1981F5Fc5E7B445d496Fb07,base:0x699959bec2c935037fbbefae6994e8ab299d5f87669ba3f290c40a02596b1c51,Reject,1h,-92.6168,"[""score_below_v2_thresholds""]",1,1,0
 saved_from_bad_token,0x3de12fF28AdA220dE1981F5Fc5E7B445d496Fb07,base:0x699959bec2c935037fbbefae6994e8ab299d5f87669ba3f290c40a02596b1c51,Reject,4h,-92.6168,"[""score_below_v2_thresholds""]",1,1,0
+saved_from_bad_token,0x3663A529cb19eA6F5524755059D657A06501DB07,base:0x5e73bd0be6ea68151d4a7debaada6482b1b88d53af7e280a0cf51389fe4f41d5,Reject,24h,-85.4811,"[""buy_pressure_below_30_percent""]",1,1,0
 saved_from_bad_token,0x3663A529cb19eA6F5524755059D657A06501DB07,base:0x5e73bd0be6ea68151d4a7debaada6482b1b88d53af7e280a0cf51389fe4f41d5,Reject,15m,-84.5859,"[""buy_pressure_below_30_percent""]",1,1,0
 saved_from_bad_token,0x3663A529cb19eA6F5524755059D657A06501DB07,base:0x5e73bd0be6ea68151d4a7debaada6482b1b88d53af7e280a0cf51389fe4f41d5,Reject,1h,-84.5859,"[""buy_pressure_below_30_percent""]",1,1,0
 saved_from_bad_token,0x3663A529cb19eA6F5524755059D657A06501DB07,base:0x5e73bd0be6ea68151d4a7debaada6482b1b88d53af7e280a0cf51389fe4f41d5,Reject,4h,-84.5859,"[""buy_pressure_below_30_percent""]",1,1,0
@@ -25,6 +26,7 @@ saved_from_bad_token,0xaB3dfbc50EF0f2175D192a75161FAcc2e73B02F6,base:0x39e6dd086
 saved_from_bad_token,0xaB3dfbc50EF0f2175D192a75161FAcc2e73B02F6,base:0x39e6dd086c12bb4ea83ba4ef1b8c43de4f6d348eb2d2acc3f121499fb1b46c47,Reject,1h,-64.5004,"[""score_below_v2_thresholds""]",0,0,1
 saved_from_bad_token,0xaB3dfbc50EF0f2175D192a75161FAcc2e73B02F6,base:0x39e6dd086c12bb4ea83ba4ef1b8c43de4f6d348eb2d2acc3f121499fb1b46c47,Reject,24h,-64.5004,"[""score_below_v2_thresholds""]",0,0,1
 saved_from_bad_token,0xaB3dfbc50EF0f2175D192a75161FAcc2e73B02F6,base:0x39e6dd086c12bb4ea83ba4ef1b8c43de4f6d348eb2d2acc3f121499fb1b46c47,Reject,4h,-64.5004,"[""score_below_v2_thresholds""]",0,0,1
+saved_from_bad_token,0x98c13D8bC341D3b161EFBacFaBc53d48eE9aD0B3,base:0xef8ce8a80cf3a4f36a1b3974e3c6ba5df3e846624bef8340f67dcf1bdd3d8339,Reject,24h,-33.3025,"[""buy_pressure_below_30_percent"",""liquidity_below_10000""]",1,0,1
 saved_from_bad_token,0x98c13D8bC341D3b161EFBacFaBc53d48eE9aD0B3,base:0xef8ce8a80cf3a4f36a1b3974e3c6ba5df3e846624bef8340f67dcf1bdd3d8339,Reject,15m,-32.1523,"[""buy_pressure_below_30_percent"",""liquidity_below_10000""]",1,0,0
 saved_from_bad_token,0x98c13D8bC341D3b161EFBacFaBc53d48eE9aD0B3,base:0xef8ce8a80cf3a4f36a1b3974e3c6ba5df3e846624bef8340f67dcf1bdd3d8339,Reject,1h,-32.1523,"[""buy_pressure_below_30_percent"",""liquidity_below_10000""]",1,0,0
 saved_from_bad_token,0x98c13D8bC341D3b161EFBacFaBc53d48eE9aD0B3,base:0xef8ce8a80cf3a4f36a1b3974e3c6ba5df3e846624bef8340f67dcf1bdd3d8339,Reject,4h,-32.1523,"[""buy_pressure_below_30_percent"",""liquidity_below_10000""]",1,0,0

@@ -36,3 +36,4 @@ token_address,chain,symbol,name,decimals,created_at_scan,first_seen_at,source
 0x3de12fF28AdA220dE1981F5Fc5E7B445d496Fb07,base,EverSwap,EverSwap,,2026-05-09T06:28:20+00:00,2026-05-09T06:28:20+00:00,profile_latest
 0xD9123E1C3e1cb83be8154543779Ab3134E0E39C7,base,AGENTIFY,Agentify Protocol,,2026-05-09T15:15:04+00:00,2026-05-09T15:15:04+00:00,profile_latest
 0x2A9c1C9325fEcd37bE10F9C1082192E955D54b07,base,NOCOIN,NoCoin,,2026-05-09T16:11:17+00:00,2026-05-09T16:11:17+00:00,profile_latest
+0xb66e76F9Ed3e13F24C5b68F68BE631CD82AffbA3,base,VVVKernel,Venice Kernel,,2026-05-09T19:35:41+00:00,2026-05-09T19:35:41+00:00,profile_latest

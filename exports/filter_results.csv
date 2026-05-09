@@ -55,3 +55,5 @@ id,token_address,pair_id,scan_time,hard_reject,qualifies_high_risk_momentum,reje
 54,0x2A9c1C9325fEcd37bE10F9C1082192E955D54b07,base:0x643dca507ad4c13e58601f44ba4ec9b58cd1a66568cf3d65f25aa43e3ee2d272,2026-05-09T17:14:32+00:00,1,0,"[""buy_pressure_below_30_percent""]",35.0,48.0,Reject,Medium Risk,Weak Opportunity,V2,,,
 55,0x10c56F005a379f8eAfc88ff5c3f40d30F0031AC9,base:0x93e7c445d77E6506b77C869C469e4305c15c075B,2026-05-09T17:14:32+00:00,0,0,[],20.0,74.0,Research Candidate,Lower Risk,Moderate Opportunity,V2,,,
 56,0x10c56F005a379f8eAfc88ff5c3f40d30F0031AC9,base:0x93e7c445d77E6506b77C869C469e4305c15c075B,2026-05-09T18:07:27+00:00,0,0,[],20.0,65.0,Research Candidate,Lower Risk,Moderate Opportunity,V2,,,
+57,0xb66e76F9Ed3e13F24C5b68F68BE631CD82AffbA3,base:0xef9d90806b051a68d8ffbdfdceb6acdd7491180562651dd2bcaf0c4d2fe550da,2026-05-09T19:35:41+00:00,0,0,[],38.0,50.0,Watchlist,Medium Risk,Weak Opportunity,V2,,,
+58,0x10c56F005a379f8eAfc88ff5c3f40d30F0031AC9,base:0x93e7c445d77E6506b77C869C469e4305c15c075B,2026-05-09T19:35:41+00:00,0,0,[],20.0,71.0,Research Candidate,Lower Risk,Moderate Opportunity,V2,,,
