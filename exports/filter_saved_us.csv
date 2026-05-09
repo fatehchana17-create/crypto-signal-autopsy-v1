@@ -19,6 +19,7 @@ saved_from_bad_token,0x6A7602bB307a661705b0f53DD493E6A5067E4778,base:0x37dF215c7
 saved_from_bad_token,0x6A7602bB307a661705b0f53DD493E6A5067E4778,base:0x37dF215c79EF81D7Aaf73D12B32F473f707cE0F0,Reject,4h,-76.0193,"[""liquidity_below_10000""]",1,0,1
 saved_from_bad_token,0xcD16f488E7Fe7E528FCC58Ef13E5C3641bc55c2B,base:0xc61cc8e297fa7d5152892fc4b43e3aa5b56ae243045b8ee13d0bb7d0b7166c48,Reject,15m,-71.6913,"[""score_below_v2_thresholds""]",0,0,0
 saved_from_bad_token,0xcD16f488E7Fe7E528FCC58Ef13E5C3641bc55c2B,base:0xc61cc8e297fa7d5152892fc4b43e3aa5b56ae243045b8ee13d0bb7d0b7166c48,Reject,1h,-71.6913,"[""score_below_v2_thresholds""]",0,0,0
+saved_from_bad_token,0xcD16f488E7Fe7E528FCC58Ef13E5C3641bc55c2B,base:0xc61cc8e297fa7d5152892fc4b43e3aa5b56ae243045b8ee13d0bb7d0b7166c48,Reject,24h,-71.6913,"[""score_below_v2_thresholds""]",0,0,0
 saved_from_bad_token,0xcD16f488E7Fe7E528FCC58Ef13E5C3641bc55c2B,base:0xc61cc8e297fa7d5152892fc4b43e3aa5b56ae243045b8ee13d0bb7d0b7166c48,Reject,4h,-71.6913,"[""score_below_v2_thresholds""]",0,0,0
 saved_from_bad_token,0xaB3dfbc50EF0f2175D192a75161FAcc2e73B02F6,base:0x39e6dd086c12bb4ea83ba4ef1b8c43de4f6d348eb2d2acc3f121499fb1b46c47,Reject,15m,-64.5004,"[""score_below_v2_thresholds""]",0,0,1
 saved_from_bad_token,0xaB3dfbc50EF0f2175D192a75161FAcc2e73B02F6,base:0x39e6dd086c12bb4ea83ba4ef1b8c43de4f6d348eb2d2acc3f121499fb1b46c47,Reject,1h,-64.5004,"[""score_below_v2_thresholds""]",0,0,1
