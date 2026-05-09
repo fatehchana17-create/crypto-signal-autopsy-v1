@@ -6,6 +6,7 @@ from typing import Any
 
 from crypto_signal_autopsy.clients.goplus import SecurityResult
 from crypto_signal_autopsy.config import Settings
+from crypto_signal_autopsy.scoring import V2Score, score_token
 
 
 @dataclass(frozen=True)
@@ -14,6 +15,14 @@ class Evaluation:
     signal_types: list[str]
     rejection_reasons: list[str]
     filter_version: str
+    final_label: str = "Reject"
+    risk_score: float | None = None
+    opportunity_score: float | None = None
+    risk_category: str = ""
+    opportunity_category: str = ""
+    qualifies_high_risk_momentum: bool = False
+    hard_reject: bool = False
+    v2_score: V2Score | None = None
 
 
 def evaluate_candidate(
@@ -22,22 +31,41 @@ def evaluate_candidate(
     previous_snapshot: Row | None,
     settings: Settings,
 ) -> Evaluation:
-    rejections = _hard_rejections(metrics, security, settings)
-    if rejections:
-        return Evaluation(False, [], rejections, settings.filter_version)
+    v2_score = score_token(metrics, security)
+    signal_types = _v2_signal_types(v2_score, metrics, previous_snapshot, settings)
+    accepted = v2_score.final_label == "Paper Trade Candidate"
+    return Evaluation(
+        accepted=accepted,
+        signal_types=signal_types if accepted else [],
+        rejection_reasons=v2_score.reject_reasons,
+        filter_version=v2_score.model_version,
+        final_label=v2_score.final_label,
+        risk_score=v2_score.risk_score,
+        opportunity_score=v2_score.opportunity_score,
+        risk_category=v2_score.risk_category,
+        opportunity_category=v2_score.opportunity_category,
+        qualifies_high_risk_momentum=v2_score.qualifies_high_risk_momentum,
+        hard_reject=v2_score.hard_reject,
+        v2_score=v2_score,
+    )
 
-    signal_types: list[str] = []
+
+def _v2_signal_types(
+    v2_score: V2Score,
+    metrics: dict[str, Any],
+    previous_snapshot: Row | None,
+    settings: Settings,
+) -> list[str]:
+    if v2_score.final_label != "Paper Trade Candidate":
+        return []
+    signal_types = ["paper_trade_candidate"]
     if _is_clean_momentum(metrics, settings):
         signal_types.append("clean_momentum")
     if _is_liquidity_expansion(metrics, previous_snapshot, settings):
         signal_types.append("liquidity_expansion")
-    if any(tag.startswith("boost_") for tag in metrics.get("source_tags", [])):
-        signal_types.append("boosted_but_not_garbage")
-
-    if not signal_types:
-        return Evaluation(False, [], ["no_signal_pattern"], settings.filter_version)
-
-    return Evaluation(True, signal_types, [], settings.filter_version)
+    if any(str(tag).startswith("boost_") for tag in metrics.get("source_tags", [])):
+        signal_types.append("boosted_research")
+    return signal_types
 
 
 def _hard_rejections(

@@ -85,6 +85,7 @@ def run_scan(conn: sqlite3.Connection, settings: Settings) -> dict[str, int]:
         previous = db.latest_dex_snapshot_before(conn, metrics["pair_address"], observed_at)
         evaluation = evaluate_candidate(metrics, security, previous, settings)
         db.insert_candidate_evaluation(conn, observed_at, metrics, evaluation, security.status)
+        db.insert_v2_scan_records(conn, observed_at, metrics, security, evaluation)
         if evaluation.accepted:
             stats["accepted_candidates"] += 1
             for signal_type in evaluation.signal_types:

@@ -13,11 +13,11 @@ from crypto_signal_autopsy.baselines import (
 from crypto_signal_autopsy.clients.coingecko import CoinGeckoClient
 from crypto_signal_autopsy.clients.dexscreener import DexScreenerClient
 from crypto_signal_autopsy.clients.http import ApiError, JsonHttpClient
-from crypto_signal_autopsy.config import Settings
+from crypto_signal_autopsy.config import HORIZONS as HORIZON_MINUTES, Settings
 from crypto_signal_autopsy.timeutils import iso_utc, parse_iso, utc_now
 
 
-HORIZONS = {"1h": timedelta(hours=1), "24h": timedelta(hours=24)}
+HORIZONS = {name: timedelta(minutes=minutes) for name, minutes in HORIZON_MINUTES.items()}
 
 
 def run_tracking(conn: sqlite3.Connection, settings: Settings) -> dict[str, int]:
@@ -33,6 +33,7 @@ def run_tracking(conn: sqlite3.Connection, settings: Settings) -> dict[str, int]
         "delayed_entries": 0,
         "outcomes": 0,
         "rejected_outcomes": 0,
+        "outcome_snapshots": 0,
         "api_errors": 0,
     }
 
@@ -179,6 +180,78 @@ def run_tracking(conn: sqlite3.Connection, settings: Settings) -> dict[str, int]
         conn.commit()
         stats["rejected_outcomes"] += 1
 
+    for filter_result, horizon, target_at in _due_v2_outcome_horizons(conn, now):
+        try:
+            raw_metrics = json.loads(filter_result["raw_metrics"])
+        except json.JSONDecodeError:
+            db.log_api_event(
+                conn,
+                observed_at,
+                "local",
+                "outcome_snapshots",
+                "invalid_raw_metrics",
+                f"pair_id={filter_result['pair_id']}",
+            )
+            continue
+        try:
+            pair = dex.fetch_pair(filter_result["chain_id"], filter_result["pair_address"])
+        except ApiError as exc:
+            stats["api_errors"] += 1
+            db.log_api_event(conn, observed_at, "dexscreener", "/latest/dex/pairs", "error", str(exc))
+            continue
+        if not pair:
+            continue
+        price = _price_from_pair(pair)
+        liquidity = _liquidity_from_pair(pair)
+        volume = _volume_h24_from_pair(pair)
+        price_at_scan = raw_metrics.get("price_usd")
+        liquidity_at_scan = raw_metrics.get("liquidity_usd")
+        volume_at_scan = raw_metrics.get("volume_h24_usd")
+        return_pct = _return_pct(price_at_scan, price)
+        history = _history_prices(conn, filter_result["pair_address"], filter_result["scan_time"], observed_at)
+        mfe, mae = _excursions(price_at_scan, [value for value in history + [price] if value is not None])
+        liquidity_drop_pct = _drop_pct(liquidity_at_scan, liquidity)
+        volume_disappeared = (
+            volume is not None
+            and volume_at_scan is not None
+            and volume_at_scan > 0
+            and volume < volume_at_scan * 0.20
+        )
+        became_illiquid = bool(
+            (liquidity is not None and liquidity < 5_000)
+            or (liquidity_drop_pct is not None and liquidity_drop_pct >= 80)
+        )
+        rugged = bool(
+            (return_pct is not None and return_pct <= -80)
+            or (liquidity_drop_pct is not None and liquidity_drop_pct >= 90)
+        )
+        inserted = db.insert_outcome_snapshot(
+            conn,
+            {
+                "token_address": filter_result["token_address"],
+                "pair_id": filter_result["pair_id"],
+                "label_at_scan": filter_result["final_label"],
+                "scan_time": filter_result["scan_time"],
+                "horizon": horizon,
+                "price_at_scan": price_at_scan,
+                "price_at_horizon": price,
+                "return_pct": return_pct,
+                "max_favorable_excursion_pct": mfe,
+                "max_adverse_excursion_pct": mae,
+                "drawdown_before_pump_pct": mae,
+                "liquidity_at_scan": liquidity_at_scan,
+                "liquidity_at_horizon": liquidity,
+                "volume_at_scan": volume_at_scan,
+                "volume_at_horizon": volume,
+                "became_illiquid": became_illiquid,
+                "rugged": rugged,
+                "volume_disappeared": volume_disappeared,
+                "snapshot_time": observed_at,
+            },
+        )
+        if inserted:
+            stats["outcome_snapshots"] += 1
+
     conn.execute(
         """
         UPDATE signals
@@ -186,7 +259,7 @@ def run_tracking(conn: sqlite3.Connection, settings: Settings) -> dict[str, int]
         WHERE status = 'open'
           AND EXISTS (
             SELECT 1 FROM signal_outcomes o
-            WHERE o.signal_id = signals.signal_id AND o.horizon = '24h'
+            WHERE o.signal_id = signals.signal_id AND o.horizon = '7d'
           )
         """
     )
@@ -261,6 +334,41 @@ def _due_rejected_horizons(
     return due
 
 
+def _due_v2_outcome_horizons(
+    conn: sqlite3.Connection,
+    now,
+) -> list[tuple[sqlite3.Row, str, object]]:
+    rows = conn.execute(
+        """
+        SELECT f.*, c.chain_id, c.pair_address, c.raw_metrics
+        FROM filter_results f
+        JOIN candidate_evaluations c
+          ON c.token_address = f.token_address
+         AND c.observed_at = f.scan_time
+         AND f.pair_id = c.chain_id || ':' || c.pair_address
+        ORDER BY f.scan_time ASC
+        """
+    ).fetchall()
+    due: list[tuple[sqlite3.Row, str, object]] = []
+    for row in rows:
+        scan_time = parse_iso(row["scan_time"])
+        for horizon, delta in HORIZONS.items():
+            target_at = scan_time + delta
+            if target_at > now:
+                continue
+            exists = conn.execute(
+                """
+                SELECT 1
+                FROM outcome_snapshots
+                WHERE pair_id = ? AND scan_time = ? AND horizon = ?
+                """,
+                (row["pair_id"], row["scan_time"], horizon),
+            ).fetchone()
+            if not exists:
+                due.append((row, horizon, target_at))
+    return due
+
+
 def _price_from_pair(pair) -> float | None:
     if not pair:
         return None
@@ -273,7 +381,56 @@ def _price_from_pair(pair) -> float | None:
         return None
 
 
+def _liquidity_from_pair(pair) -> float | None:
+    value = (pair.get("liquidity") or {}).get("usd") if isinstance(pair, dict) else None
+    return _float(value)
+
+
+def _volume_h24_from_pair(pair) -> float | None:
+    value = (pair.get("volume") or {}).get("h24") if isinstance(pair, dict) else None
+    return _float(value)
+
+
 def _return_pct(start: float | None, end: float | None) -> float | None:
     if not start or not end or start <= 0:
         return None
     return ((end / start) - 1) * 100
+
+
+def _history_prices(conn: sqlite3.Connection, pair_address: str, start_at: str, end_at: str) -> list[float]:
+    rows = conn.execute(
+        """
+        SELECT price_usd
+        FROM dex_token_snapshots
+        WHERE pair_address = ?
+          AND observed_at >= ?
+          AND observed_at <= ?
+          AND price_usd IS NOT NULL
+        ORDER BY observed_at ASC
+        """,
+        (pair_address, start_at, end_at),
+    ).fetchall()
+    return [float(row["price_usd"]) for row in rows if row["price_usd"] is not None]
+
+
+def _excursions(start: float | None, prices: list[float]) -> tuple[float | None, float | None]:
+    if not start or start <= 0 or not prices:
+        return None, None
+    high = max(prices)
+    low = min(prices)
+    return _return_pct(start, high), _return_pct(start, low)
+
+
+def _drop_pct(start: float | None, end: float | None) -> float | None:
+    if start is None or end is None or start <= 0:
+        return None
+    return max(0.0, ((start - end) / start) * 100)
+
+
+def _float(value) -> float | None:
+    if value in {None, "", "null"}:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None

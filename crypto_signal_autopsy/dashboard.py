@@ -17,9 +17,10 @@ from crypto_signal_autopsy.review import (
     money,
     pct,
 )
+from crypto_signal_autopsy.v2_dashboard import LABELS, build_v2_payload
 
 
-st.set_page_config(page_title="Crypto Signal Autopsy V1", layout="wide")
+st.set_page_config(page_title="Crypto Signal Autopsy V2", layout="wide")
 
 
 def main() -> None:
@@ -40,12 +41,13 @@ def main() -> None:
         """
         <section class="hero">
           <div class="hero-copy">
-            <h1>Crypto Signal Autopsy V1</h1>
-            <p>Clean data first. Strict filters. Manual review without guesswork.</p>
+            <h1>Crypto Signal Autopsy V2</h1>
+            <p>Research dashboard for crypto token risk and opportunity analysis.</p>
+            <p class="hero-disclaimer">Research only. No financial advice. No buy signals. No sell signals. No auto trading.</p>
             <div class="hero-meta">
               <span>Base chain</span>
               <span>Hourly scanner</span>
-              <span>Rejected-token audit</span>
+              <span>V2 labels and scoring</span>
             </div>
           </div>
         </section>
@@ -63,10 +65,12 @@ def main() -> None:
     col4.metric("API Events", len(api_events))
     st.markdown("</div>", unsafe_allow_html=True)
 
-    tab_overview, tab_analysis, tab_manual, tab_signals, tab_outcomes, tab_rejected_audit, tab_raw, tab_config = st.tabs(
-        ["Overview", "Analysis", "Manual Review", "Signals", "Outcomes", "Rejected Audit", "Raw Tables", "Config"]
+    tab_v2, tab_overview, tab_analysis, tab_manual, tab_signals, tab_outcomes, tab_rejected_audit, tab_raw, tab_config = st.tabs(
+        ["V2 Lab", "Overview", "Analysis", "Manual Review", "Signals", "Outcomes", "Rejected Audit", "Raw Tables", "Config"]
     )
 
+    with tab_v2:
+        _v2_lab(conn)
     with tab_overview:
         _overview(signals, outcomes, rejected_outcomes, evaluations, api_events, rejected_records, settings)
     with tab_analysis:
@@ -173,6 +177,97 @@ def _overview(
     if rejected_records:
         st.subheader("Latest Rejected Tokens")
         _render_latest_rejections(rejected_records[:6])
+
+
+def _v2_lab(conn: sqlite3.Connection) -> None:
+    payload = build_v2_payload(conn)
+    st.markdown('<div class="section-title">V2 Research Lab</div>', unsafe_allow_html=True)
+    st.caption(payload["disclaimer"])
+
+    cards = payload["health_cards"]
+    for index in range(0, len(cards), 3):
+        cols = st.columns(3)
+        for col, card in zip(cols, cards[index : index + 3]):
+            col.metric(card["label"], card["value"])
+
+    st.subheader("Bucket Tables")
+    for label in LABELS:
+        with st.expander(label, expanded=label in {"Reject", "Watchlist"}):
+            _render_v2_bucket_table(payload["bucket_tables"].get(label, []))
+
+    left, right = st.columns(2)
+    with left:
+        st.subheader("Median vs Average Performance")
+        st.caption("Average return can be distorted by outliers. Median return is usually more reliable.")
+        _render_simple_table(payload["performance"], "No V2 outcome snapshots yet.")
+    with right:
+        st.subheader("Score Bucket Performance")
+        _render_simple_table(payload["score_buckets"], "No score bucket performance yet.")
+
+    st.divider()
+    st.subheader("Outlier Analysis")
+    outlier_cols = st.columns(2)
+    with outlier_cols[0]:
+        st.markdown("**Biggest missed winners**")
+        _render_simple_table(payload["outliers"]["missed_winners"], "No missed winners found yet.")
+        st.markdown("**Biggest avoided losers**")
+        _render_simple_table(payload["outliers"]["avoided_losers"], "No avoided losers found yet.")
+    with outlier_cols[1]:
+        st.markdown("**High-risk pumps**")
+        _render_simple_table(payload["outliers"]["high_risk_pumps"], "No high-risk pumps found yet.")
+        st.markdown("**Rugs and dumps**")
+        _render_simple_table(payload["outliers"]["rugs_dumps"], "No rugs or dumps found yet.")
+
+    st.divider()
+    saved_col, blocked_col = st.columns(2)
+    with saved_col:
+        st.subheader("Filters That Saved Us")
+        _render_simple_table(payload["filters_saved_us"], "No saved-from-bad-token evidence yet.")
+    with blocked_col:
+        st.subheader("Filters That Blocked Winners")
+        _render_simple_table(payload["filters_blocked_winners"], "No blocked-winner evidence yet.")
+
+    st.divider()
+    paper_col, notes_col = st.columns(2)
+    with paper_col:
+        st.subheader("Paper Trade Simulation")
+        st.caption("Paper Trade Candidate means simulated tracking only, not a buy signal.")
+        _render_simple_table(payload["paper_trades"], "No paper trade candidates yet.")
+    with notes_col:
+        st.subheader("Manual Review Notes")
+        _render_simple_table(payload["review_notes"], "No manual review notes yet.")
+
+
+def _render_v2_bucket_table(rows: list[dict[str, str]]) -> None:
+    if not rows:
+        st.info("No tokens in this bucket yet.")
+        return
+    body = []
+    for row in rows[:30]:
+        link = ""
+        if row.get("url"):
+            link = f'<a class="table-action" href="{escape(row["url"])}" target="_blank">Open</a>'
+        body.append(
+            f"""
+            <tr>
+              <td><strong>{escape(row.get("symbol", "UNKNOWN"))}</strong><br><span class="muted-cell">{escape(row.get("scan_time", ""))}</span></td>
+              <td>{escape(row.get("chain", ""))}</td>
+              <td class="num">{escape(row.get("pair_age", ""))}</td>
+              <td class="num">{escape(row.get("liquidity", ""))}</td>
+              <td class="num">{escape(row.get("volume24h", ""))}</td>
+              <td class="num">{escape(row.get("move1h", ""))}</td>
+              <td class="num">{escape(row.get("risk_score", ""))}</td>
+              <td class="num">{escape(row.get("opportunity_score", ""))}</td>
+              <td>{escape(row.get("main_reasons", ""))}</td>
+              <td>{link}</td>
+            </tr>
+            """
+        )
+    _render_table(
+        headers=["Token", "Chain", "Age", "Liquidity", "24h Vol", "1h Move", "Risk", "Opp", "Main Reasons", "DEX"],
+        body="".join(body),
+        min_width=1180,
+    )
 
 
 def _manual_review(records: list[dict], settings: Settings) -> None:
@@ -756,6 +851,10 @@ def _style(header_uri: str) -> None:
           color: #4b5563;
           font-size: 16px;
           line-height: 1.5;
+        }
+        .hero-disclaimer {
+          color: #8a4b22 !important;
+          font-weight: 800;
         }
         .hero-meta {
           display: flex;

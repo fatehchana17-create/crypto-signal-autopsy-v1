@@ -7,6 +7,65 @@ import os
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
+MODEL_VERSION = "V2"
+
+HORIZONS = {
+    "15m": 15,
+    "1h": 60,
+    "4h": 240,
+    "24h": 1440,
+    "3d": 4320,
+    "7d": 10080,
+}
+
+HARD_REJECT = {
+    "min_liquidity_usd": 10_000,
+    "min_volume_24h": 15_000,
+    "min_pair_age_minutes": 10,
+    "max_top_holder_pct": 25,
+    "max_top_10_holder_pct": 60,
+    "max_fdv_liquidity_ratio": 200,
+    "min_buy_ratio": 0.30,
+    "min_unique_buyers_1h": 10,
+    "max_buy_tax": 10,
+    "max_sell_tax": 10,
+}
+
+HIGH_RISK_MOMENTUM = {
+    "min_liquidity_usd": 10_000,
+    "min_volume_24h": 25_000,
+    "min_pair_age_minutes": 10,
+    "max_price_change_1h": 300,
+    "min_txns_15m": 30,
+    "min_unique_buyers_15m": 10,
+    "max_top_holder_pct": 25,
+    "max_top_10_holder_pct": 60,
+    "max_fdv_liquidity_ratio": 200,
+    "min_buy_ratio": 0.40,
+    "min_security_score": 60,
+    "max_buy_tax": 10,
+    "max_sell_tax": 10,
+}
+
+SAFE_RESEARCH = {
+    "min_liquidity_usd": 50_000,
+    "min_volume_24h": 100_000,
+    "min_pair_age_hours": 6,
+    "max_price_change_1h": 80,
+    "min_txns_1h": 50,
+    "min_txns_24h": 300,
+    "min_unique_buyers_1h": 25,
+    "min_buy_ratio": 0.45,
+    "max_top_holder_pct": 15,
+    "max_top_10_holder_pct": 45,
+    "max_fdv_liquidity_ratio": 50,
+    "max_marketcap_liquidity_ratio": 40,
+    "min_security_score": 80,
+    "max_buy_tax": 5,
+    "max_sell_tax": 5,
+    "max_estimated_slippage_pct": 5,
+}
+
 
 def load_dotenv(path: Path | None = None) -> None:
     env_path = path or PROJECT_ROOT / ".env"

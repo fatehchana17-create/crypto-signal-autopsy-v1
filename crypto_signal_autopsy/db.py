@@ -166,6 +166,188 @@ CREATE TABLE IF NOT EXISTS rejected_candidate_outcomes (
 
 CREATE INDEX IF NOT EXISTS idx_rejected_outcomes_horizon
   ON rejected_candidate_outcomes(horizon, observed_at);
+
+CREATE TABLE IF NOT EXISTS tokens (
+    token_address TEXT PRIMARY KEY,
+    chain TEXT,
+    symbol TEXT,
+    name TEXT,
+    decimals INTEGER,
+    created_at_scan TEXT,
+    first_seen_at TEXT,
+    source TEXT
+);
+
+CREATE TABLE IF NOT EXISTS pairs (
+    pair_id TEXT PRIMARY KEY,
+    token_address TEXT,
+    chain TEXT,
+    dex_name TEXT,
+    pair_address TEXT,
+    base_token TEXT,
+    quote_token TEXT,
+    pair_created_at TEXT,
+    pair_age_minutes REAL,
+    pair_age_hours REAL,
+    liquidity_usd REAL,
+    fdv REAL,
+    market_cap REAL,
+    fdv_liquidity_ratio REAL,
+    marketcap_liquidity_ratio REAL,
+    price_usd REAL,
+    volume_5m REAL,
+    volume_1h REAL,
+    volume_6h REAL,
+    volume_24h REAL,
+    volume_liquidity_ratio REAL,
+    txns_5m_buys INTEGER,
+    txns_5m_sells INTEGER,
+    txns_15m_buys INTEGER,
+    txns_15m_sells INTEGER,
+    txns_1h_buys INTEGER,
+    txns_1h_sells INTEGER,
+    txns_24h_buys INTEGER,
+    txns_24h_sells INTEGER,
+    total_txns_1h INTEGER,
+    total_txns_24h INTEGER,
+    buy_ratio REAL,
+    unique_buyers_15m INTEGER,
+    unique_buyers_1h INTEGER,
+    unique_buyers_24h INTEGER,
+    price_change_5m REAL,
+    price_change_1h REAL,
+    price_change_6h REAL,
+    price_change_24h REAL,
+    estimated_slippage_100_usd REAL,
+    raw_json TEXT,
+    scan_time TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_pairs_scan_time
+  ON pairs(scan_time);
+
+CREATE TABLE IF NOT EXISTS security_checks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    token_address TEXT,
+    chain TEXT,
+    provider TEXT,
+    security_score REAL,
+    is_honeypot INTEGER,
+    cannot_sell INTEGER,
+    is_blacklisted INTEGER,
+    trading_disabled INTEGER,
+    is_mintable INTEGER,
+    is_proxy INTEGER,
+    owner_renounced INTEGER,
+    blacklist_function INTEGER,
+    dangerous_owner_permissions INTEGER,
+    buy_tax REAL,
+    sell_tax REAL,
+    top_holder_pct REAL,
+    top_10_holder_pct REAL,
+    lp_locked_pct REAL,
+    lp_burned_pct REAL,
+    risk_flags TEXT,
+    raw_json TEXT,
+    scan_time TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_security_checks_token_time
+  ON security_checks(token_address, scan_time);
+
+CREATE TABLE IF NOT EXISTS filter_results (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    token_address TEXT,
+    pair_id TEXT,
+    scan_time TEXT,
+    hard_reject INTEGER,
+    qualifies_high_risk_momentum INTEGER,
+    reject_reasons TEXT,
+    risk_score REAL,
+    opportunity_score REAL,
+    final_label TEXT,
+    risk_category TEXT,
+    opportunity_category TEXT,
+    model_version TEXT,
+    UNIQUE(pair_id, scan_time, model_version)
+);
+
+CREATE INDEX IF NOT EXISTS idx_filter_results_label
+  ON filter_results(final_label, scan_time);
+
+CREATE TABLE IF NOT EXISTS social_catalysts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    token_address TEXT,
+    scan_time TEXT,
+    website_present INTEGER,
+    twitter_present INTEGER,
+    telegram_present INTEGER,
+    discord_present INTEGER,
+    dexscreener_boosted INTEGER,
+    boost_amount REAL,
+    coingecko_listed INTEGER,
+    coinmarketcap_listed INTEGER,
+    cex_listed INTEGER,
+    news_mentions INTEGER,
+    social_notes TEXT
+);
+
+CREATE TABLE IF NOT EXISTS paper_trades (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    token_address TEXT,
+    pair_id TEXT,
+    created_at TEXT,
+    entry_rule TEXT,
+    sim_entry_price REAL,
+    sim_position_size_usd REAL,
+    stop_rule TEXT,
+    take_profit_rule TEXT,
+    status TEXT,
+    exit_time TEXT,
+    exit_price REAL,
+    net_return_pct REAL,
+    notes TEXT,
+    UNIQUE(pair_id, entry_rule)
+);
+
+CREATE TABLE IF NOT EXISTS outcome_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    token_address TEXT,
+    pair_id TEXT,
+    label_at_scan TEXT,
+    scan_time TEXT,
+    horizon TEXT,
+    price_at_scan REAL,
+    price_at_horizon REAL,
+    return_pct REAL,
+    max_favorable_excursion_pct REAL,
+    max_adverse_excursion_pct REAL,
+    drawdown_before_pump_pct REAL,
+    liquidity_at_scan REAL,
+    liquidity_at_horizon REAL,
+    volume_at_scan REAL,
+    volume_at_horizon REAL,
+    became_illiquid INTEGER,
+    rugged INTEGER,
+    volume_disappeared INTEGER,
+    snapshot_time TEXT,
+    UNIQUE(pair_id, scan_time, horizon)
+);
+
+CREATE INDEX IF NOT EXISTS idx_outcome_snapshots_horizon
+  ON outcome_snapshots(horizon, label_at_scan);
+
+CREATE TABLE IF NOT EXISTS review_notes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    token_address TEXT,
+    review_time TEXT,
+    reviewer TEXT,
+    missed_winner INTEGER,
+    saved_from_bad_token INTEGER,
+    main_lesson TEXT,
+    manual_notes TEXT,
+    screenshot_url TEXT
+);
 """
 
 
@@ -180,6 +362,7 @@ def connect(db_path: Path) -> sqlite3.Connection:
 def init_db(conn: sqlite3.Connection) -> None:
     conn.executescript(SCHEMA)
     conn.commit()
+    backfill_v2_from_v1(conn)
 
 
 def to_json(value: Any) -> str:
@@ -190,6 +373,59 @@ def from_json(value: str | None, default: Any = None) -> Any:
     if not value:
         return default
     return json.loads(value)
+
+
+def backfill_v2_from_v1(conn: sqlite3.Connection) -> int:
+    from crypto_signal_autopsy.clients.goplus import SecurityResult
+    from crypto_signal_autopsy.config import load_settings
+    from crypto_signal_autopsy.filters import evaluate_candidate
+
+    settings = load_settings()
+    rows = conn.execute(
+        """
+        SELECT c.*, s.status AS security_status_row, s.risk_flags AS security_risk_flags,
+               s.buy_tax_pct, s.sell_tax_pct, s.raw_json AS security_raw_json
+        FROM candidate_evaluations c
+        LEFT JOIN security_snapshots s
+          ON s.token_address = c.token_address
+         AND s.observed_at = c.observed_at
+        WHERE NOT EXISTS (
+          SELECT 1
+          FROM filter_results f
+          WHERE f.token_address = c.token_address
+            AND f.scan_time = c.observed_at
+            AND f.pair_id = c.chain_id || ':' || c.pair_address
+            AND f.model_version = 'V2'
+        )
+        ORDER BY c.observed_at ASC
+        """
+    ).fetchall()
+    inserted = 0
+    for row in rows:
+        try:
+            metrics = from_json(row["raw_metrics"], {})
+            risk_flags = from_json(row["security_risk_flags"], [])
+            security_raw = from_json(row["security_raw_json"], {})
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(metrics, dict):
+            continue
+        metrics.setdefault("observed_at", row["observed_at"])
+        metrics.setdefault("chain_id", row["chain_id"])
+        metrics.setdefault("token_address", row["token_address"])
+        metrics.setdefault("pair_address", row["pair_address"])
+        metrics.setdefault("pair_id", f"{row['chain_id']}:{row['pair_address']}")
+        security = SecurityResult(
+            row["security_status_row"] or row["security_status"] or "backfilled_no_security",
+            risk_flags if isinstance(risk_flags, list) else [],
+            row["buy_tax_pct"],
+            row["sell_tax_pct"],
+            security_raw if isinstance(security_raw, dict) else {},
+        )
+        evaluation = evaluate_candidate(metrics, security, None, settings)
+        insert_v2_scan_records(conn, row["observed_at"], metrics, security, evaluation)
+        inserted += 1
+    return inserted
 
 
 def log_api_event(
@@ -327,6 +563,288 @@ def insert_security_snapshot(
     conn.commit()
 
 
+def insert_v2_scan_records(
+    conn: sqlite3.Connection,
+    observed_at: str,
+    metrics: dict[str, Any],
+    security: Any,
+    evaluation: Any,
+) -> None:
+    insert_token_record(conn, observed_at, metrics)
+    insert_pair_record(conn, observed_at, metrics)
+    insert_security_check(conn, observed_at, metrics, security)
+    insert_social_catalyst(conn, observed_at, metrics)
+    insert_filter_result(conn, observed_at, metrics, evaluation)
+    if evaluation.final_label == "Paper Trade Candidate":
+        insert_paper_trade_candidate(conn, observed_at, metrics)
+
+
+def insert_token_record(conn: sqlite3.Connection, observed_at: str, metrics: dict[str, Any]) -> None:
+    conn.execute(
+        """
+        INSERT INTO tokens (
+          token_address, chain, symbol, name, decimals, created_at_scan, first_seen_at, source
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(token_address) DO UPDATE SET
+          symbol = COALESCE(excluded.symbol, tokens.symbol),
+          name = COALESCE(excluded.name, tokens.name),
+          source = excluded.source
+        """,
+        (
+            metrics["token_address"],
+            metrics.get("chain_id"),
+            metrics.get("base_symbol"),
+            metrics.get("base_name"),
+            metrics.get("base_decimals"),
+            observed_at,
+            observed_at,
+            ",".join(str(tag) for tag in metrics.get("source_tags", [])),
+        ),
+    )
+    conn.commit()
+
+
+def insert_pair_record(conn: sqlite3.Connection, observed_at: str, metrics: dict[str, Any]) -> None:
+    conn.execute(
+        """
+        INSERT OR REPLACE INTO pairs (
+          pair_id, token_address, chain, dex_name, pair_address, base_token,
+          quote_token, pair_created_at, pair_age_minutes, pair_age_hours,
+          liquidity_usd, fdv, market_cap, fdv_liquidity_ratio,
+          marketcap_liquidity_ratio, price_usd, volume_5m, volume_1h,
+          volume_6h, volume_24h, volume_liquidity_ratio, txns_5m_buys,
+          txns_5m_sells, txns_15m_buys, txns_15m_sells, txns_1h_buys,
+          txns_1h_sells, txns_24h_buys, txns_24h_sells, total_txns_1h,
+          total_txns_24h, buy_ratio, unique_buyers_15m, unique_buyers_1h,
+          unique_buyers_24h, price_change_5m, price_change_1h,
+          price_change_6h, price_change_24h, estimated_slippage_100_usd,
+          raw_json, scan_time
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            metrics.get("pair_id") or f"{metrics.get('chain_id')}:{metrics.get('pair_address')}",
+            metrics["token_address"],
+            metrics.get("chain_id"),
+            metrics.get("dex_id"),
+            metrics.get("pair_address"),
+            metrics.get("base_symbol"),
+            metrics.get("quote_symbol"),
+            metrics.get("pair_created_at"),
+            metrics.get("pair_age_minutes"),
+            metrics.get("pair_age_hours"),
+            metrics.get("liquidity_usd"),
+            metrics.get("fdv"),
+            metrics.get("market_cap"),
+            metrics.get("fdv_liquidity_ratio"),
+            metrics.get("marketcap_liquidity_ratio"),
+            metrics.get("price_usd"),
+            metrics.get("volume_5m_usd"),
+            metrics.get("volume_h1_usd"),
+            metrics.get("volume_h6_usd"),
+            metrics.get("volume_h24_usd"),
+            metrics.get("volume_liquidity_ratio"),
+            metrics.get("buys_m5"),
+            metrics.get("sells_m5"),
+            metrics.get("txns_15m_buys"),
+            metrics.get("txns_15m_sells"),
+            metrics.get("txns_1h_buys"),
+            metrics.get("txns_1h_sells"),
+            metrics.get("txns_24h_buys"),
+            metrics.get("txns_24h_sells"),
+            metrics.get("total_txns_1h"),
+            metrics.get("total_txns_24h"),
+            metrics.get("buy_ratio"),
+            metrics.get("unique_buyers_15m"),
+            metrics.get("unique_buyers_1h"),
+            metrics.get("unique_buyers_24h"),
+            metrics.get("price_change_5m_pct"),
+            metrics.get("price_change_h1_pct"),
+            metrics.get("price_change_h6_pct"),
+            metrics.get("price_change_h24_pct"),
+            metrics.get("estimated_slippage_100_usd"),
+            to_json(metrics.get("raw_json", {})),
+            observed_at,
+        ),
+    )
+    conn.commit()
+
+
+def insert_security_check(
+    conn: sqlite3.Connection,
+    observed_at: str,
+    metrics: dict[str, Any],
+    security: Any,
+) -> None:
+    raw = security.raw or {}
+    conn.execute(
+        """
+        INSERT INTO security_checks (
+          token_address, chain, provider, security_score, is_honeypot,
+          cannot_sell, is_blacklisted, trading_disabled, is_mintable,
+          is_proxy, owner_renounced, blacklist_function,
+          dangerous_owner_permissions, buy_tax, sell_tax, top_holder_pct,
+          top_10_holder_pct, lp_locked_pct, lp_burned_pct, risk_flags,
+          raw_json, scan_time
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            metrics["token_address"],
+            metrics.get("chain_id"),
+            "goplus",
+            _security_num(raw, "security_score", "score"),
+            _truthy_int(raw.get("is_honeypot")),
+            _truthy_int(raw.get("cannot_sell") or raw.get("cannot_sell_all")),
+            _truthy_int(raw.get("is_blacklisted")),
+            _truthy_int(raw.get("trading_disabled")),
+            _truthy_int(raw.get("is_mintable")),
+            _truthy_int(raw.get("is_proxy")),
+            _truthy_int(raw.get("owner_renounced")),
+            _truthy_int(raw.get("blacklist_function")),
+            1 if {"owner_change_balance", "hidden_owner"}.intersection(set(security.risk_flags)) else 0,
+            security.buy_tax_pct,
+            security.sell_tax_pct,
+            _security_num(raw, "top_holder_pct", "holder_count_1_pct"),
+            _security_num(raw, "top_10_holder_pct", "top_10_holder_rate"),
+            _security_num(raw, "lp_locked_pct"),
+            _security_num(raw, "lp_burned_pct"),
+            to_json(security.risk_flags),
+            to_json(raw),
+            observed_at,
+        ),
+    )
+    conn.commit()
+
+
+def insert_filter_result(conn: sqlite3.Connection, observed_at: str, metrics: dict[str, Any], evaluation: Any) -> None:
+    conn.execute(
+        """
+        INSERT OR IGNORE INTO filter_results (
+          token_address, pair_id, scan_time, hard_reject,
+          qualifies_high_risk_momentum, reject_reasons, risk_score,
+          opportunity_score, final_label, risk_category, opportunity_category,
+          model_version
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            metrics["token_address"],
+            metrics.get("pair_id") or f"{metrics.get('chain_id')}:{metrics.get('pair_address')}",
+            observed_at,
+            1 if evaluation.hard_reject else 0,
+            1 if evaluation.qualifies_high_risk_momentum else 0,
+            to_json(evaluation.rejection_reasons),
+            evaluation.risk_score,
+            evaluation.opportunity_score,
+            evaluation.final_label,
+            evaluation.risk_category,
+            evaluation.opportunity_category,
+            evaluation.filter_version,
+        ),
+    )
+    conn.commit()
+
+
+def insert_social_catalyst(conn: sqlite3.Connection, observed_at: str, metrics: dict[str, Any]) -> None:
+    raw = metrics.get("raw_json") or {}
+    info = raw.get("info") if isinstance(raw, dict) else {}
+    socials = info.get("socials") if isinstance(info, dict) else []
+    websites = info.get("websites") if isinstance(info, dict) else []
+    conn.execute(
+        """
+        INSERT INTO social_catalysts (
+          token_address, scan_time, website_present, twitter_present,
+          telegram_present, discord_present, dexscreener_boosted, boost_amount,
+          coingecko_listed, coinmarketcap_listed, cex_listed, news_mentions,
+          social_notes
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            metrics["token_address"],
+            observed_at,
+            1 if websites else 0,
+            1 if _social_present(socials, "twitter", "x") else 0,
+            1 if _social_present(socials, "telegram") else 0,
+            1 if _social_present(socials, "discord") else 0,
+            1 if _is_boosted(metrics) else 0,
+            metrics.get("boost_total_amount"),
+            1 if metrics.get("coingecko_listed") else 0,
+            1 if metrics.get("coinmarketcap_listed") else 0,
+            1 if metrics.get("cex_listed") else 0,
+            0,
+            "",
+        ),
+    )
+    conn.commit()
+
+
+def insert_paper_trade_candidate(conn: sqlite3.Connection, observed_at: str, metrics: dict[str, Any]) -> None:
+    conn.execute(
+        """
+        INSERT OR IGNORE INTO paper_trades (
+          token_address, pair_id, created_at, entry_rule, sim_entry_price,
+          sim_position_size_usd, stop_rule, take_profit_rule, status, notes
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            metrics["token_address"],
+            metrics.get("pair_id") or f"{metrics.get('chain_id')}:{metrics.get('pair_address')}",
+            observed_at,
+            "V2 paper trade candidate - simulated tracking only",
+            metrics.get("price_usd"),
+            100.0,
+            "Research stop only; no live order",
+            "Research take-profit only; no live order",
+            "open",
+            "Paper Trade Candidate means simulated tracking only. Not a buy signal.",
+        ),
+    )
+    conn.commit()
+
+
+def insert_outcome_snapshot(conn: sqlite3.Connection, row: dict[str, Any]) -> bool:
+    cursor = conn.execute(
+        """
+        INSERT OR IGNORE INTO outcome_snapshots (
+          token_address, pair_id, label_at_scan, scan_time, horizon,
+          price_at_scan, price_at_horizon, return_pct,
+          max_favorable_excursion_pct, max_adverse_excursion_pct,
+          drawdown_before_pump_pct, liquidity_at_scan, liquidity_at_horizon,
+          volume_at_scan, volume_at_horizon, became_illiquid, rugged,
+          volume_disappeared, snapshot_time
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            row.get("token_address"),
+            row.get("pair_id"),
+            row.get("label_at_scan"),
+            row.get("scan_time"),
+            row.get("horizon"),
+            row.get("price_at_scan"),
+            row.get("price_at_horizon"),
+            row.get("return_pct"),
+            row.get("max_favorable_excursion_pct"),
+            row.get("max_adverse_excursion_pct"),
+            row.get("drawdown_before_pump_pct"),
+            row.get("liquidity_at_scan"),
+            row.get("liquidity_at_horizon"),
+            row.get("volume_at_scan"),
+            row.get("volume_at_horizon"),
+            1 if row.get("became_illiquid") else 0,
+            1 if row.get("rugged") else 0,
+            1 if row.get("volume_disappeared") else 0,
+            row.get("snapshot_time"),
+        ),
+    )
+    conn.commit()
+    return cursor.rowcount > 0
+
+
 def insert_candidate_evaluation(
     conn: sqlite3.Connection,
     observed_at: str,
@@ -427,3 +945,43 @@ def export_table(conn: sqlite3.Connection, table: str, out_path: Path) -> int:
         writer.writeheader()
         writer.writerows(dict(row) for row in rows)
     return len(rows)
+
+
+def _truthy_int(value: Any) -> int:
+    if value is None:
+        return 0
+    if isinstance(value, bool):
+        return 1 if value else 0
+    return 1 if str(value).strip().lower() in {"1", "true", "yes", "y"} else 0
+
+
+def _security_num(raw: dict[str, Any], *keys: str) -> float | None:
+    for key in keys:
+        value = raw.get(key)
+        if value in {None, "", "null"}:
+            continue
+        try:
+            number = float(value)
+        except (TypeError, ValueError):
+            continue
+        if 0 < number <= 1 and ("pct" in key or "rate" in key):
+            return number * 100
+        return number
+    return None
+
+
+def _social_present(socials: Any, *needles: str) -> bool:
+    if not isinstance(socials, list):
+        return False
+    for item in socials:
+        if not isinstance(item, dict):
+            continue
+        text = " ".join(str(item.get(key, "")) for key in ("type", "url")).lower()
+        if any(needle in text for needle in needles):
+            return True
+    return False
+
+
+def _is_boosted(metrics: dict[str, Any]) -> bool:
+    tags = metrics.get("source_tags") or []
+    return bool(metrics.get("boost_total_amount")) or any(str(tag).startswith("boost_") for tag in tags)

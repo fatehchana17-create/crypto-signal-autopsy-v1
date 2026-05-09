@@ -14,6 +14,7 @@ from crypto_signal_autopsy.analysis_tables import build_analysis_payload
 from crypto_signal_autopsy.config import Settings
 from crypto_signal_autopsy.db import from_json, init_db
 from crypto_signal_autopsy.review import build_rejection_record, humanize_reason, money, pct
+from crypto_signal_autopsy.v2_dashboard import build_v2_payload
 
 
 def build_static_site(conn: sqlite3.Connection, settings: Settings, out_dir: Path | None = None) -> Path:
@@ -72,6 +73,7 @@ def _build_payload(conn: sqlite3.Connection, settings: Settings) -> dict[str, An
         "outcome_summary": outcome_summary,
         "latest_rejections": [_public_record(record) for record in records[:80]],
         "analysis": build_analysis_payload(conn, settings),
+        "v2": build_v2_payload(conn),
     }
 
 
@@ -120,7 +122,7 @@ def _render_html(payload: dict[str, Any]) -> str:
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Crypto Signal Autopsy V1</title>
+  <title>Crypto Signal Autopsy V2</title>
   <style>
     :root {{
       --ink: #12353b;
@@ -155,12 +157,14 @@ def _render_html(payload: dict[str, Any]) -> str:
     }}
     h1 {{ margin: 0 0 10px; font-size: 42px; line-height: 1.03; letter-spacing: 0; }}
     .lead {{ margin: 0; max-width: 760px; color: var(--muted); font-size: 18px; line-height: 1.55; }}
+    .disclaimer {{ margin: 14px 0 0; max-width: 820px; color: #8a4b22; font-size: 14px; font-weight: 800; }}
     .meta {{ display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }}
     .pill {{ border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.78); padding: 8px 12px; color: var(--muted); font-weight: 700; font-size: 13px; }}
     .grid {{ display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin: 20px 0; }}
     .four {{ display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 16px; }}
     .card {{ background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 18px; box-shadow: 0 12px 30px rgba(18,53,59,.07); }}
     .metric {{ font-size: 31px; font-weight: 800; margin-top: 6px; }}
+    .metric-small {{ font-size: 21px; line-height: 1.25; overflow-wrap: anywhere; }}
     .label {{ color: var(--muted); font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }}
     .two {{ display: grid; grid-template-columns: .9fr 1.1fr; gap: 16px; margin-top: 16px; }}
     h2 {{ margin: 0 0 14px; font-size: 23px; letter-spacing: 0; }}
@@ -190,16 +194,52 @@ def _render_html(payload: dict[str, Any]) -> str:
 <body>
   <main class="shell">
     <header>
-      <h1>Crypto Signal Autopsy V1</h1>
-      <p class="lead">A public 24/7 mirror of the research dashboard. It shows what the scanner found, why tokens were rejected, and what happened after the audit windows.</p>
+      <h1>Crypto Signal Autopsy V2</h1>
+      <p class="lead">Research dashboard for crypto token risk and opportunity analysis. It separates tokens into evidence buckets and tracks what happened after each scan.</p>
+      <p class="disclaimer">Research Only - Not Financial Advice. No buy signals. No sell signals. No auto trading.</p>
       <div class="meta">
         <span class="pill">Base chain</span>
         <span class="pill">GitHub Actions hourly scan</span>
-        <span class="pill">Rejected-token audit</span>
+        <span class="pill">V2 labels and scoring</span>
       </div>
     </header>
 
     <section class="grid" id="metrics"></section>
+
+    <section class="card" style="margin-top:16px">
+      <h2>V2 Bucket Tables</h2>
+      <p class="small">Paper Trade Candidate means simulated tracking only. High-Risk Momentum Watchlist means risky token being studied, not recommended.</p>
+      <div id="bucketTables"></div>
+    </section>
+
+    <section class="two">
+      <div class="card">
+        <h2>Median vs Average Performance</h2>
+        <p class="small">Average return can be distorted by outliers. Median return is usually more reliable.</p>
+        <div id="v2Performance"></div>
+      </div>
+      <div class="card">
+        <h2>Score Bucket Performance</h2>
+        <div id="scoreBuckets"></div>
+      </div>
+    </section>
+
+    <section class="four">
+      <div class="card"><h2>Biggest Missed Winners</h2><div id="missedWinners"></div></div>
+      <div class="card"><h2>Biggest Avoided Losers</h2><div id="avoidedLosers"></div></div>
+      <div class="card"><h2>High-Risk Pumps</h2><div id="highRiskPumps"></div></div>
+      <div class="card"><h2>Rugs And Dumps</h2><div id="rugsDumps"></div></div>
+    </section>
+
+    <section class="two">
+      <div class="card"><h2>Filters That Saved Us</h2><div id="filtersSaved"></div></div>
+      <div class="card"><h2>Filters That Blocked Winners</h2><div id="filtersBlocked"></div></div>
+    </section>
+
+    <section class="two">
+      <div class="card"><h2>Paper Trade Simulation</h2><div id="paperTrades"></div></div>
+      <div class="card"><h2>Manual Review Notes</h2><div id="reviewNotes"></div></div>
+    </section>
 
     <section class="two">
       <div class="card">
@@ -249,15 +289,10 @@ def _render_html(payload: dict[str, Any]) -> str:
   <script id="payload" type="application/json">{safe_data}</script>
   <script>
     const payload = JSON.parse(document.getElementById("payload").textContent);
-    const counts = payload.counts;
-    const metrics = [
-      ["Rejected Tokens", counts.rejected_tokens],
-      ["Rejected Outcomes", counts.rejected_outcomes],
-      ["Accepted Signals", counts.accepted_signals],
-      ["API Events", counts.api_events],
-    ];
+    const v2 = payload.v2;
+    const metrics = v2.health_cards.map(card => [card.label, card.value]);
     document.getElementById("metrics").innerHTML = metrics.map(([label, value]) => `
-      <div class="card"><div class="label">${{label}}</div><div class="metric">${{value}}</div></div>
+      <div class="card"><div class="label">${{label}}</div><div class="metric ${{String(value).length > 12 ? "metric-small" : ""}}">${{value}}</div></div>
     `).join("");
 
     function table(headers, rows) {{
@@ -312,6 +347,82 @@ def _render_html(payload: dict[str, Any]) -> str:
         </tr>`)
       );
     }}
+
+    function renderBucketTables() {{
+      const labels = ["Reject", "Watchlist", "High-Risk Momentum Watchlist", "Research Candidate", "Paper Trade Candidate"];
+      document.getElementById("bucketTables").innerHTML = labels.map(label => `
+        <h2>${{label}}</h2>
+        ${{table(
+          ["Token", "Chain", "Age", "Liquidity", "24h Vol", "1h Move", "Risk", "Opp", "Reasons", "DEX"],
+          (v2.bucket_tables[label] || []).slice(0, 12).map(row => `<tr>
+            <td><strong>${{row.symbol}}</strong><br><span class="small">${{row.scan_time}}</span></td>
+            <td>${{row.chain}}</td>
+            <td>${{row.pair_age}}</td>
+            <td>${{row.liquidity}}</td>
+            <td>${{row.volume24h}}</td>
+            <td>${{row.move1h}}</td>
+            <td>${{row.risk_score}}</td>
+            <td>${{row.opportunity_score}}</td>
+            <td class="reason">${{row.main_reasons}}</td>
+            <td>${{row.url ? `<a href="${{row.url}}" target="_blank" rel="noreferrer">Open</a>` : ""}}</td>
+          </tr>`)
+        )}}
+      `).join("");
+    }}
+
+    function renderOutcomeRows(id, rows) {{
+      document.getElementById(id).innerHTML = table(
+        ["Token", "Label", "Horizon", "Return", "Reasons", "Illiquid", "Rug", "Volume Gone"],
+        rows.slice(0, 12).map(row => `<tr>
+          <td><strong>${{row.token_address.slice(0, 10)}}...</strong></td>
+          <td>${{row.label_at_scan}}</td>
+          <td>${{row.horizon}}</td>
+          <td class="${{cellClass(row.return)}}">${{row.return}}</td>
+          <td>${{row.reasons}}</td>
+          <td>${{row.became_illiquid}}</td>
+          <td>${{row.rugged}}</td>
+          <td>${{row.volume_disappeared}}</td>
+        </tr>`)
+      );
+    }}
+
+    renderBucketTables();
+    document.getElementById("v2Performance").innerHTML = table(
+      ["Horizon", "Count", "Median", "Average", "Best", "Worst", "Outlier Note"],
+      v2.performance.map(row => `<tr>
+        <td>${{row.horizon}}</td><td>${{row.count}}</td><td>${{row.median}}</td>
+        <td>${{row.average}}</td><td>${{row.best}}</td><td>${{row.worst}}</td><td>${{row.outlier_note}}</td>
+      </tr>`)
+    );
+    document.getElementById("scoreBuckets").innerHTML = table(
+      ["Risk", "Opp", "Count", "Median", "Average", "Best", "Worst", "Rug", "Illiquid"],
+      v2.score_buckets.slice(0, 20).map(row => `<tr>
+        <td>${{row.risk_bucket}}</td><td>${{row.opportunity_bucket}}</td><td>${{row.count}}</td>
+        <td>${{row.median}}</td><td>${{row.average}}</td><td>${{row.best}}</td><td>${{row.worst}}</td>
+        <td>${{row.rug_rate}}</td><td>${{row.illiquidity_rate}}</td>
+      </tr>`)
+    );
+    renderOutcomeRows("missedWinners", v2.outliers.missed_winners);
+    renderOutcomeRows("avoidedLosers", v2.outliers.avoided_losers);
+    renderOutcomeRows("highRiskPumps", v2.outliers.high_risk_pumps);
+    renderOutcomeRows("rugsDumps", v2.outliers.rugs_dumps);
+    renderOutcomeRows("filtersSaved", v2.filters_saved_us);
+    renderOutcomeRows("filtersBlocked", v2.filters_blocked_winners);
+    document.getElementById("paperTrades").innerHTML = table(
+      ["Token", "Pair", "Entry", "Position", "Status", "Notes"],
+      v2.paper_trades.map(row => `<tr>
+        <td>${{row.token_address.slice(0, 10)}}...</td><td>${{row.pair_id}}</td>
+        <td>${{row.sim_entry}}</td><td>${{row.position}}</td><td>${{row.status}}</td><td>${{row.notes}}</td>
+      </tr>`)
+    );
+    document.getElementById("reviewNotes").innerHTML = table(
+      ["Token", "Time", "Missed Winner", "Saved", "Lesson", "Notes"],
+      v2.review_notes.map(row => `<tr>
+        <td>${{row.token_address.slice(0, 10)}}...</td><td>${{row.review_time}}</td>
+        <td>${{row.missed_winner}}</td><td>${{row.saved_from_bad_token}}</td>
+        <td>${{row.main_lesson}}</td><td>${{row.manual_notes}}</td>
+      </tr>`)
+    );
 
     document.getElementById("outcomes").innerHTML = table(
       ["Horizon", "Count", "Median", "Average", "Best", "Worst"],
