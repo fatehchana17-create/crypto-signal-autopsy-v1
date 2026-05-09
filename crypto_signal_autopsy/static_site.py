@@ -188,8 +188,19 @@ def _render_html(payload: dict[str, Any]) -> str:
     .small {{ color: var(--muted); font-size: 13px; line-height: 1.5; }}
     .notice {{ border-left: 4px solid var(--warn); padding: 12px 14px; background: #fff8f2; color: #7e421c; font-weight: 700; border-radius: 6px; }}
     .status-tile {{ border: 1px solid var(--line); border-radius: 8px; padding: 14px; background: var(--soft); }}
+    .guide {{ display: grid; gap: 12px; }}
+    .guide-row {{ display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 14px; padding: 13px 0; border-bottom: 1px solid var(--line); }}
+    .guide-row:last-child {{ border-bottom: 0; }}
+    .guide-key {{ font-weight: 850; color: var(--ink); }}
+    .guide-copy {{ color: var(--muted); line-height: 1.5; }}
+    .simple-cards {{ display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }}
+    .simple-card {{ border: 1px solid var(--line); border-radius: 8px; padding: 14px; background: var(--soft); }}
+    .simple-card strong {{ display: block; font-size: 20px; margin-bottom: 4px; }}
+    .advanced-section {{ margin-top: 18px; }}
+    .advanced-section summary {{ cursor: pointer; font-weight: 850; font-size: 20px; color: var(--ink); padding: 16px 18px; border: 1px solid var(--line); border-radius: 8px; background: #fff; box-shadow: 0 12px 30px rgba(18,53,59,.06); }}
+    .advanced-section[open] summary {{ margin-bottom: 16px; }}
     @media (max-width: 880px) {{
-      .grid, .two, .four {{ grid-template-columns: 1fr; }}
+      .grid, .two, .four, .simple-cards, .guide-row {{ grid-template-columns: 1fr; }}
       h1 {{ font-size: 33px; }}
       header {{ padding: 24px; }}
       th:nth-child(4), td:nth-child(4), th:nth-child(5), td:nth-child(5) {{ display: none; }}
@@ -213,8 +224,19 @@ def _render_html(payload: dict[str, Any]) -> str:
     <section class="grid" id="metrics"></section>
 
     <section class="card" style="margin-top:16px">
-      <h2>V2 Bucket Tables</h2>
-      <p class="small">Paper Trade Candidate means simulated tracking only. High-Risk Momentum Watchlist means risky token being studied, not recommended.</p>
+      <h2>Start Here</h2>
+      <p class="small">This page is a research notebook. It finds tokens, rejects risky ones, tracks what happened later, and studies wallets around those tokens.</p>
+      <div id="simpleGuide"></div>
+    </section>
+
+    <section class="two">
+      <div class="card"><h2>What The Labels Mean</h2><div id="labelGuide"></div></div>
+      <div class="card"><h2>Best Reading Order</h2><div id="readingOrder"></div></div>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <h2>Token Decision Buckets</h2>
+      <p class="small">Start here to see why each token was rejected, watched, or promoted to research. None of these labels are buy signals.</p>
       <div id="bucketTables"></div>
     </section>
 
@@ -242,6 +264,9 @@ def _render_html(payload: dict[str, Any]) -> str:
       <div id="walletClusters"></div>
       <p class="small">Wallet tracking is a research signal only. A wallet buying a token does not make the token safe. Hard security filters always override wallet activity. Smart wallet labels require enough historical evidence and may still be wrong.</p>
     </section>
+
+    <details class="advanced-section">
+      <summary>Advanced evidence tables</summary>
 
     <section class="two">
       <div class="card">
@@ -282,6 +307,8 @@ def _render_html(payload: dict[str, Any]) -> str:
         <div id="reasons"></div>
       </div>
     </section>
+
+    </details>
 
     <section class="card" style="margin-top:16px">
       <h2>Latest Rejected Tokens</h2>
@@ -332,6 +359,46 @@ def _render_html(payload: dict[str, Any]) -> str:
       return `<div class="scroll"><table><thead><tr>${{headers.map(h => `<th>${{h}}</th>`).join("")}}</tr></thead><tbody>${{rows.join("")}}</tbody></table></div>`;
     }}
 
+    function renderSimpleGuide() {{
+      const labels = v2.label_counts || {{}};
+      const scanned = Object.values(labels).reduce((sum, value) => sum + Number(value || 0), 0);
+      const walletStatus = wallets.status || {{}};
+      document.getElementById("simpleGuide").innerHTML = `
+        <div class="simple-cards">
+          <div class="simple-card"><strong>${{scanned}}</strong><span class="small">tokens checked by the scanner</span></div>
+          <div class="simple-card"><strong>${{labels["Reject"] || 0}}</strong><span class="small">tokens rejected by safety/research rules</span></div>
+          <div class="simple-card"><strong>${{walletStatus.wallets_tracked || 0}}</strong><span class="small">wallets tracked around scanned tokens</span></div>
+        </div>
+        <div class="guide" style="margin-top:12px">
+          <div class="guide-row"><div class="guide-key">What it does</div><div class="guide-copy">The system scans public crypto data, filters risky tokens, saves the reason, then checks later if the decision was good or bad.</div></div>
+          <div class="guide-row"><div class="guide-key">What to trust first</div><div class="guide-copy">Look at the plain labels, rejection reasons, and later performance. Do not treat any row as a buy signal.</div></div>
+          <div class="guide-row"><div class="guide-key">Wallet data</div><div class="guide-copy">Wallet tables show who traded scanned tokens. A wallet buying something does not make the token safe.</div></div>
+        </div>
+      `;
+    }}
+
+    function renderLabelGuide() {{
+      const rows = [
+        ["Reject", "The token failed safety or quality rules.", "Usually ignore it, then check later if the filter saved us or missed a winner."],
+        ["Watchlist", "Not clean enough for paper trading, but interesting enough to observe.", "Study only. Wait for more evidence."],
+        ["Research Candidate", "Cleaner than most rows, but still not a buy signal.", "Read the details and compare later performance."],
+        ["Paper Trade Candidate", "Strongest simulated-tracking bucket.", "Paper tracking only. No real trade instruction."],
+        ["Unproven Wallet", "A wallet with too little history.", "Do not call it smart yet."]
+      ].map(row => `<tr><td><strong>${{row[0]}}</strong></td><td>${{row[1]}}</td><td>${{row[2]}}</td></tr>`);
+      document.getElementById("labelGuide").innerHTML = table(["Label", "Plain meaning", "What to do"], rows);
+    }}
+
+    function renderReadingOrder() {{
+      const rows = [
+        ["1", "Token Decision Buckets", "See which tokens were rejected or watched, and why."],
+        ["2", "Smart Wallet Tracker", "See whether wallets are showing useful or risky behavior."],
+        ["3", "Latest Rejected Tokens", "Manually inspect the newest rejects with chart links."],
+        ["4", "One-hour and 24-hour tables", "Check whether rejected or accepted tokens later did well or badly."],
+        ["5", "Advanced evidence", "Open only when you want deeper stats and outlier tables."]
+      ].map(row => `<tr><td><strong>${{row[0]}}</strong></td><td>${{row[1]}}</td><td>${{row[2]}}</td></tr>`);
+      document.getElementById("readingOrder").innerHTML = table(["Step", "Read this", "Why"], rows);
+    }}
+
     const cellClass = (value) => {{
       const parsed = Number(String(value || "").replace("%", ""));
       if (Number.isNaN(parsed)) return "";
@@ -360,14 +427,14 @@ def _render_html(payload: dict[str, Any]) -> str:
 
     function renderAuditTable(id, rows, summary) {{
       document.getElementById(id).innerHTML = summaryLabel(summary) + table(
-        ["Token", "Horizon", "Net", "Liquidity", "24h Vol", "Age", "Why", "What it means", "Link"],
+        ["Token", "Checked after", "Return after cost", "Liquidity", "24h volume", "Age", "Why it was here", "Plain meaning", "Chart"],
         auditRows(rows)
       );
     }}
 
     function renderExtremeTable(id, rows) {{
       document.getElementById(id).innerHTML = table(
-        ["Token", "Horizon", "Net", "Liquidity", "Why", "What it means", "Link"],
+        ["Token", "Checked after", "Return", "Liquidity", "Why it was here", "Plain meaning", "Chart"],
         rows.slice(0, 10).map(row => `<tr>
           <td><strong>${{row.symbol}}</strong><br><span class="small">${{row.name || ""}}</span></td>
           <td>${{row.horizon}}</td>
@@ -385,10 +452,9 @@ def _render_html(payload: dict[str, Any]) -> str:
       document.getElementById("bucketTables").innerHTML = labels.map(label => `
         <h2>${{label}}</h2>
         ${{table(
-          ["Token", "Chain", "Age", "Liquidity", "24h Vol", "1h Move", "Risk", "Opp", "Reasons", "DEX"],
+          ["Token", "Age", "Liquidity", "24h volume", "1h move", "Risk score", "Opportunity score", "Why it is here", "Chart"],
           (v2.bucket_tables[label] || []).slice(0, 12).map(row => `<tr>
             <td><strong>${{row.symbol}}</strong><br><span class="small">${{row.scan_time}}</span></td>
-            <td>${{row.chain}}</td>
             <td>${{row.pair_age}}</td>
             <td>${{row.liquidity}}</td>
             <td>${{row.volume24h}}</td>
@@ -404,7 +470,7 @@ def _render_html(payload: dict[str, Any]) -> str:
 
     function renderOutcomeRows(id, rows) {{
       document.getElementById(id).innerHTML = table(
-        ["Token", "Label", "Horizon", "Return", "Reasons", "Illiquid", "Rug", "Volume Gone"],
+        ["Token", "Decision at scan", "Checked after", "Return", "Why", "Liquidity failed?", "Rug?", "Volume gone?"],
         rows.slice(0, 12).map(row => `<tr>
           <td><strong>${{row.token_address.slice(0, 10)}}...</strong></td>
           <td>${{row.label_at_scan}}</td>
@@ -439,40 +505,39 @@ def _render_html(payload: dict[str, Any]) -> str:
 
     function renderWalletTables() {{
       document.getElementById("walletLeaderboard").innerHTML = table(
-        ["Wallet", "Chain", "Label", "Quality", "Risk", "Tokens", "Win", "Median", "Avg", "Rug", "Quick Dump", "Hold", "Last"],
+        ["Wallet", "Plain label", "Quality", "Risk", "Tokens seen", "Win rate", "Rug exposure", "Last active"],
         wallets.leaderboard.slice(0, 20).map(row => `<tr>
           <td title="${{row.wallet_full}}"><strong>${{row.wallet}}</strong></td>
-          <td>${{row.chain}}</td><td>${{row.label}}</td><td>${{row.quality}}</td><td>${{row.risk}}</td>
-          <td>${{row.tokens}}</td><td>${{row.win_rate}}</td><td>${{row.median_return}}</td><td>${{row.average_return}}</td>
-          <td>${{row.rug_exposure}}</td><td>${{row.quick_dump}}</td><td>${{row.avg_hold}}</td><td>${{row.last_active}}</td>
+          <td>${{row.label}}</td><td>${{row.quality}}</td><td>${{row.risk}}</td>
+          <td>${{row.tokens}}</td><td>${{row.win_rate}}</td><td>${{row.rug_exposure}}</td><td>${{row.last_active}}</td>
         </tr>`)
       );
       document.getElementById("walletActivity").innerHTML = table(
-        ["Time", "Wallet", "Label", "Side", "Token", "Amount", "Pair Age", "Liquidity", "Token Risk", "Token Opp", "Wallet Signal"],
+        ["Time", "Wallet", "Wallet label", "Did", "Token", "Amount", "Liquidity", "Token risk", "Wallet signal"],
         wallets.activity_feed.slice(0, 20).map(row => `<tr>
           <td>${{row.time}}</td><td>${{row.wallet}}</td><td>${{row.wallet_label}}</td><td>${{row.side}}</td>
-          <td><strong>${{row.token}}</strong></td><td>${{row.amount}}</td><td>${{row.pair_age}}</td><td>${{row.liquidity}}</td>
-          <td>${{row.token_risk}}</td><td>${{row.token_opportunity}}</td><td>${{row.wallet_signal}}</td>
+          <td><strong>${{row.token}}</strong></td><td>${{row.amount}}</td><td>${{row.liquidity}}</td>
+          <td>${{row.token_risk}}</td><td>${{row.wallet_signal}}</td>
         </tr>`)
       );
       document.getElementById("walletSignalTokens").innerHTML = table(
-        ["Token", "Chain", "Smart", "Useful", "Suspicious", "Net Flow", "Score", "Wallet Label", "Token Label", "Risk", "Opp"],
+        ["Token", "Useful wallets", "Suspicious wallets", "Money flow", "Wallet score", "Wallet meaning", "Token status"],
         wallets.token_signals.slice(0, 20).map(row => `<tr>
-          <td><strong>${{row.token}}</strong></td><td>${{row.chain}}</td><td>${{row.smart}}</td><td>${{row.useful}}</td>
+          <td><strong>${{row.token}}</strong></td><td>${{row.useful}}</td>
           <td>${{row.suspicious}}</td><td>${{row.net_flow}}</td><td>${{row.wallet_score}}</td><td>${{row.wallet_label}}</td>
-          <td>${{row.token_label}}</td><td>${{row.risk}}</td><td>${{row.opportunity}}</td>
+          <td>${{row.token_label}}</td>
         </tr>`)
       );
       document.getElementById("suspiciousWallets").innerHTML = table(
-        ["Wallet", "Label", "Risk", "Tokens", "Rug", "Quick Dump", "First Minute", "One-Hit", "Suspicion", "Notes"],
+        ["Wallet", "Warning type", "Risk", "Tokens seen", "Rug exposure", "Quick dumps", "Suspicion score", "Plain note"],
         wallets.suspicious_wallets.slice(0, 20).map(row => `<tr>
           <td title="${{row.wallet_full}}"><strong>${{row.wallet}}</strong></td><td>${{row.label}}</td><td>${{row.risk}}</td>
-          <td>${{row.tokens}}</td><td>${{row.rug_exposure}}</td><td>${{row.quick_dump}}</td><td>${{row.first_minute}}</td>
-          <td>${{row.one_hit}}</td><td>${{row.suspicion}}</td><td>${{row.notes}}</td>
+          <td>${{row.tokens}}</td><td>${{row.rug_exposure}}</td><td>${{row.quick_dump}}</td>
+          <td>${{row.suspicion}}</td><td>${{row.notes}}</td>
         </tr>`)
       );
       document.getElementById("walletClusters").innerHTML = table(
-        ["Token", "Cluster Type", "Wallets", "Buy USD", "Avg Quality", "Avg Risk", "Scan Time", "Notes"],
+        ["Token", "Cluster type", "Wallets", "Total buys", "Average quality", "Average risk", "Found at", "Plain note"],
         wallets.clusters.slice(0, 20).map(row => `<tr>
           <td><strong>${{row.token}}</strong></td><td>${{row.cluster_type}}</td><td>${{row.wallet_count}}</td>
           <td>${{row.total_buy}}</td><td>${{row.avg_quality}}</td><td>${{row.avg_risk}}</td><td>${{row.scan_time}}</td><td>${{row.notes}}</td>
@@ -480,6 +545,9 @@ def _render_html(payload: dict[str, Any]) -> str:
       );
     }}
 
+    renderSimpleGuide();
+    renderLabelGuide();
+    renderReadingOrder();
     renderBucketTables();
     renderWalletStatus();
     renderWalletTables();

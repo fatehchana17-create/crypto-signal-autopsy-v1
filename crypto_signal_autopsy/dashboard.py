@@ -67,9 +67,10 @@ def main() -> None:
     col4.metric("API Events", len(api_events))
     st.markdown("</div>", unsafe_allow_html=True)
 
-    tab_v2, tab_wallets, tab_overview, tab_analysis, tab_manual, tab_signals, tab_outcomes, tab_rejected_audit, tab_raw, tab_config = st.tabs(
+    tab_start, tab_v2, tab_wallets, tab_overview, tab_analysis, tab_manual, tab_signals, tab_outcomes, tab_rejected_audit, tab_raw, tab_config = st.tabs(
         [
-            "V2 Lab",
+            "Start Here",
+            "Token Buckets",
             "Smart Wallets",
             "Overview",
             "Analysis",
@@ -82,6 +83,8 @@ def main() -> None:
         ]
     )
 
+    with tab_start:
+        _start_here(conn, settings)
     with tab_v2:
         _v2_lab(conn)
     with tab_wallets:
@@ -194,10 +197,81 @@ def _overview(
         _render_latest_rejections(rejected_records[:6])
 
 
+def _start_here(conn: sqlite3.Connection, settings: Settings) -> None:
+    v2 = build_v2_payload(conn)
+    wallets = build_wallet_dashboard_payload(conn, settings)
+    labels = v2["label_counts"]
+    wallet_status = wallets["status"]
+
+    st.markdown('<div class="section-title">Start Here</div>', unsafe_allow_html=True)
+    st.caption(
+        "This is a research notebook. It scans tokens, rejects risky ones, tracks what happened later, "
+        "and studies wallets around those tokens. Nothing here is a buy signal."
+    )
+
+    cards = [
+        ("Tokens checked", str(sum(labels.values()))),
+        ("Rejected tokens", str(labels.get("Reject", 0))),
+        ("Watchlist tokens", str(labels.get("Watchlist", 0))),
+        ("Research candidates", str(labels.get("Research Candidate", 0))),
+        ("Wallets tracked", wallet_status["wallets_tracked"]),
+        ("Wallet trades saved", wallet_status["trades_tracked"]),
+    ]
+    for index in range(0, len(cards), 3):
+        cols = st.columns(3)
+        for col, (label, value) in zip(cols, cards[index : index + 3]):
+            col.metric(label, value)
+
+    left, right = st.columns(2)
+    with left:
+        st.subheader("What the labels mean")
+        _render_simple_table(
+            [
+                {
+                    "Label": "Reject",
+                    "Plain meaning": "Failed safety or quality rules.",
+                    "What to do": "Usually ignore it, then check later if the filter was right.",
+                },
+                {
+                    "Label": "Watchlist",
+                    "Plain meaning": "Interesting, but not clean enough for paper trading.",
+                    "What to do": "Study only. Wait for more evidence.",
+                },
+                {
+                    "Label": "Research Candidate",
+                    "Plain meaning": "Cleaner than most, still not a buy signal.",
+                    "What to do": "Read details and compare later performance.",
+                },
+                {
+                    "Label": "Unproven Wallet",
+                    "Plain meaning": "Wallet has too little history.",
+                    "What to do": "Do not call it smart yet.",
+                },
+            ],
+            "No label guide available.",
+        )
+    with right:
+        st.subheader("Best reading order")
+        _render_simple_table(
+            [
+                {"Step": "1", "Read this": "Token Buckets", "Why": "See why each token was rejected or watched."},
+                {"Step": "2", "Read this": "Smart Wallets", "Why": "See wallet behavior, but remember it is research only."},
+                {"Step": "3", "Read this": "Overview", "Why": "Check whether accepted/rejected groups are performing well or badly."},
+                {"Step": "4", "Read this": "Analysis", "Why": "Use 1h and 24h tables to audit decisions."},
+                {"Step": "5", "Read this": "Raw Tables", "Why": "Only for debugging or deeper inspection."},
+            ],
+            "No reading order available.",
+        )
+
+    st.info(
+        "Simple rule: a good website here does not mean a good trade. The goal is to avoid fooling ourselves with messy token and wallet data."
+    )
+
+
 def _v2_lab(conn: sqlite3.Connection) -> None:
     payload = build_v2_payload(conn)
-    st.markdown('<div class="section-title">V2 Research Lab</div>', unsafe_allow_html=True)
-    st.caption(payload["disclaimer"])
+    st.markdown('<div class="section-title">Token Decision Buckets</div>', unsafe_allow_html=True)
+    st.caption("Start here to see why each token was rejected, watched, or promoted to research. No label is a buy signal.")
 
     cards = payload["health_cards"]
     for index in range(0, len(cards), 3):
@@ -283,20 +357,44 @@ def _wallet_lab(conn: sqlite3.Connection, settings: Settings) -> None:
     left, right = st.columns(2)
     with left:
         st.subheader("Wallet Leaderboard")
-        st.caption("Default order: label priority, quality high, risk low, tokens traded high.")
-        _render_simple_table(payload["leaderboard"], "Wallet module has not collected enough data yet.")
+        st.caption("A simple view of wallets found around scanned tokens. Most new wallets should stay Unproven.")
+        _render_simple_table(
+            _select_fields(
+                payload["leaderboard"],
+                ["wallet", "label", "quality", "risk", "tokens", "win_rate", "rug_exposure", "last_active"],
+            ),
+            "Wallet module has not collected enough data yet.",
+        )
     with right:
         st.subheader("Wallet Activity Feed")
-        _render_simple_table(payload["activity_feed"], "No wallet trade activity saved yet.")
+        _render_simple_table(
+            _select_fields(
+                payload["activity_feed"],
+                ["time", "wallet", "wallet_label", "side", "token", "amount", "liquidity", "token_risk", "wallet_signal"],
+            ),
+            "No wallet trade activity saved yet.",
+        )
 
     st.divider()
     signal_col, suspicious_col = st.columns(2)
     with signal_col:
         st.subheader("Wallet Signal Tokens")
-        _render_simple_table(payload["token_signals"], "No token-level wallet signals yet.")
+        _render_simple_table(
+            _select_fields(
+                payload["token_signals"],
+                ["token", "useful", "suspicious", "net_flow", "wallet_score", "wallet_label", "token_label"],
+            ),
+            "No token-level wallet signals yet.",
+        )
     with suspicious_col:
         st.subheader("Suspicious Wallet Warnings")
-        _render_simple_table(payload["suspicious_wallets"], "No suspicious wallet rows yet.")
+        _render_simple_table(
+            _select_fields(
+                payload["suspicious_wallets"],
+                ["wallet", "label", "risk", "tokens", "rug_exposure", "quick_dump", "suspicion", "notes"],
+            ),
+            "No suspicious wallet rows yet.",
+        )
 
     st.divider()
     st.subheader("Smart Wallet Cluster Detection")
@@ -802,6 +900,14 @@ def _render_simple_table(rows: list[dict[str, str]], empty_message: str) -> None
         cells = "".join(f"<td>{escape(str(row.get(header, '')))}</td>" for header in headers)
         body.append(f"<tr>{cells}</tr>")
     _render_table(headers=headers, body="".join(body))
+
+
+def _select_fields(rows: list[dict[str, str]], fields: list[str]) -> list[dict[str, str]]:
+    return [{_human_field(field): row.get(field, "") for field in fields} for row in rows]
+
+
+def _human_field(field: str) -> str:
+    return field.replace("_", " ").title()
 
 
 def _render_table(headers: list[str], body: str, min_width: int = 920) -> None:
