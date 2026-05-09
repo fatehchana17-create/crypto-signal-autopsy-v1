@@ -18,9 +18,10 @@ from crypto_signal_autopsy.review import (
     pct,
 )
 from crypto_signal_autopsy.v2_dashboard import LABELS, build_v2_payload
+from crypto_signal_autopsy.wallet_exports import build_wallet_dashboard_payload
 
 
-st.set_page_config(page_title="Crypto Signal Autopsy V2", layout="wide")
+st.set_page_config(page_title="Crypto Signal Autopsy V3", layout="wide")
 
 
 def main() -> None:
@@ -41,13 +42,14 @@ def main() -> None:
         """
         <section class="hero">
           <div class="hero-copy">
-            <h1>Crypto Signal Autopsy V2</h1>
+            <h1>Crypto Signal Autopsy V3</h1>
             <p>Research dashboard for crypto token risk and opportunity analysis.</p>
-            <p class="hero-disclaimer">Research only. No financial advice. No buy signals. No sell signals. No auto trading.</p>
+            <p class="hero-disclaimer">Research only. No financial advice. No buy signals. No sell signals. No auto trading. Wallet activity is not a buy signal.</p>
             <div class="hero-meta">
               <span>Base chain</span>
               <span>Hourly scanner</span>
               <span>V2 labels and scoring</span>
+              <span>V3 wallet research</span>
             </div>
           </div>
         </section>
@@ -65,12 +67,25 @@ def main() -> None:
     col4.metric("API Events", len(api_events))
     st.markdown("</div>", unsafe_allow_html=True)
 
-    tab_v2, tab_overview, tab_analysis, tab_manual, tab_signals, tab_outcomes, tab_rejected_audit, tab_raw, tab_config = st.tabs(
-        ["V2 Lab", "Overview", "Analysis", "Manual Review", "Signals", "Outcomes", "Rejected Audit", "Raw Tables", "Config"]
+    tab_v2, tab_wallets, tab_overview, tab_analysis, tab_manual, tab_signals, tab_outcomes, tab_rejected_audit, tab_raw, tab_config = st.tabs(
+        [
+            "V2 Lab",
+            "Smart Wallets",
+            "Overview",
+            "Analysis",
+            "Manual Review",
+            "Signals",
+            "Outcomes",
+            "Rejected Audit",
+            "Raw Tables",
+            "Config",
+        ]
     )
 
     with tab_v2:
         _v2_lab(conn)
+    with tab_wallets:
+        _wallet_lab(conn, settings)
     with tab_overview:
         _overview(signals, outcomes, rejected_outcomes, evaluations, api_events, rejected_records, settings)
     with tab_analysis:
@@ -236,6 +251,60 @@ def _v2_lab(conn: sqlite3.Connection) -> None:
     with notes_col:
         st.subheader("Manual Review Notes")
         _render_simple_table(payload["review_notes"], "No manual review notes yet.")
+
+
+def _wallet_lab(conn: sqlite3.Connection, settings: Settings) -> None:
+    payload = build_wallet_dashboard_payload(conn, settings)
+    status = payload["status"]
+    st.markdown('<div class="section-title">Smart Wallet Tracker</div>', unsafe_allow_html=True)
+    st.caption(
+        "Research only. Wallet activity is not a buy signal. Smart Wallet does not mean perfect wallet. "
+        "Suspicious Wallet does not prove crime or fraud. Paper tracking only."
+    )
+    if status.get("warning"):
+        st.warning(status["warning"])
+
+    cards = [
+        ("Enabled", status["enabled"]),
+        ("Provider", status["active_provider"]),
+        ("Last Wallet Scan", status["last_wallet_scan"]),
+        ("Wallet API Errors", status["wallet_api_errors"]),
+        ("Wallets Tracked", status["wallets_tracked"]),
+        ("Trades Tracked", status["trades_tracked"]),
+        ("Smart Wallets", status["smart_wallets"]),
+        ("Useful Wallets", status["useful_wallets"]),
+        ("Suspicious Wallets", status["suspicious_wallets"]),
+    ]
+    for index in range(0, len(cards), 3):
+        cols = st.columns(3)
+        for col, (label, value) in zip(cols, cards[index : index + 3]):
+            col.metric(label, value)
+
+    left, right = st.columns(2)
+    with left:
+        st.subheader("Wallet Leaderboard")
+        st.caption("Default order: label priority, quality high, risk low, tokens traded high.")
+        _render_simple_table(payload["leaderboard"], "Wallet module has not collected enough data yet.")
+    with right:
+        st.subheader("Wallet Activity Feed")
+        _render_simple_table(payload["activity_feed"], "No wallet trade activity saved yet.")
+
+    st.divider()
+    signal_col, suspicious_col = st.columns(2)
+    with signal_col:
+        st.subheader("Wallet Signal Tokens")
+        _render_simple_table(payload["token_signals"], "No token-level wallet signals yet.")
+    with suspicious_col:
+        st.subheader("Suspicious Wallet Warnings")
+        _render_simple_table(payload["suspicious_wallets"], "No suspicious wallet rows yet.")
+
+    st.divider()
+    st.subheader("Smart Wallet Cluster Detection")
+    _render_simple_table(payload["clusters"], "No wallet clusters detected yet.")
+    st.info(
+        "A wallet buying a token does not make the token safe. Hard security filters always override wallet activity. "
+        "Smart wallet labels require enough historical evidence and may still be wrong."
+    )
 
 
 def _render_v2_bucket_table(rows: list[dict[str, str]]) -> None:

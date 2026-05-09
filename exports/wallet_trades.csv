@@ -1,0 +1,1 @@
+id,wallet_address,token_address,pair_id,chain,trade_time,side,amount_usd,token_amount,price_usd,liquidity_usd_at_trade,pair_age_minutes_at_trade,tx_hash,source,raw_json

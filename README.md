@@ -1,6 +1,6 @@
-# Crypto Signal Autopsy V2
+# Crypto Signal Autopsy V3
 
-Crypto Signal Autopsy V2 is a public crypto research dashboard.
+Crypto Signal Autopsy V3 is a public crypto research dashboard.
 
 It does not give buy signals.
 It does not auto-trade.
@@ -28,6 +28,26 @@ The goal is to learn:
 - Tracks outcomes at 15m, 1h, 4h, 24h, 3d, and 7d.
 - Exports V2 CSV files for labels, outcomes, outliers, filter lessons, and score buckets.
 - Builds a static GitHub Pages dashboard that does not call APIs from the browser.
+
+## Smart Wallet Tracking Module
+
+The Smart Wallet Tracking Module studies wallets that interact with scanned tokens.
+
+It tracks wallet behavior, estimates wallet quality/risk, and checks whether wallet activity improves token research.
+
+This module does not provide copy-trading signals.
+
+A wallet buying a token does not mean the token should be bought.
+
+The module exists to answer research questions:
+
+- Do certain wallets repeatedly enter early before strong moves?
+- Do those wallets also avoid rugs?
+- Do they realize profits or only hold unrealized gains?
+- Do suspicious wallets appear before dumps?
+- Does wallet clustering improve research candidate quality?
+
+The first V3 provider is Moralis pair swaps for EVM chains. If `MORALIS_API_KEY` is missing, the wallet module is skipped and the normal scanner/dashboard still run.
 
 ## Important Labels
 
@@ -58,6 +78,7 @@ The scanner also works without the dashboard:
 ```powershell
 python -m crypto_signal_autopsy.cli scan
 python -m crypto_signal_autopsy.cli track
+python -m crypto_signal_autopsy.cli wallets
 python -m crypto_signal_autopsy.cli export
 python -m crypto_signal_autopsy.cli static-site
 ```
@@ -103,6 +124,17 @@ GitHub Actions also runs the scanner on a schedule and publishes the static dash
 - `exports/score_bucket_performance.csv`
 
 Old V1 CSVs are still exported for compatibility.
+
+## V3 Wallet CSV Outputs
+
+- `exports/wallets.csv`
+- `exports/wallet_trades.csv`
+- `exports/wallet_performance.csv`
+- `exports/wallet_token_signals.csv`
+- `exports/wallet_clusters.csv`
+- `exports/wallet_leaderboard.csv`
+- `exports/suspicious_wallets.csv`
+- `exports/wallet_activity_feed.csv`
 
 ## Success Rules
 

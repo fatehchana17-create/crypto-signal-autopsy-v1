@@ -10,6 +10,7 @@ from crypto_signal_autopsy.config import Settings
 from crypto_signal_autopsy.export import export_all
 from crypto_signal_autopsy.scan import run_scan
 from crypto_signal_autopsy.track import run_tracking
+from crypto_signal_autopsy.wallet_discovery import run_wallet_module
 
 
 def configure_logging(log_path: Path) -> None:
@@ -56,12 +57,14 @@ def run_daemon(
         try:
             scan_stats = run_scan(conn, settings)
             track_stats = run_tracking(conn, settings)
+            wallet_stats = run_wallet_module(conn, settings)
             export_stats = export_all(conn, settings.export_dir)
             logging.info(
-                "cycle started=%s scan=%s track=%s export=%s",
+                "cycle started=%s scan=%s track=%s wallets=%s export=%s",
                 started,
                 scan_stats,
                 track_stats,
+                wallet_stats,
                 export_stats,
             )
         except Exception:

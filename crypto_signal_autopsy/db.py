@@ -348,6 +348,139 @@ CREATE TABLE IF NOT EXISTS review_notes (
     manual_notes TEXT,
     screenshot_url TEXT
 );
+
+CREATE TABLE IF NOT EXISTS wallets (
+    wallet_address TEXT PRIMARY KEY,
+    chain TEXT,
+    first_seen_at TEXT,
+    last_seen_at TEXT,
+    wallet_label TEXT,
+    wallet_quality_score REAL,
+    wallet_risk_score REAL,
+    tokens_traded INTEGER,
+    realized_exits INTEGER,
+    win_rate REAL,
+    median_realized_return_pct REAL,
+    avg_realized_return_pct REAL,
+    total_realized_pnl_usd REAL,
+    rug_exposure_rate REAL,
+    low_liquidity_trade_rate REAL,
+    quick_dump_rate REAL,
+    first_minute_entry_rate REAL,
+    avg_hold_time_minutes REAL,
+    biggest_win_contribution_pct REAL,
+    suspicious_behavior_score REAL,
+    notes TEXT,
+    updated_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS wallet_trades (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    wallet_address TEXT,
+    token_address TEXT,
+    pair_id TEXT,
+    chain TEXT,
+    trade_time TEXT,
+    side TEXT,
+    amount_usd REAL,
+    token_amount REAL,
+    price_usd REAL,
+    liquidity_usd_at_trade REAL,
+    pair_age_minutes_at_trade REAL,
+    tx_hash TEXT,
+    source TEXT,
+    raw_json TEXT
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_wallet_trades_tx_hash
+  ON wallet_trades(chain, tx_hash, wallet_address, token_address, side)
+  WHERE tx_hash IS NOT NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_wallet_trades_logical
+  ON wallet_trades(wallet_address, token_address, pair_id, trade_time, side, amount_usd, price_usd)
+  WHERE tx_hash IS NULL;
+
+CREATE INDEX IF NOT EXISTS idx_wallet_trades_pair_time
+  ON wallet_trades(pair_id, trade_time);
+
+CREATE INDEX IF NOT EXISTS idx_wallet_trades_wallet
+  ON wallet_trades(wallet_address, trade_time);
+
+CREATE TABLE IF NOT EXISTS wallet_performance (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    wallet_address TEXT,
+    token_address TEXT,
+    chain TEXT,
+    first_buy_time TEXT,
+    avg_buy_price REAL,
+    total_buy_usd REAL,
+    first_sell_time TEXT,
+    avg_sell_price REAL,
+    total_sell_usd REAL,
+    realized_pnl_usd REAL,
+    realized_return_pct REAL,
+    max_unrealized_return_pct REAL,
+    max_drawdown_pct REAL,
+    hold_time_minutes REAL,
+    rugged_after_entry INTEGER,
+    became_illiquid_after_entry INTEGER,
+    volume_disappeared_after_entry INTEGER,
+    updated_at TEXT
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_wallet_performance_wallet_token
+  ON wallet_performance(wallet_address, token_address, chain);
+
+CREATE TABLE IF NOT EXISTS wallet_token_signals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    token_address TEXT,
+    pair_id TEXT,
+    chain TEXT,
+    scan_time TEXT,
+    smart_wallet_count INTEGER,
+    useful_wallet_count INTEGER,
+    high_risk_wallet_count INTEGER,
+    suspicious_wallet_count INTEGER,
+    dump_wallet_count INTEGER,
+    unproven_wallet_count INTEGER,
+    total_wallet_buy_usd REAL,
+    total_wallet_sell_usd REAL,
+    net_wallet_flow_usd REAL,
+    smart_or_useful_wallets_entered_within_30m INTEGER,
+    low_rug_exposure_wallet_count INTEGER,
+    deployer_linked_wallet_involved INTEGER,
+    wallet_signal_score REAL,
+    wallet_signal_label TEXT
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_wallet_token_signal_scan
+  ON wallet_token_signals(pair_id, scan_time);
+
+CREATE TABLE IF NOT EXISTS wallet_clusters (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    token_address TEXT,
+    pair_id TEXT,
+    chain TEXT,
+    scan_time TEXT,
+    cluster_type TEXT,
+    wallet_count INTEGER,
+    total_buy_usd REAL,
+    average_wallet_quality_score REAL,
+    average_wallet_risk_score REAL,
+    notes TEXT
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_wallet_clusters_scan
+  ON wallet_clusters(pair_id, scan_time, cluster_type);
+
+CREATE TABLE IF NOT EXISTS api_errors (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    api_name TEXT,
+    endpoint TEXT,
+    related_address TEXT,
+    error_message TEXT,
+    created_at TEXT
+);
 """
 
 
@@ -361,8 +494,28 @@ def connect(db_path: Path) -> sqlite3.Connection:
 
 def init_db(conn: sqlite3.Connection) -> None:
     conn.executescript(SCHEMA)
+    migrate_schema(conn)
     conn.commit()
     backfill_v2_from_v1(conn)
+
+
+def migrate_schema(conn: sqlite3.Connection) -> None:
+    _ensure_columns(
+        conn,
+        "filter_results",
+        {
+            "wallet_signal_score": "REAL",
+            "wallet_signal_label": "TEXT",
+            "final_research_score": "REAL",
+        },
+    )
+
+
+def _ensure_columns(conn: sqlite3.Connection, table: str, columns: dict[str, str]) -> None:
+    existing = {row["name"] for row in conn.execute(f"PRAGMA table_info({table})").fetchall()}
+    for name, ddl_type in columns.items():
+        if name not in existing:
+            conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {ddl_type}")
 
 
 def to_json(value: Any) -> str:

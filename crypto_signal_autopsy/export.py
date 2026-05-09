@@ -6,6 +6,7 @@ from pathlib import Path
 from statistics import mean, median
 
 from crypto_signal_autopsy import db
+from crypto_signal_autopsy.wallet_exports import export_wallet_data
 
 
 EXPORTS = {
@@ -38,6 +39,7 @@ def export_all(conn: sqlite3.Connection, export_dir: Path) -> dict[str, int]:
     counts["score_bucket_performance"] = _export_score_bucket_performance(
         conn, export_dir / "score_bucket_performance.csv"
     )
+    counts.update(export_wallet_data(conn, export_dir))
     return counts
 
 

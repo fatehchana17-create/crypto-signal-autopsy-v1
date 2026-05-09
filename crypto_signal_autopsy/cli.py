@@ -11,6 +11,7 @@ from crypto_signal_autopsy.export import export_all
 from crypto_signal_autopsy.scan import run_scan
 from crypto_signal_autopsy.static_site import build_static_site
 from crypto_signal_autopsy.track import run_tracking
+from crypto_signal_autopsy.wallet_discovery import run_wallet_module
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -19,6 +20,7 @@ def main(argv: list[str] | None = None) -> int:
     subparsers.add_parser("init-db", help="Create or migrate the SQLite database.")
     subparsers.add_parser("scan", help="Run one CEX/DEX discovery and signal scan.")
     subparsers.add_parser("track", help="Track due delayed entries and 1h/24h outcomes.")
+    subparsers.add_parser("wallets", help="Run V3 smart wallet discovery, scoring, and signals.")
     subparsers.add_parser("run-once", help="Run scan, tracking, and CSV export.")
     subparsers.add_parser("export", help="Export CSV files.")
     subparsers.add_parser("static-site", help="Build the static GitHub Pages dashboard.")
@@ -51,12 +53,19 @@ def main(argv: list[str] | None = None) -> int:
         print(_format_stats("track", stats))
         return 0
 
+    if args.command == "wallets":
+        stats = run_wallet_module(conn, settings)
+        print(_format_stats("wallets", stats))
+        return 0
+
     if args.command == "run-once":
         scan_stats = run_scan(conn, settings)
         track_stats = run_tracking(conn, settings)
+        wallet_stats = run_wallet_module(conn, settings)
         export_counts = export_all(conn, settings.export_dir)
         print(_format_stats("scan", scan_stats))
         print(_format_stats("track", track_stats))
+        print(_format_stats("wallets", wallet_stats))
         print(_format_stats("export", export_counts))
         return 0
 

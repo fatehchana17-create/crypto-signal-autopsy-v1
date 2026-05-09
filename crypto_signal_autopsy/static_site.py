@@ -15,6 +15,7 @@ from crypto_signal_autopsy.config import Settings
 from crypto_signal_autopsy.db import from_json, init_db
 from crypto_signal_autopsy.review import build_rejection_record, humanize_reason, money, pct
 from crypto_signal_autopsy.v2_dashboard import build_v2_payload
+from crypto_signal_autopsy.wallet_exports import build_wallet_dashboard_payload, write_public_wallet_json_data
 
 
 def build_static_site(conn: sqlite3.Connection, settings: Settings, out_dir: Path | None = None) -> Path:
@@ -29,6 +30,7 @@ def build_static_site(conn: sqlite3.Connection, settings: Settings, out_dir: Pat
     (target_dir / ".nojekyll").write_text("", encoding="utf-8")
 
     payload = _build_payload(conn, settings)
+    write_public_wallet_json_data(conn, target_dir / "data")
     html = _render_html(payload)
     out_path = target_dir / "index.html"
     out_path.write_text(html, encoding="utf-8")
@@ -74,6 +76,7 @@ def _build_payload(conn: sqlite3.Connection, settings: Settings) -> dict[str, An
         "latest_rejections": [_public_record(record) for record in records[:80]],
         "analysis": build_analysis_payload(conn, settings),
         "v2": build_v2_payload(conn),
+        "wallets": build_wallet_dashboard_payload(conn, settings),
     }
 
 
@@ -122,7 +125,7 @@ def _render_html(payload: dict[str, Any]) -> str:
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Crypto Signal Autopsy V2</title>
+  <title>Crypto Signal Autopsy V3</title>
   <style>
     :root {{
       --ink: #12353b;
@@ -183,6 +186,8 @@ def _render_html(payload: dict[str, Any]) -> str:
     input, select {{ border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; min-height: 40px; background: #fff; color: var(--ink); }}
     input {{ flex: 1 1 260px; }}
     .small {{ color: var(--muted); font-size: 13px; line-height: 1.5; }}
+    .notice {{ border-left: 4px solid var(--warn); padding: 12px 14px; background: #fff8f2; color: #7e421c; font-weight: 700; border-radius: 6px; }}
+    .status-tile {{ border: 1px solid var(--line); border-radius: 8px; padding: 14px; background: var(--soft); }}
     @media (max-width: 880px) {{
       .grid, .two, .four {{ grid-template-columns: 1fr; }}
       h1 {{ font-size: 33px; }}
@@ -194,13 +199,14 @@ def _render_html(payload: dict[str, Any]) -> str:
 <body>
   <main class="shell">
     <header>
-      <h1>Crypto Signal Autopsy V2</h1>
+      <h1>Crypto Signal Autopsy V3</h1>
       <p class="lead">Research dashboard for crypto token risk and opportunity analysis. It separates tokens into evidence buckets and tracks what happened after each scan.</p>
-      <p class="disclaimer">Research Only - Not Financial Advice. No buy signals. No sell signals. No auto trading.</p>
+      <p class="disclaimer">Research Only - Not Financial Advice. No buy signals. No sell signals. No auto trading. Wallet activity is not a buy signal.</p>
       <div class="meta">
         <span class="pill">Base chain</span>
         <span class="pill">GitHub Actions hourly scan</span>
         <span class="pill">V2 labels and scoring</span>
+        <span class="pill">V3 smart wallet research</span>
       </div>
     </header>
 
@@ -210,6 +216,31 @@ def _render_html(payload: dict[str, Any]) -> str:
       <h2>V2 Bucket Tables</h2>
       <p class="small">Paper Trade Candidate means simulated tracking only. High-Risk Momentum Watchlist means risky token being studied, not recommended.</p>
       <div id="bucketTables"></div>
+    </section>
+
+    <h2 class="section-title">Smart Wallet Tracker</h2>
+    <p class="summary-line">Wallet tracking studies behavior around scanned tokens. It does not create copy-trading signals.</p>
+    <section class="card" style="margin-top:16px">
+      <h2>Wallet Module Status</h2>
+      <p class="notice">Research Only - Not Financial Advice. Wallet activity is not a buy signal. Smart Wallet does not mean perfect wallet. Suspicious Wallet does not prove crime or fraud. Paper tracking only.</p>
+      <div class="grid" id="walletStatus"></div>
+      <p class="small" id="walletWarning"></p>
+    </section>
+
+    <section class="two">
+      <div class="card"><h2>Wallet Leaderboard</h2><div id="walletLeaderboard"></div></div>
+      <div class="card"><h2>Wallet Activity Feed</h2><div id="walletActivity"></div></div>
+    </section>
+
+    <section class="two">
+      <div class="card"><h2>Wallet Signal Tokens</h2><div id="walletSignalTokens"></div></div>
+      <div class="card"><h2>Suspicious Wallet Warnings</h2><div id="suspiciousWallets"></div></div>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <h2>Smart Wallet Cluster Detection</h2>
+      <div id="walletClusters"></div>
+      <p class="small">Wallet tracking is a research signal only. A wallet buying a token does not make the token safe. Hard security filters always override wallet activity. Smart wallet labels require enough historical evidence and may still be wrong.</p>
     </section>
 
     <section class="two">
@@ -290,6 +321,7 @@ def _render_html(payload: dict[str, Any]) -> str:
   <script>
     const payload = JSON.parse(document.getElementById("payload").textContent);
     const v2 = payload.v2;
+    const wallets = payload.wallets;
     const metrics = v2.health_cards.map(card => [card.label, card.value]);
     document.getElementById("metrics").innerHTML = metrics.map(([label, value]) => `
       <div class="card"><div class="label">${{label}}</div><div class="metric ${{String(value).length > 12 ? "metric-small" : ""}}">${{value}}</div></div>
@@ -386,7 +418,71 @@ def _render_html(payload: dict[str, Any]) -> str:
       );
     }}
 
+    function renderWalletStatus() {{
+      const status = wallets.status;
+      const rows = [
+        ["Enabled", status.enabled],
+        ["Provider", status.active_provider],
+        ["Last wallet scan", status.last_wallet_scan],
+        ["API errors", status.wallet_api_errors],
+        ["Wallets tracked", status.wallets_tracked],
+        ["Trades tracked", status.trades_tracked],
+        ["Smart wallets", status.smart_wallets],
+        ["Useful wallets", status.useful_wallets],
+        ["Suspicious wallets", status.suspicious_wallets],
+      ];
+      document.getElementById("walletStatus").innerHTML = rows.map(([label, value]) => `
+        <div class="status-tile"><div class="label">${{label}}</div><div class="metric ${{String(value).length > 12 ? "metric-small" : ""}}">${{value}}</div></div>
+      `).join("");
+      document.getElementById("walletWarning").textContent = status.warning || "Wallet module is collecting research data.";
+    }}
+
+    function renderWalletTables() {{
+      document.getElementById("walletLeaderboard").innerHTML = table(
+        ["Wallet", "Chain", "Label", "Quality", "Risk", "Tokens", "Win", "Median", "Avg", "Rug", "Quick Dump", "Hold", "Last"],
+        wallets.leaderboard.slice(0, 20).map(row => `<tr>
+          <td title="${{row.wallet_full}}"><strong>${{row.wallet}}</strong></td>
+          <td>${{row.chain}}</td><td>${{row.label}}</td><td>${{row.quality}}</td><td>${{row.risk}}</td>
+          <td>${{row.tokens}}</td><td>${{row.win_rate}}</td><td>${{row.median_return}}</td><td>${{row.average_return}}</td>
+          <td>${{row.rug_exposure}}</td><td>${{row.quick_dump}}</td><td>${{row.avg_hold}}</td><td>${{row.last_active}}</td>
+        </tr>`)
+      );
+      document.getElementById("walletActivity").innerHTML = table(
+        ["Time", "Wallet", "Label", "Side", "Token", "Amount", "Pair Age", "Liquidity", "Token Risk", "Token Opp", "Wallet Signal"],
+        wallets.activity_feed.slice(0, 20).map(row => `<tr>
+          <td>${{row.time}}</td><td>${{row.wallet}}</td><td>${{row.wallet_label}}</td><td>${{row.side}}</td>
+          <td><strong>${{row.token}}</strong></td><td>${{row.amount}}</td><td>${{row.pair_age}}</td><td>${{row.liquidity}}</td>
+          <td>${{row.token_risk}}</td><td>${{row.token_opportunity}}</td><td>${{row.wallet_signal}}</td>
+        </tr>`)
+      );
+      document.getElementById("walletSignalTokens").innerHTML = table(
+        ["Token", "Chain", "Smart", "Useful", "Suspicious", "Net Flow", "Score", "Wallet Label", "Token Label", "Risk", "Opp"],
+        wallets.token_signals.slice(0, 20).map(row => `<tr>
+          <td><strong>${{row.token}}</strong></td><td>${{row.chain}}</td><td>${{row.smart}}</td><td>${{row.useful}}</td>
+          <td>${{row.suspicious}}</td><td>${{row.net_flow}}</td><td>${{row.wallet_score}}</td><td>${{row.wallet_label}}</td>
+          <td>${{row.token_label}}</td><td>${{row.risk}}</td><td>${{row.opportunity}}</td>
+        </tr>`)
+      );
+      document.getElementById("suspiciousWallets").innerHTML = table(
+        ["Wallet", "Label", "Risk", "Tokens", "Rug", "Quick Dump", "First Minute", "One-Hit", "Suspicion", "Notes"],
+        wallets.suspicious_wallets.slice(0, 20).map(row => `<tr>
+          <td title="${{row.wallet_full}}"><strong>${{row.wallet}}</strong></td><td>${{row.label}}</td><td>${{row.risk}}</td>
+          <td>${{row.tokens}}</td><td>${{row.rug_exposure}}</td><td>${{row.quick_dump}}</td><td>${{row.first_minute}}</td>
+          <td>${{row.one_hit}}</td><td>${{row.suspicion}}</td><td>${{row.notes}}</td>
+        </tr>`)
+      );
+      document.getElementById("walletClusters").innerHTML = table(
+        ["Token", "Cluster Type", "Wallets", "Buy USD", "Avg Quality", "Avg Risk", "Scan Time", "Notes"],
+        wallets.clusters.slice(0, 20).map(row => `<tr>
+          <td><strong>${{row.token}}</strong></td><td>${{row.cluster_type}}</td><td>${{row.wallet_count}}</td>
+          <td>${{row.total_buy}}</td><td>${{row.avg_quality}}</td><td>${{row.avg_risk}}</td><td>${{row.scan_time}}</td><td>${{row.notes}}</td>
+        </tr>`)
+      );
+    }}
+
     renderBucketTables();
+    renderWalletStatus();
+    renderWalletTables();
     document.getElementById("v2Performance").innerHTML = table(
       ["Horizon", "Count", "Median", "Average", "Best", "Worst", "Outlier Note"],
       v2.performance.map(row => `<tr>

@@ -122,7 +122,14 @@ class Settings:
     coingecko_demo_api_key: str | None
     coingecko_pro_api_key: str | None
     goplus_access_token: str | None
+    moralis_api_key: str | None
+    birdeye_api_key: str | None
     require_goplus: bool
+    wallet_module_enabled: bool
+    wallet_provider: str
+    wallet_history_days: int
+    wallet_pair_limit: int
+    wallet_trade_limit: int
     min_liquidity_usd: float
     min_volume_24h_usd: float
     min_pair_age_hours: float
@@ -150,8 +157,15 @@ def load_settings() -> Settings:
         cex_top_n=_env_int("CSA_CEX_TOP_N", 100),
         coingecko_demo_api_key=os.getenv("COINGECKO_DEMO_API_KEY") or None,
         coingecko_pro_api_key=os.getenv("COINGECKO_PRO_API_KEY") or None,
-        goplus_access_token=os.getenv("GOPLUS_ACCESS_TOKEN") or None,
+        goplus_access_token=os.getenv("GOPLUS_ACCESS_TOKEN") or os.getenv("GOPLUS_API_KEY") or None,
+        moralis_api_key=os.getenv("MORALIS_API_KEY") or None,
+        birdeye_api_key=os.getenv("BIRDEYE_API_KEY") or None,
         require_goplus=_env_bool("CSA_REQUIRE_GOPLUS", False),
+        wallet_module_enabled=_env_bool("CSA_WALLET_MODULE_ENABLED", True),
+        wallet_provider=os.getenv("CSA_WALLET_PROVIDER", "moralis").strip().lower() or "moralis",
+        wallet_history_days=_env_int("CSA_WALLET_HISTORY_DAYS", 7),
+        wallet_pair_limit=_env_int("CSA_WALLET_PAIR_LIMIT", 25),
+        wallet_trade_limit=_env_int("CSA_WALLET_TRADE_LIMIT", 100),
         min_liquidity_usd=_env_float("CSA_MIN_LIQUIDITY_USD", 500_000),
         min_volume_24h_usd=_env_float("CSA_MIN_VOLUME_24H_USD", 100_000),
         min_pair_age_hours=_env_float("CSA_MIN_PAIR_AGE_HOURS", 6),

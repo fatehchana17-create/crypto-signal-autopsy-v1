@@ -41,7 +41,15 @@ jobs:
           COINGECKO_DEMO_API_KEY: ${{ secrets.COINGECKO_DEMO_API_KEY }}
           COINGECKO_PRO_API_KEY: ${{ secrets.COINGECKO_PRO_API_KEY }}
           GOPLUS_ACCESS_TOKEN: ${{ secrets.GOPLUS_ACCESS_TOKEN }}
+          GOPLUS_API_KEY: ${{ secrets.GOPLUS_API_KEY }}
+          MORALIS_API_KEY: ${{ secrets.MORALIS_API_KEY }}
+          BIRDEYE_API_KEY: ${{ secrets.BIRDEYE_API_KEY }}
           CSA_REQUIRE_GOPLUS: "false"
+          CSA_WALLET_MODULE_ENABLED: "true"
+          CSA_WALLET_PROVIDER: "moralis"
+          CSA_WALLET_HISTORY_DAYS: "7"
+          CSA_WALLET_PAIR_LIMIT: "25"
+          CSA_WALLET_TRADE_LIMIT: "100"
           CSA_MIN_LIQUIDITY_USD: "500000"
           CSA_MIN_VOLUME_24H_USD: "100000"
           CSA_MIN_PAIR_AGE_HOURS: "6"
@@ -56,7 +64,10 @@ jobs:
         run: |
           mkdir -p data exports
           python -m crypto_signal_autopsy.cli init-db
-          python -m crypto_signal_autopsy.cli run-once
+          python -m crypto_signal_autopsy.cli scan
+          python -m crypto_signal_autopsy.cli track
+          python -m crypto_signal_autopsy.cli wallets
+          python -m crypto_signal_autopsy.cli export
           python -m crypto_signal_autopsy.cli static-site
           python - <<'PY'
           import sqlite3
@@ -70,7 +81,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f data/autopsy.sqlite exports/*.csv docs/index.html docs/.nojekyll
+          git add -f data/autopsy.sqlite exports/*.csv exports/dashboard/data/*.json docs/index.html docs/.nojekyll docs/data/*.json
           if git diff --cached --quiet; then
             echo "No data changes to commit."
           else
