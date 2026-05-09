@@ -11,3 +11,5 @@ id,observed_at,provider,endpoint,status,message,request_url
 10,2026-05-09T17:14:39+00:00,wallet_module,status,disabled,Wallet module inactive: missing MORALIS_API_KEY.,
 11,2026-05-09T18:07:29+00:00,wallet_module,status,disabled,Wallet module inactive: missing MORALIS_API_KEY.,
 12,2026-05-09T19:35:44+00:00,wallet_module,status,disabled,Wallet module inactive: missing MORALIS_API_KEY.,
+13,2026-05-09T21:04:33+00:00,dexscreener,candidate_discovery,empty,no base token profiles/boosts found,
+14,2026-05-09T21:04:36+00:00,wallet_module,status,disabled,Wallet module inactive: missing MORALIS_API_KEY.,
