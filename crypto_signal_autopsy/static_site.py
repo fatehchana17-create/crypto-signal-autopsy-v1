@@ -13,6 +13,11 @@ from typing import Any
 from crypto_signal_autopsy.analysis_tables import build_analysis_payload
 from crypto_signal_autopsy.config import Settings
 from crypto_signal_autopsy.db import from_json, init_db
+from crypto_signal_autopsy.quant_analytics import (
+    build_quant_payload,
+    refresh_quant_analytics,
+    write_public_quant_json_data,
+)
 from crypto_signal_autopsy.review import build_rejection_record, humanize_reason, money, pct
 from crypto_signal_autopsy.v2_dashboard import build_v2_payload
 from crypto_signal_autopsy.wallet_exports import build_wallet_dashboard_payload, write_public_wallet_json_data
@@ -29,8 +34,10 @@ def build_static_site(conn: sqlite3.Connection, settings: Settings, out_dir: Pat
         shutil.copyfile(header_asset, asset_dir / "dashboard-header.png")
     (target_dir / ".nojekyll").write_text("", encoding="utf-8")
 
+    refresh_quant_analytics(conn, settings)
     payload = _build_payload(conn, settings)
     write_public_wallet_json_data(conn, target_dir / "data")
+    write_public_quant_json_data(conn, target_dir / "data")
     html = _render_html(payload)
     out_path = target_dir / "index.html"
     out_path.write_text(html, encoding="utf-8")
@@ -77,6 +84,7 @@ def _build_payload(conn: sqlite3.Connection, settings: Settings) -> dict[str, An
         "analysis": build_analysis_payload(conn, settings),
         "v2": build_v2_payload(conn),
         "wallets": build_wallet_dashboard_payload(conn, settings),
+        "quant": build_quant_payload(conn),
     }
 
 
@@ -712,6 +720,389 @@ def _render_html(payload: dict[str, Any]) -> str:
     search.addEventListener("input", renderRows);
     reasonFilter.addEventListener("change", renderRows);
     renderRows();
+  </script>
+</body>
+</html>
+"""
+
+
+def _render_html(payload: dict[str, Any]) -> str:
+    data = json.dumps(payload, separators=(",", ":"), ensure_ascii=True)
+    safe_data = data.replace("</", "<\\/")
+    return f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Crypto Signal Autopsy Quant Dashboard</title>
+  <style>
+    :root {{
+      --bg: #05070d;
+      --bg2: #070b14;
+      --panel: rgba(11, 16, 32, .88);
+      --panel-soft: rgba(17, 24, 39, .82);
+      --border: #1f2937;
+      --border-hot: rgba(34, 197, 94, .36);
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --green: #22c55e;
+      --cyan: #06b6d4;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --purple: #8b5cf6;
+      --shadow: 0 24px 70px rgba(0,0,0,.38);
+    }}
+    * {{ box-sizing: border-box; }}
+    html {{ scroll-behavior: smooth; }}
+    body {{
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px),
+        radial-gradient(circle at 18% -8%, rgba(6,182,212,.22), transparent 34%),
+        radial-gradient(circle at 88% 0%, rgba(34,197,94,.18), transparent 30%),
+        var(--bg);
+      background-size: 42px 42px, 42px 42px, auto, auto, auto;
+    }}
+    a {{ color: var(--cyan); text-decoration: none; font-weight: 800; }}
+    .shell {{ max-width: 1440px; margin: 0 auto; padding: 24px 22px 70px; }}
+    .topnav {{
+      position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between;
+      gap: 14px; padding: 12px 0 18px; background: linear-gradient(180deg, rgba(5,7,13,.96), rgba(5,7,13,.72));
+      backdrop-filter: blur(12px);
+    }}
+    .brand {{ display:flex; align-items:center; gap:10px; font-weight:900; letter-spacing:.02em; }}
+    .mark {{ width: 28px; height: 28px; border:1px solid var(--green); background: linear-gradient(135deg, rgba(34,197,94,.28), rgba(6,182,212,.15)); display:grid; place-items:center; color:var(--green); }}
+    .navlinks {{ display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; }}
+    .navlinks a {{ color: var(--muted); border:1px solid var(--border); padding:7px 10px; border-radius:6px; font-size:12px; }}
+    .hero {{
+      min-height: 360px; border: 1px solid var(--border); border-radius: 8px; padding: 34px;
+      display:grid; grid-template-columns: minmax(0, 1.15fr) minmax(300px, .85fr); gap: 24px;
+      background: linear-gradient(135deg, rgba(11,16,32,.96), rgba(7,11,20,.86));
+      box-shadow: var(--shadow); overflow:hidden; position:relative;
+    }}
+    .hero::after {{ content:""; position:absolute; inset:auto 0 0; height:1px; background:linear-gradient(90deg, transparent, var(--green), var(--cyan), transparent); opacity:.8; }}
+    .eyebrow {{ margin:0 0 12px; color:var(--cyan); font-size:12px; font-weight:950; text-transform:uppercase; letter-spacing:.12em; }}
+    h1 {{ margin:0 0 12px; font-size: clamp(36px, 5vw, 68px); line-height:.95; letter-spacing:0; }}
+    .lead {{ color: var(--muted); max-width: 780px; font-size: 17px; line-height:1.55; margin:0; }}
+    .disclaimer {{ margin:18px 0 0; padding:12px 14px; border:1px solid rgba(245,158,11,.42); color:#ffd38a; background:rgba(245,158,11,.08); border-radius:8px; font-weight:800; }}
+    .terminal {{ border:1px solid var(--border); background:#070a12; border-radius:8px; padding:18px; min-height:260px; font-family:"Cascadia Mono", Consolas, monospace; box-shadow: inset 0 0 0 1px rgba(255,255,255,.02); }}
+    .term-row {{ display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.06); color:var(--muted); }}
+    .term-row strong {{ color: var(--text); text-align:right; }}
+    .verdict {{ color: var(--green); }}
+    .section {{ margin-top: 24px; }}
+    .section-head {{ display:flex; align-items:end; justify-content:space-between; gap:14px; margin:0 0 12px; }}
+    h2 {{ margin:0; font-size:24px; letter-spacing:0; }}
+    .section-copy {{ color:var(--muted); margin:5px 0 0; line-height:1.5; }}
+    .grid {{ display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap:14px; }}
+    .grid3 {{ display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap:14px; }}
+    .two {{ display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:14px; }}
+    .panel, .metric-card, .category-card {{
+      border:1px solid var(--border); background:var(--panel); border-radius:8px; padding:16px; box-shadow: 0 14px 40px rgba(0,0,0,.22);
+    }}
+    .metric-label {{ color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.08em; font-weight:900; }}
+    .metric-value {{ font-size:30px; font-weight:900; margin-top:6px; overflow-wrap:anywhere; }}
+    .status {{ display:inline-flex; align-items:center; gap:7px; border:1px solid var(--border); border-radius:999px; padding:5px 9px; font-size:12px; font-weight:900; color:var(--muted); }}
+    .dot {{ width:8px; height:8px; border-radius:50%; background:var(--muted); box-shadow:0 0 14px currentColor; }}
+    .good, .Good, .Operational {{ color:var(--green); }}
+    .bad, .Bad {{ color:var(--red); }}
+    .Mixed, .Research {{ color:var(--amber); }}
+    .Inactive, .Small, .Too {{ color:var(--muted); }}
+    .category-card {{ position:relative; overflow:hidden; }}
+    .category-card::before {{ content:""; position:absolute; inset:0 0 auto; height:2px; background:linear-gradient(90deg, var(--green), var(--cyan), var(--purple)); opacity:.65; }}
+    .category-top {{ display:flex; justify-content:space-between; gap:12px; align-items:start; }}
+    .category-name {{ font-weight:950; font-size:18px; }}
+    .category-count {{ color:var(--muted); font-family:"Cascadia Mono", Consolas, monospace; }}
+    .kpi-list {{ display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:8px; margin-top:12px; }}
+    .kpi {{ background:rgba(255,255,255,.035); border:1px solid rgba(255,255,255,.06); border-radius:6px; padding:9px; }}
+    .kpi span {{ display:block; color:var(--muted); font-size:11px; }}
+    .kpi strong {{ display:block; margin-top:3px; }}
+    .chart {{ min-height:260px; }}
+    .bars {{ display:grid; gap:10px; }}
+    .bar-row {{ display:grid; grid-template-columns: 76px minmax(0,1fr) 70px; gap:10px; align-items:center; color:var(--muted); font-size:13px; }}
+    .bar-track {{ height:12px; background:#0a0f1c; border:1px solid var(--border); border-radius:99px; overflow:hidden; }}
+    .bar-fill {{ height:100%; background:linear-gradient(90deg, var(--green), var(--cyan)); min-width:2px; }}
+    table {{ width:100%; border-collapse:collapse; }}
+    th, td {{ padding:10px 9px; border-bottom:1px solid rgba(255,255,255,.07); text-align:left; vertical-align:top; font-size:13px; }}
+    th {{ color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.08em; }}
+    tr:hover td {{ background:rgba(255,255,255,.025); }}
+    .scroll {{ overflow:auto; max-width:100%; }}
+    .small {{ color:var(--muted); font-size:12px; line-height:1.45; }}
+    .warning {{ border:1px solid rgba(245,158,11,.38); background:rgba(245,158,11,.08); color:#ffd38a; border-radius:8px; padding:12px; font-weight:800; }}
+    .tabs {{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }}
+    button, select, input {{ background:#0b1020; color:var(--text); border:1px solid var(--border); border-radius:6px; padding:9px 10px; font:inherit; }}
+    button {{ cursor:pointer; color:var(--muted); font-weight:900; }}
+    button.active {{ color:var(--green); border-color:var(--border-hot); background:rgba(34,197,94,.08); }}
+    .exports a {{ display:inline-flex; margin:4px 7px 4px 0; padding:7px 9px; border:1px solid var(--border); border-radius:6px; color:var(--muted); }}
+    @media (max-width: 1050px) {{ .grid {{ grid-template-columns: repeat(2, minmax(0, 1fr)); }} .hero, .two, .grid3 {{ grid-template-columns:1fr; }} }}
+    @media (max-width: 680px) {{ .shell {{ padding:16px 12px 50px; }} .grid {{ grid-template-columns:1fr; }} .hero {{ padding:20px; }} th:nth-child(n+5), td:nth-child(n+5) {{ display:none; }} }}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <nav class="topnav">
+      <div class="brand"><div class="mark">Σ</div><span>Crypto Signal Autopsy</span></div>
+      <div class="navlinks">
+        <a href="#overview">Overview</a><a href="#categories">Categories</a><a href="#charts">Charts</a>
+        <a href="#failures">Failures</a><a href="#missed">Missed Winners</a><a href="#baselines">Baselines</a>
+        <a href="#wallets">Wallets</a><a href="#quality">Data Quality</a>
+      </div>
+    </nav>
+
+    <section class="hero" id="overview">
+      <div>
+        <p class="eyebrow">Executive Quant Overview</p>
+        <h1>Crypto Signal Autopsy</h1>
+        <p class="lead">Research dashboard for crypto token risk, rejection audits, candidate tracking, and 10x setup analysis.</p>
+        <p class="disclaimer">Research only. No buy/sell signals. No financial advice. Paper candidates are simulated research labels only.</p>
+      </div>
+      <div class="terminal" id="executiveTerminal"></div>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><div><h2>System Verdict Cards</h2><p class="section-copy">The scanner is working, but candidate edge is not proven yet.</p></div></div>
+      <div class="grid" id="healthCards"></div>
+    </section>
+
+    <section class="section" id="categories">
+      <div class="section-head"><div><h2>Category Performance Cards</h2><p class="section-copy">Each category shows sample size, median return, best/worst outcome, positive rate, and audit verdict.</p></div></div>
+      <div class="grid3" id="categoryCards"></div>
+    </section>
+
+    <section class="section" id="charts">
+      <div class="section-head"><div><h2>Outcome Charts</h2><p class="section-copy">Median and average are both shown because averages can be distorted by outliers.</p></div></div>
+      <div class="two">
+        <div class="panel"><h2>Outcome Curve By Horizon</h2><div id="outcomeCurve" class="chart"></div></div>
+        <div class="panel"><h2>Category Positive Rate</h2><div id="positiveRateChart" class="chart"></div></div>
+      </div>
+      <div class="two section">
+        <div class="panel"><h2>10x Score vs Future Return</h2><div id="tenXScatter" class="chart"></div></div>
+        <div class="panel"><h2>Failure Diagnosis Donut</h2><div id="failureDonut" class="chart"></div></div>
+      </div>
+    </section>
+
+    <section class="section two" id="failures">
+      <div class="panel">
+        <h2>Accepted Failure Lab</h2>
+        <p class="section-copy">Paper candidates are simulated research labels only. Current accepted/paper results are weak until proven by larger samples.</p>
+        <div id="failureLab"></div>
+      </div>
+      <div class="panel">
+        <h2>10x Score Failure Review</h2>
+        <p class="section-copy">High 10x score failures must be visible, not hidden.</p>
+        <div id="tenXFailure"></div>
+      </div>
+    </section>
+
+    <section class="section two" id="missed">
+      <div class="panel">
+        <h2>Missed Winner Lab</h2>
+        <p class="section-copy">Some rejected tokens pumped hard. This does not automatically mean the filter was wrong. The system must check whether those tokens were actually tradable or only high-risk momentum.</p>
+        <div id="missedWinnerLab"></div>
+      </div>
+      <div class="panel">
+        <h2>High-Risk Momentum Lab</h2>
+        <p class="section-copy">High-risk momentum. Studied because similar rejected tokens sometimes pumped. Not a buy signal.</p>
+        <div id="highRiskMomentumLab"></div>
+      </div>
+    </section>
+
+    <section class="section" id="baselines">
+      <div class="panel">
+        <h2>Baseline Comparison</h2>
+        <p class="section-copy">No strategy proves edge unless candidates beat BTC, ETH, all-scanned, and similar-token baselines.</p>
+        <div id="baselineTable"></div>
+      </div>
+    </section>
+
+    <section class="section two" id="wallets">
+      <div class="panel"><h2>Wallet Intelligence Status</h2><div id="walletStatus"></div></div>
+      <div class="panel"><h2>10x Candidate Engine</h2><div id="tenXEngine"></div></div>
+    </section>
+
+    <section class="section" id="quality">
+      <div class="panel">
+        <h2>Data Quality Panel</h2>
+        <p class="warning">Short-horizon results may be approximate because GitHub Actions runs roughly hourly.</p>
+        <div id="dataQuality"></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="panel">
+        <h2>Raw Tables / Exports</h2>
+        <p class="section-copy">All data is generated before deployment. The public dashboard does not call crypto APIs from the browser.</p>
+        <div class="exports" id="exports"></div>
+      </div>
+    </section>
+  </main>
+
+  <script id="payload" type="application/json">{safe_data}</script>
+  <script>
+    const payload = JSON.parse(document.getElementById("payload").textContent);
+    const v2 = payload.v2 || {{}};
+    const quant = payload.quant || {{}};
+    const wallets = payload.wallets || {{}};
+    const labels = ["Reject","Watchlist","High-Risk Momentum Watchlist","Research Candidate","Paper Trade Candidate"];
+    const fmtPct = value => value === null || value === undefined || value === "" ? "No data" : `${{Number(value).toFixed(2)}}%`;
+    const money = value => value === null || value === undefined || value === "" ? "No data" : `$${{Number(value).toLocaleString(undefined, {{maximumFractionDigits: 0}})}}`;
+    const cls = value => {{
+      const n = Number(String(value ?? "").replace("%",""));
+      if (Number.isNaN(n)) return "";
+      return n > 0 ? "good" : n < 0 ? "bad" : "";
+    }};
+    const cell = value => `<td class="${{cls(value)}}">${{value ?? ""}}</td>`;
+    const table = (headers, rows, empty="No rows yet.") => rows && rows.length
+      ? `<div class="scroll"><table><thead><tr>${{headers.map(h=>`<th>${{h}}</th>`).join("")}}</tr></thead><tbody>${{rows.join("")}}</tbody></table></div>`
+      : `<p class="small">${{empty}}</p>`;
+    const parsePct = value => Number(String(value ?? "0").replace("%","")) || 0;
+    const byCategory = category => (quant.category_performance || []).filter(row => row.category === category);
+    const perf = (category, horizon) => byCategory(category).find(row => row.horizon === horizon) || {{}};
+    const labelCounts = v2.label_counts || {{}};
+
+    const paper1h = perf("Paper Trade Candidate", "1h");
+    const activeErrors = Number(v2.api_errors || 0);
+    const totalScanned = Object.values(labelCounts).reduce((sum, value) => sum + Number(value || 0), 0);
+    const systemHealth = activeErrors === 0 && totalScanned > 0 ? "Operational" : "Needs Attention";
+    const paperEdge = Number(paper1h.median_return || -1) < 0 ? "Not Proven / Weak" : "Needs More Sample";
+    document.getElementById("executiveTerminal").innerHTML = [
+      ["Model version", v2.model_version || "V2"],
+      ["Last scan time", v2.latest_scan || payload.latest_seen],
+      ["Last outcome time", payload.latest_outcome],
+      ["Total tokens scanned", totalScanned],
+      ["Rejected audit accuracy", (v2.filter_accuracy || {{}}).accuracy_rate || "No data"],
+      ["API errors", activeErrors],
+      ["Wallet module", (wallets.status || {{}}).enabled || "Unknown"],
+      ["Current System Verdict", "Research pipeline working. Paper candidate edge not proven."]
+    ].map(([k,v]) => `<div class="term-row"><span>${{k}}</span><strong class="${{k.includes("Verdict") ? "verdict" : ""}}">${{v}}</strong></div>`).join("");
+
+    const healthCards = [
+      ["Research Pipeline Status", systemHealth, "The scanner is working, but candidate edge is not proven yet."],
+      ["Paper Candidate Warning", paperEdge, "Paper candidates are simulated research labels only. Current accepted/paper results are weak until proven by larger samples."],
+      ["Rejected Audit Strength", (v2.filter_accuracy || {{}}).accuracy_rate || "No data", "Rejected-token audit is currently the strongest part of the system. It helps measure whether filters are protecting against weak tokens."],
+      ["Missed Winner Warning", "Audit Required", "Some rejected tokens pumped hard. This does not automatically mean the filter was wrong. The system must check whether those tokens were actually tradable or only high-risk momentum."],
+      ["No Auto Trading", "Blocked", "This dashboard is not ready for auto-trading. Auto-trading should not be added until candidate performance beats baselines with enough data."]
+    ];
+    document.getElementById("healthCards").innerHTML = healthCards.map(([label,value,copy]) => `
+      <div class="metric-card"><div class="metric-label">${{label}}</div><div class="metric-value">${{value}}</div><p class="small">${{copy}}</p></div>
+    `).join("");
+
+    function categoryVerdictClass(verdict) {{
+      if ((verdict || "").includes("Good")) return "Good";
+      if ((verdict || "").includes("Bad")) return "Bad";
+      if ((verdict || "").includes("Inactive")) return "Inactive";
+      if ((verdict || "").includes("Small")) return "Small";
+      return "Mixed";
+    }}
+
+    document.getElementById("categoryCards").innerHTML = labels.map(label => {{
+      const p1 = perf(label, "1h"), p4 = perf(label, "4h"), p24 = perf(label, "24h");
+      const base = p24.verdict ? p24 : p4.verdict ? p4 : p1;
+      const verdict = base.verdict || "Too Small Sample";
+      return `<div class="category-card">
+        <div class="category-top"><div><div class="category-name">${{label}}</div><div class="category-count">${{labelCounts[label] || 0}} rows</div></div><span class="status ${{categoryVerdictClass(verdict)}}"><i class="dot"></i>${{verdict}}</span></div>
+        <div class="kpi-list">
+          <div class="kpi"><span>Median 1h</span><strong class="${{cls(p1.median_return)}}">${{fmtPct(p1.median_return)}}</strong></div>
+          <div class="kpi"><span>Median 4h</span><strong class="${{cls(p4.median_return)}}">${{fmtPct(p4.median_return)}}</strong></div>
+          <div class="kpi"><span>Median 24h</span><strong class="${{cls(p24.median_return)}}">${{fmtPct(p24.median_return)}}</strong></div>
+          <div class="kpi"><span>Avg 1h</span><strong class="${{cls(p1.average_return)}}">${{fmtPct(p1.average_return)}}</strong></div>
+          <div class="kpi"><span>Best</span><strong class="${{cls(base.best_return)}}">${{fmtPct(base.best_return)}}</strong></div>
+          <div class="kpi"><span>Worst</span><strong class="${{cls(base.worst_return)}}">${{fmtPct(base.worst_return)}}</strong></div>
+          <div class="kpi"><span>Positive</span><strong>${{base.positive_rate == null ? "No data" : `${{(Number(base.positive_rate)*100).toFixed(1)}}%`}}</strong></div>
+          <div class="kpi"><span>Sample</span><strong>${{base.count || 0}}</strong></div>
+        </div>
+      </div>`;
+    }}).join("");
+
+    function renderBars(id, rows, valueKey, labelKey) {{
+      const values = rows.map(row => Math.abs(Number(row[valueKey]) || 0));
+      const max = Math.max(1, ...values);
+      document.getElementById(id).innerHTML = `<div class="bars">${{rows.map(row => {{
+        const value = Number(row[valueKey]) || 0;
+        return `<div class="bar-row"><span>${{row[labelKey]}}</span><div class="bar-track"><div class="bar-fill" style="width:${{Math.min(100, Math.abs(value)/max*100)}}%; background:${{value < 0 ? "linear-gradient(90deg,var(--red),var(--amber))" : "linear-gradient(90deg,var(--green),var(--cyan))"}}"></div></div><strong class="${{cls(value)}}">${{fmtPct(value)}}</strong></div>`;
+      }}).join("")}}</div>`;
+    }}
+
+    renderBars("outcomeCurve", v2.performance || [], row => row, "horizon");
+    document.getElementById("outcomeCurve").innerHTML = `<div class="bars">${{(v2.performance || []).map(row => {{
+      const med = parsePct(row.median);
+      const avg = parsePct(row.average);
+      return `<div class="bar-row"><span>${{row.horizon}}</span><div class="bar-track"><div class="bar-fill" style="width:${{Math.min(100, Math.abs(avg) * 4 + 4)}}%; background:${{avg < 0 ? "linear-gradient(90deg,var(--red),var(--amber))" : "linear-gradient(90deg,var(--green),var(--cyan))"}}"></div></div><strong class="${{cls(avg)}}">avg ${{row.average}}</strong></div>
+      <div class="bar-row"><span></span><div class="bar-track"><div class="bar-fill" style="width:${{Math.min(100, Math.abs(med) * 4 + 4)}}%; opacity:.55"></div></div><strong class="${{cls(med)}}">med ${{row.median}}</strong></div>`;
+    }}).join("")}}</div>`;
+
+    const posRows = labels.map(label => {{
+      const row = perf(label, "1h");
+      return {{label, positive: Number(row.positive_rate || 0) * 100}};
+    }});
+    document.getElementById("positiveRateChart").innerHTML = `<div class="bars">${{posRows.map(row => `<div class="bar-row"><span>${{row.label.replace(" Candidate","")}}</span><div class="bar-track"><div class="bar-fill" style="width:${{Math.min(100,row.positive)}}%"></div></div><strong>${{row.positive.toFixed(1)}}%</strong></div>`).join("")}}</div>`;
+
+    const tenXFailures = quant.ten_x_failure_review || [];
+    document.getElementById("tenXScatter").innerHTML = tenXFailures.length
+      ? `<svg width="100%" height="250" viewBox="0 0 520 250" role="img">${{tenXFailures.slice(0,80).map(row => {{
+          const x = 40 + Math.min(100, Number(row.ten_x_score || 0)) * 4.4;
+          const y = 210 - Math.max(-100, Math.min(100, Number(row.return_pct || 0))) * 0.9;
+          return `<circle cx="${{x}}" cy="${{y}}" r="5" fill="var(--red)"><title>${{row.symbol}} ${{fmtPct(row.return_pct)}}</title></circle>`;
+        }}).join("")}}<line x1="40" y1="210" x2="490" y2="210" stroke="#334155"/><line x1="40" y1="25" x2="40" y2="210" stroke="#334155"/><text x="42" y="22" fill="#9ca3af" font-size="12">Return</text><text x="400" y="238" fill="#9ca3af" font-size="12">10x score</text></svg>`
+      : `<p class="small">No 10x score failures yet.</p>`;
+
+    const reasonCounts = {{}};
+    (quant.accepted_failure_diagnosis || []).forEach(row => {{
+      let reasons = [];
+      try {{ reasons = JSON.parse(row.failure_reasons || "[]"); }} catch {{}}
+      reasons.forEach(reason => reasonCounts[reason] = (reasonCounts[reason] || 0) + 1);
+    }});
+    const reasonRows = Object.entries(reasonCounts);
+    document.getElementById("failureDonut").innerHTML = reasonRows.length
+      ? table(["Failure category","Count"], reasonRows.map(([k,v])=>`<tr><td>${{k}}</td><td>${{v}}</td></tr>`))
+      : `<p class="small">No accepted failures yet. This section will populate when research or paper candidates lose more than 25%.</p>`;
+
+    document.getElementById("failureLab").innerHTML = table(
+      ["Token","Label","Horizon","Return","Failure reasons","Fix"],
+      (quant.accepted_failure_diagnosis || []).slice(0,18).map(row => `<tr><td><strong>${{row.symbol}}</strong></td><td>${{row.original_label}}</td><td>${{row.horizon}}</td>${{cell(fmtPct(row.return_pct))}}<td>${{row.failure_reasons}}</td><td>${{row.fix_recommendation}}</td></tr>`),
+      "No accepted failures yet. This section will populate when research or paper candidates lose more than 25%."
+    );
+    document.getElementById("tenXFailure").innerHTML = table(
+      ["Token","10x","Risk-adjusted","Horizon","Return","Diagnosis"],
+      tenXFailures.slice(0,18).map(row => `<tr><td><strong>${{row.symbol}}</strong></td><td>${{Number(row.ten_x_score || 0).toFixed(0)}}</td><td>${{Number(row.risk_adjusted_10x_score || 0).toFixed(0)}}</td><td>${{row.horizon}}</td>${{cell(fmtPct(row.return_pct))}}<td>${{row.diagnosis_text}}</td></tr>`),
+      "No 10x score failures yet."
+    );
+    document.getElementById("missedWinnerLab").innerHTML = table(
+      ["Token","Original label","Horizon","Return","Tradability","High-risk momentum?","Lesson"],
+      (quant.missed_winner_review || []).slice(0,20).map(row => `<tr><td><strong>${{row.symbol}}</strong></td><td>${{row.original_label}}</td><td>${{row.horizon}}</td>${{cell(fmtPct(row.return_at_horizon_pct))}}<td>${{row.tradability_label}}</td><td>${{row.should_be_high_risk_momentum ? "Yes" : "No"}}</td><td>${{row.main_lesson}}</td></tr>`),
+      "No missed winners found yet."
+    );
+    document.getElementById("highRiskMomentumLab").innerHTML = table(
+      ["Token","Liquidity","Volume","Move","10x","Reasons","Chart"],
+      (v2.bucket_tables?.["High-Risk Momentum Watchlist"] || []).slice(0,20).map(row => `<tr><td><strong>${{row.symbol}}</strong></td><td>${{row.liquidity}}</td><td>${{row.volume24h}}</td><td>${{row.move1h}}</td><td>${{row.ten_x_score}}</td><td>${{row.main_reasons || "High-risk momentum research"}}</td><td>${{row.url ? `<a href="${{row.url}}" target="_blank" rel="noreferrer">Open</a>` : ""}}</td></tr>`),
+      "No High-Risk Momentum tokens yet. If rejected tokens keep pumping, check whether routing rules are too strict."
+    );
+    document.getElementById("baselineTable").innerHTML = table(
+      ["Token","Label","Horizon","Token","BTC","ETH","All scanned","Same liquidity","Same age","Verdict"],
+      (quant.baseline_comparisons || []).slice(0,40).map(row => `<tr><td><strong>${{row.symbol}}</strong></td><td>${{row.label}}</td><td>${{row.horizon}}</td>${{cell(fmtPct(row.token_return_pct))}}${{cell(fmtPct(row.btc_return_pct))}}${{cell(fmtPct(row.eth_return_pct))}}${{cell(fmtPct(row.excess_vs_all_scanned))}}${{cell(fmtPct(row.excess_vs_same_liquidity))}}${{cell(fmtPct(row.excess_vs_same_age))}}<td>${{row.baseline_verdict}}</td></tr>`),
+      "No baseline comparison yet. Baseline data must be collected before edge can be evaluated."
+    );
+
+    const w = wallets.status || {{}};
+    document.getElementById("walletStatus").innerHTML = `
+      <div class="grid">
+        ${{[["Enabled",w.enabled],["Provider",w.active_provider],["Wallets",w.wallets_tracked],["Trades",w.trades_tracked],["Smart",w.smart_wallets],["Useful",w.useful_wallets],["Suspicious",w.suspicious_wallets],["API errors",w.wallet_api_errors]].map(([k,v]) => `<div class="kpi"><span>${{k}}</span><strong>${{v ?? "No data"}}</strong></div>`).join("")}}
+      </div>
+      <p class="small">${{w.warning || "Wallets are tracked but not yet classified. Wallet labels require historical evidence, realized exits, and risk scoring."}}</p>
+    `;
+    document.getElementById("tenXEngine").innerHTML = table(
+      ["Label","Rows"],
+      Object.entries((v2.bucket_tables || {{}})).map(([label, rows]) => `<tr><td>${{label}}</td><td>${{rows.length}}</td></tr>`)
+    ) + `<p class="small">10x Potential Score, Risk-Adjusted 10x Score, Manipulation Risk Score, and Tradability Score are audit metrics only. They are not predictions.</p>`;
+    document.getElementById("dataQuality").innerHTML = table(
+      ["Metric","Value","Status","Detail"],
+      (quant.data_quality_report || []).map(row => `<tr><td>${{row.metric}}</td><td>${{row.value}}</td><td class="${{row.status === "OK" ? "good" : "Mixed"}}">${{row.status}}</td><td>${{row.detail || ""}}</td></tr>`)
+    );
+    const repoExports = "https://github.com/fatehchana17-create/crypto-signal-autopsy-v1/blob/main/exports/";
+    const exportNames = ["category_performance","accepted_failure_diagnosis","missed_winner_review","baseline_comparisons","ten_x_failure_review","data_quality_report","filter_results","outcome_snapshots","paper_trades","wallets"];
+    document.getElementById("exports").innerHTML = exportNames.map(name => `<a href="${{repoExports}}${{name}}.csv">${{name}}.csv</a><a href="data/${{name}}.json">${{name}}.json</a>`).join("");
   </script>
 </body>
 </html>

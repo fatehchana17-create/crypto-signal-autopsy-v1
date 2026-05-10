@@ -33,19 +33,50 @@ HARD_REJECT = {
 }
 
 HIGH_RISK_MOMENTUM = {
-    "min_liquidity_usd": 10_000,
-    "min_volume_24h": 25_000,
-    "min_pair_age_minutes": 10,
-    "max_price_change_1h": 300,
-    "min_txns_15m": 30,
+    "min_liquidity_usd": 25_000,
+    "min_volume_24h": 40_000,
+    "min_pair_age_minutes": 15,
+    "max_pair_age_hours": 6,
+    "min_price_change_1h": 80,
+    "max_price_change_1h": 700,
+    "min_txns_15m": 10,
     "min_unique_buyers_15m": 10,
+    "min_unique_buyers_1h": 10,
     "max_top_holder_pct": 25,
     "max_top_10_holder_pct": 60,
     "max_fdv_liquidity_ratio": 200,
-    "min_buy_ratio": 0.40,
+    "min_buy_ratio": 0.35,
     "min_security_score": 60,
     "max_buy_tax": 10,
     "max_sell_tax": 10,
+}
+
+PAPER_TRADE_GATE = {
+    "max_risk_score": 30,
+    "min_opportunity_score": 75,
+    "min_ten_x_score": 80,
+    "max_price_change_1h": 80,
+    "max_price_change_5m": 30,
+    "min_liquidity_usd": 150_000,
+    "min_volume_24h": 200_000,
+    "min_pair_age_hours": 3,
+    "max_volume_liquidity_ratio": 15,
+    "min_unique_buyers_1h": 30,
+    "min_buy_ratio": 0.45,
+    "max_buy_ratio": 0.70,
+    "max_top_holder_pct": 15,
+    "max_top_10_holder_pct": 45,
+    "min_security_score": 80,
+    "max_buy_tax": 5,
+    "max_sell_tax": 5,
+}
+
+DELAYED_ENTRY_SURVIVAL = {
+    "required_wait_minutes": 30,
+    "max_drawdown_during_wait_pct": -15,
+    "min_liquidity_retention_pct": 80,
+    "max_volume_fade_pct": 60,
+    "max_spread_or_slippage_pct": 5,
 }
 
 SAFE_RESEARCH = {

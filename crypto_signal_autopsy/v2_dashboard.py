@@ -16,6 +16,7 @@ LABELS = [
     "Watchlist",
     "High-Risk Momentum Watchlist",
     "Research Candidate",
+    "Pending Paper Candidate",
     "Paper Trade Candidate",
 ]
 
@@ -78,6 +79,7 @@ def _health_cards(
             "value": str(label_counts.get("High-Risk Momentum Watchlist", 0)),
         },
         {"label": "Research Candidates", "value": str(label_counts.get("Research Candidate", 0))},
+        {"label": "Pending Paper Candidates", "value": str(label_counts.get("Pending Paper Candidate", 0))},
         {"label": "Paper Trade Candidates", "value": str(label_counts.get("Paper Trade Candidate", 0))},
         {"label": "Active API Errors", "value": str(api_errors)},
         {"label": "Rejected Audit Accuracy", "value": filter_accuracy["accuracy_rate"]},

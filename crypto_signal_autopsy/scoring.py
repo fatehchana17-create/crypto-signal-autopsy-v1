@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from crypto_signal_autopsy.clients.goplus import SecurityResult
-from crypto_signal_autopsy.config import HARD_REJECT, HIGH_RISK_MOMENTUM, MODEL_VERSION
+from crypto_signal_autopsy.config import HARD_REJECT, HIGH_RISK_MOMENTUM, MODEL_VERSION, PAPER_TRADE_GATE
 
 
 FINAL_LABELS = [
@@ -12,6 +12,7 @@ FINAL_LABELS = [
     "Watchlist",
     "High-Risk Momentum Watchlist",
     "Research Candidate",
+    "Pending Paper Candidate",
     "Paper Trade Candidate",
 ]
 
@@ -43,9 +44,11 @@ def score_token(metrics: dict[str, Any], security: SecurityResult) -> V2Score:
         opportunity_score,
     )
     high_risk_momentum = qualifies_high_risk_momentum(metrics, security)
+    paper_gate = qualifies_paper_trade_gate(metrics, security, risk_score, opportunity_score, ten_x_score)
     final_label = choose_final_label(
         hard_reject=bool(reject_reasons),
         qualifies_high_risk_momentum=high_risk_momentum,
+        qualifies_paper_trade_gate=paper_gate,
         risk_score=risk_score,
         opportunity_score=opportunity_score,
     )
@@ -122,20 +125,69 @@ def hard_reject_reasons(metrics: dict[str, Any], security: SecurityResult) -> li
 
 def qualifies_high_risk_momentum(metrics: dict[str, Any], security: SecurityResult) -> bool:
     security_raw = security.raw or {}
+    security_score = _security_score(security)
+    if security_score is None and security.status != "ok" and not security.risk_flags:
+        security_score = HIGH_RISK_MOMENTUM["min_security_score"]
     checks = [
         _gte(_num(metrics.get("liquidity_usd")), HIGH_RISK_MOMENTUM["min_liquidity_usd"]),
         _gte(_num(metrics.get("volume_h24_usd")), HIGH_RISK_MOMENTUM["min_volume_24h"]),
         _gte(_pair_age_minutes(metrics), HIGH_RISK_MOMENTUM["min_pair_age_minutes"]),
+        _lte(_num(metrics.get("pair_age_hours")), HIGH_RISK_MOMENTUM["max_pair_age_hours"]),
+        _gte(_num(metrics.get("price_change_h1_pct")), HIGH_RISK_MOMENTUM["min_price_change_1h"]),
         _lte(_num(metrics.get("price_change_h1_pct")), HIGH_RISK_MOMENTUM["max_price_change_1h"]),
         _gte(_txns_15m(metrics), HIGH_RISK_MOMENTUM["min_txns_15m"]),
         _gte(_unique_buyers_15m(metrics), HIGH_RISK_MOMENTUM["min_unique_buyers_15m"]),
-        _lte(_security_num(security_raw, "top_holder_pct", "holder_count_1_pct"), HIGH_RISK_MOMENTUM["max_top_holder_pct"]),
-        _lte(_security_num(security_raw, "top_10_holder_pct", "top_10_holder_rate"), HIGH_RISK_MOMENTUM["max_top_10_holder_pct"]),
+        _gte(_unique_buyers_1h(metrics), HIGH_RISK_MOMENTUM["min_unique_buyers_1h"]),
+        _lte_missing_ok(
+            _security_num(security_raw, "top_holder_pct", "holder_count_1_pct"),
+            HIGH_RISK_MOMENTUM["max_top_holder_pct"],
+        ),
+        _lte_missing_ok(
+            _security_num(security_raw, "top_10_holder_pct", "top_10_holder_rate"),
+            HIGH_RISK_MOMENTUM["max_top_10_holder_pct"],
+        ),
         _lte(_num(metrics.get("fdv_liquidity_ratio")), HIGH_RISK_MOMENTUM["max_fdv_liquidity_ratio"]),
         _gte(_buy_ratio(metrics), HIGH_RISK_MOMENTUM["min_buy_ratio"]),
-        _gte(_security_score(security), HIGH_RISK_MOMENTUM["min_security_score"]),
-        _lte(_num(security.buy_tax_pct), HIGH_RISK_MOMENTUM["max_buy_tax"]),
-        _lte(_num(security.sell_tax_pct), HIGH_RISK_MOMENTUM["max_sell_tax"]),
+        _gte(security_score, HIGH_RISK_MOMENTUM["min_security_score"]),
+        _lte_missing_ok(_num(security.buy_tax_pct), HIGH_RISK_MOMENTUM["max_buy_tax"]),
+        _lte_missing_ok(_num(security.sell_tax_pct), HIGH_RISK_MOMENTUM["max_sell_tax"]),
+    ]
+    return all(checks)
+
+
+def qualifies_paper_trade_gate(
+    metrics: dict[str, Any],
+    security: SecurityResult,
+    risk_score: float,
+    opportunity_score: float,
+    ten_x_score: float,
+) -> bool:
+    security_raw = security.raw or {}
+    buy_ratio = _buy_ratio(metrics)
+    security_score = _security_score(security)
+    checks = [
+        risk_score <= PAPER_TRADE_GATE["max_risk_score"],
+        opportunity_score >= PAPER_TRADE_GATE["min_opportunity_score"],
+        ten_x_score >= PAPER_TRADE_GATE["min_ten_x_score"],
+        _lte(_num(metrics.get("price_change_h1_pct")), PAPER_TRADE_GATE["max_price_change_1h"]),
+        _lte_missing_ok(_num(metrics.get("price_change_5m_pct") or metrics.get("price_change_5m")), PAPER_TRADE_GATE["max_price_change_5m"]),
+        _gte(_num(metrics.get("liquidity_usd")), PAPER_TRADE_GATE["min_liquidity_usd"]),
+        _gte(_num(metrics.get("volume_h24_usd")), PAPER_TRADE_GATE["min_volume_24h"]),
+        _gte(_num(metrics.get("pair_age_hours")), PAPER_TRADE_GATE["min_pair_age_hours"]),
+        _lte(_num(metrics.get("volume_liquidity_ratio")), PAPER_TRADE_GATE["max_volume_liquidity_ratio"]),
+        _gte(_unique_buyers_1h(metrics), PAPER_TRADE_GATE["min_unique_buyers_1h"]),
+        buy_ratio is not None and PAPER_TRADE_GATE["min_buy_ratio"] <= buy_ratio <= PAPER_TRADE_GATE["max_buy_ratio"],
+        _lte_missing_ok(
+            _security_num(security_raw, "top_holder_pct", "holder_count_1_pct"),
+            PAPER_TRADE_GATE["max_top_holder_pct"],
+        ),
+        _lte_missing_ok(
+            _security_num(security_raw, "top_10_holder_pct", "top_10_holder_rate"),
+            PAPER_TRADE_GATE["max_top_10_holder_pct"],
+        ),
+        _gte(security_score, PAPER_TRADE_GATE["min_security_score"]),
+        _lte_missing_ok(_num(security.buy_tax_pct), PAPER_TRADE_GATE["max_buy_tax"]),
+        _lte_missing_ok(_num(security.sell_tax_pct), PAPER_TRADE_GATE["max_sell_tax"]),
     ]
     return all(checks)
 
@@ -474,6 +526,7 @@ def ten_x_label(score: float, risk_score: float) -> str:
 def choose_final_label(
     hard_reject: bool,
     qualifies_high_risk_momentum: bool,
+    qualifies_paper_trade_gate: bool,
     risk_score: float,
     opportunity_score: float,
 ) -> str:
@@ -483,8 +536,8 @@ def choose_final_label(
         return "High-Risk Momentum Watchlist"
     if risk_score > 75:
         return "Reject"
-    if risk_score <= 35 and opportunity_score >= 75:
-        return "Paper Trade Candidate"
+    if qualifies_paper_trade_gate:
+        return "Pending Paper Candidate"
     if risk_score <= 45 and opportunity_score >= 65:
         return "Research Candidate"
     if risk_score <= 60 and opportunity_score >= 45:
@@ -608,6 +661,10 @@ def _gte(value: float | None, threshold: float) -> bool:
 
 def _lte(value: float | None, threshold: float) -> bool:
     return value is not None and value <= threshold
+
+
+def _lte_missing_ok(value: float | None, threshold: float) -> bool:
+    return value is None or value <= threshold
 
 
 def _num(value: Any) -> float | None:

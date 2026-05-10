@@ -512,6 +512,111 @@ CREATE TABLE IF NOT EXISTS api_errors (
     error_message TEXT,
     created_at TEXT
 );
+
+CREATE TABLE IF NOT EXISTS category_performance (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    category TEXT,
+    horizon TEXT,
+    count INTEGER,
+    median_return REAL,
+    average_return REAL,
+    best_return REAL,
+    worst_return REAL,
+    positive_rate REAL,
+    verdict TEXT,
+    updated_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS accepted_failure_diagnosis (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    token_address TEXT,
+    symbol TEXT,
+    pair_id TEXT,
+    original_label TEXT,
+    horizon TEXT,
+    return_pct REAL,
+    max_adverse_excursion_pct REAL,
+    max_favorable_excursion_pct REAL,
+    liquidity_at_scan REAL,
+    liquidity_at_horizon REAL,
+    volume_at_scan REAL,
+    volume_at_horizon REAL,
+    price_change_1h_at_scan REAL,
+    failure_reasons TEXT,
+    diagnosis_text TEXT,
+    fix_recommendation TEXT,
+    created_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS missed_winner_review (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    token_address TEXT,
+    symbol TEXT,
+    pair_id TEXT,
+    original_label TEXT,
+    horizon TEXT,
+    max_future_return_pct REAL,
+    return_at_horizon_pct REAL,
+    reject_reasons TEXT,
+    liquidity_at_scan REAL,
+    volume_at_scan REAL,
+    pair_age_hours_at_scan REAL,
+    price_change_1h_at_scan REAL,
+    security_score REAL,
+    fdv REAL,
+    fdv_liquidity_ratio REAL,
+    tradability_score REAL,
+    tradability_label TEXT,
+    should_be_high_risk_momentum INTEGER,
+    main_lesson TEXT,
+    created_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS baseline_comparisons (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    token_address TEXT,
+    symbol TEXT,
+    pair_id TEXT,
+    label TEXT,
+    horizon TEXT,
+    token_return_pct REAL,
+    btc_return_pct REAL,
+    eth_return_pct REAL,
+    all_scanned_median_pct REAL,
+    same_liquidity_bucket_median_pct REAL,
+    same_age_bucket_median_pct REAL,
+    excess_vs_btc REAL,
+    excess_vs_eth REAL,
+    excess_vs_all_scanned REAL,
+    excess_vs_same_liquidity REAL,
+    excess_vs_same_age REAL,
+    baseline_verdict TEXT,
+    created_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS ten_x_failure_review (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    token_address TEXT,
+    symbol TEXT,
+    pair_id TEXT,
+    ten_x_score REAL,
+    risk_adjusted_10x_score REAL,
+    manipulation_risk_score REAL,
+    horizon TEXT,
+    return_pct REAL,
+    failure_reasons TEXT,
+    diagnosis_text TEXT,
+    created_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS data_quality_report (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    metric TEXT,
+    value TEXT,
+    status TEXT,
+    detail TEXT,
+    updated_at TEXT
+);
 """
 
 
@@ -1321,7 +1426,7 @@ def export_table(conn: sqlite3.Connection, table: str, out_path: Path) -> int:
         return 0
 
     with out_path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=rows[0].keys())
+        writer = csv.DictWriter(handle, fieldnames=rows[0].keys(), lineterminator="\n")
         writer.writeheader()
         writer.writerows(dict(row) for row in rows)
     return len(rows)

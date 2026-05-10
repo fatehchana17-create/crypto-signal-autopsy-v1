@@ -1,0 +1,114 @@
+[
+  {
+    "detail": "Short-horizon results may be approximate because GitHub Actions runs roughly hourly.",
+    "id": 42,
+    "metric": "Timing precision",
+    "status": "Review",
+    "updated_at": "2026-05-10T20:39:15+00:00",
+    "value": "Approximate"
+  },
+  {
+    "detail": "17 outcome rows from 362 scan rows.",
+    "id": 41,
+    "metric": "24h horizon coverage",
+    "status": "OK",
+    "updated_at": "2026-05-10T20:39:15+00:00",
+    "value": "4.7%"
+  },
+  {
+    "detail": "134 outcome rows from 362 scan rows.",
+    "id": 40,
+    "metric": "8h horizon coverage",
+    "status": "Review",
+    "updated_at": "2026-05-10T20:39:15+00:00",
+    "value": "37.0%"
+  },
+  {
+    "detail": "239 outcome rows from 362 scan rows.",
+    "id": 39,
+    "metric": "4h horizon coverage",
+    "status": "OK",
+    "updated_at": "2026-05-10T20:39:15+00:00",
+    "value": "66.0%"
+  },
+  {
+    "detail": "289 outcome rows from 362 scan rows.",
+    "id": 38,
+    "metric": "2h horizon coverage",
+    "status": "OK",
+    "updated_at": "2026-05-10T20:39:15+00:00",
+    "value": "79.8%"
+  },
+  {
+    "detail": "320 outcome rows from 362 scan rows.",
+    "id": 37,
+    "metric": "1h horizon coverage",
+    "status": "OK",
+    "updated_at": "2026-05-10T20:39:15+00:00",
+    "value": "88.4%"
+  },
+  {
+    "detail": "320 outcome rows from 362 scan rows.",
+    "id": 36,
+    "metric": "30m horizon coverage",
+    "status": "OK",
+    "updated_at": "2026-05-10T20:39:15+00:00",
+    "value": "88.4%"
+  },
+  {
+    "detail": "321 outcome rows from 362 scan rows.",
+    "id": 35,
+    "metric": "15m horizon coverage",
+    "status": "OK",
+    "updated_at": "2026-05-10T20:39:15+00:00",
+    "value": "88.7%"
+  },
+  {
+    "detail": "GoPlus/security can be absent on free or unauthenticated runs.",
+    "id": 34,
+    "metric": "Missing security score count",
+    "status": "OK",
+    "updated_at": "2026-05-10T20:39:15+00:00",
+    "value": "0"
+  },
+  {
+    "detail": "",
+    "id": 33,
+    "metric": "Missing liquidity count",
+    "status": "Review",
+    "updated_at": "2026-05-10T20:39:15+00:00",
+    "value": "1"
+  },
+  {
+    "detail": "",
+    "id": 32,
+    "metric": "Missing 1h move count",
+    "status": "Review",
+    "updated_at": "2026-05-10T20:39:15+00:00",
+    "value": "199"
+  },
+  {
+    "detail": "",
+    "id": 31,
+    "metric": "Active API errors",
+    "status": "OK",
+    "updated_at": "2026-05-10T20:39:15+00:00",
+    "value": "0"
+  },
+  {
+    "detail": "",
+    "id": 30,
+    "metric": "Last successful outcome update",
+    "status": "OK",
+    "updated_at": "2026-05-10T20:39:15+00:00",
+    "value": "2026-05-10T19:35:24+00:00"
+  },
+  {
+    "detail": "",
+    "id": 29,
+    "metric": "Last successful scan",
+    "status": "OK",
+    "updated_at": "2026-05-10T20:39:15+00:00",
+    "value": "2026-05-10T19:35:23+00:00"
+  }
+]

@@ -36,7 +36,7 @@ def evaluate_candidate(
 ) -> Evaluation:
     v2_score = score_token(metrics, security)
     signal_types = _v2_signal_types(v2_score, metrics, previous_snapshot, settings)
-    accepted = v2_score.final_label == "Paper Trade Candidate"
+    accepted = v2_score.final_label in {"Pending Paper Candidate", "Paper Trade Candidate"}
     return Evaluation(
         accepted=accepted,
         signal_types=signal_types if accepted else [],

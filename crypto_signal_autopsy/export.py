@@ -6,6 +6,8 @@ from pathlib import Path
 from statistics import mean, median
 
 from crypto_signal_autopsy import db
+from crypto_signal_autopsy.config import load_settings
+from crypto_signal_autopsy.quant_analytics import export_quant_data, refresh_quant_analytics
 from crypto_signal_autopsy.wallet_exports import export_wallet_data
 
 
@@ -29,6 +31,8 @@ EXPORTS = {
 
 def export_all(conn: sqlite3.Connection, export_dir: Path) -> dict[str, int]:
     db.init_db(conn)
+    settings = load_settings()
+    quant_counts = refresh_quant_analytics(conn, settings)
     export_dir.mkdir(parents=True, exist_ok=True)
     counts: dict[str, int] = {}
     for name, table in EXPORTS.items():
@@ -41,6 +45,8 @@ def export_all(conn: sqlite3.Connection, export_dir: Path) -> dict[str, int]:
     counts["score_bucket_performance"] = _export_score_bucket_performance(
         conn, export_dir / "score_bucket_performance.csv"
     )
+    counts.update(quant_counts)
+    counts.update(export_quant_data(conn, export_dir))
     counts.update(export_wallet_data(conn, export_dir))
     return counts
 
@@ -55,6 +61,7 @@ def _export_dashboard_summary(conn: sqlite3.Connection, out_path: Path) -> int:
         "watchlist_tokens": str(labels.get("Watchlist", 0)),
         "high_risk_momentum_tokens": str(labels.get("High-Risk Momentum Watchlist", 0)),
         "research_candidates": str(labels.get("Research Candidate", 0)),
+        "pending_paper_candidates": str(labels.get("Pending Paper Candidate", 0)),
         "paper_trade_candidates": str(labels.get("Paper Trade Candidate", 0)),
         "api_errors": str(api_errors),
         "completed_rejected_audits": str(
@@ -257,7 +264,7 @@ def _write_rows(out_path: Path, rows: list[dict[str, str]]) -> None:
         out_path.write_text("", encoding="utf-8")
         return
     with out_path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0].keys()))
+        writer = csv.DictWriter(handle, fieldnames=list(rows[0].keys()), lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
 

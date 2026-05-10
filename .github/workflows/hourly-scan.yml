@@ -68,6 +68,7 @@ jobs:
           python -m crypto_signal_autopsy.cli scan
           python -m crypto_signal_autopsy.cli track
           python -m crypto_signal_autopsy.cli wallets
+          python -m crypto_signal_autopsy.cli analytics
           python -m crypto_signal_autopsy.cli export
           python -m crypto_signal_autopsy.cli static-site
           python - <<'PY'

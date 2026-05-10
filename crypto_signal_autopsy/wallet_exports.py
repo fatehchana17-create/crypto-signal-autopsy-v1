@@ -342,7 +342,7 @@ def _format_cluster_row(row: sqlite3.Row) -> dict[str, str]:
 def _write_csv(out_path: Path, rows: list[sqlite3.Row], headers: list[str]) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with out_path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=headers)
+        writer = csv.DictWriter(handle, fieldnames=headers, lineterminator="\n")
         writer.writeheader()
         for row in rows:
             writer.writerow(dict(row))

@@ -17,17 +17,17 @@ def _strong_metrics() -> dict:
         "pair_age_minutes": 720,
         "price_change_h1_pct": 12,
         "fdv_liquidity_ratio": 8,
-        "buys_h1": 150,
-        "sells_h1": 50,
+        "buys_h1": 120,
+        "sells_h1": 80,
         "unique_buyers_1h": 150,
         "raw_json": {"info": {"websites": [{"url": "https://example.test"}], "socials": []}},
     }
 
 
-def test_strong_safe_token_becomes_paper_trade_candidate() -> None:
+def test_strong_safe_token_becomes_pending_paper_candidate() -> None:
     result = score_token(_strong_metrics(), SecurityResult("ok", [], 0, 0, {"security_score": 95}))
 
-    assert result.final_label == "Paper Trade Candidate"
+    assert result.final_label == "Pending Paper Candidate"
     assert result.risk_score <= 35
     assert result.opportunity_score >= 75
     assert result.ten_x_label == "Strong 10x Research Setup"

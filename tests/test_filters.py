@@ -17,7 +17,7 @@ def _base_metrics() -> dict:
         "fdv_liquidity_ratio": 8,
         "volume_liquidity_ratio": 1.33,
         "buys_h1": 120,
-        "sells_h1": 60,
+        "sells_h1": 80,
         "unique_buyers_1h": 120,
         "price_change_h1_pct": 8,
         "pair_age_hours": 12,
@@ -31,8 +31,8 @@ def test_clean_momentum_passes_with_volume_spike() -> None:
     security = SecurityResult("ok", [], None, None, {"security_score": 95})
     evaluation = evaluate_candidate(_base_metrics(), security, None, settings)
     assert evaluation.accepted
-    assert evaluation.final_label == "Paper Trade Candidate"
-    assert "paper_trade_candidate" in evaluation.signal_types
+    assert evaluation.final_label == "Pending Paper Candidate"
+    assert evaluation.signal_types == []
 
 
 def test_low_liquidity_rejected() -> None:

@@ -1,11 +1,14 @@
-# Crypto Signal Autopsy V3
+# Crypto Signal Autopsy
 
-Crypto Signal Autopsy V3 is a public crypto research dashboard.
+Crypto Signal Autopsy is a crypto token research and audit dashboard.
+
+It tracks token filters, rejected-token outcomes, candidate performance, missed winners, paper-trade simulations, and baseline comparisons.
 
 It does not give buy signals.
 It does not auto-trade.
 It does not provide financial advice.
 It does not claim to predict pumps.
+It does not claim to find guaranteed 10x coins.
 
 The system scans public crypto market data, applies hard safety filters, scores tokens by risk and opportunity, tracks future outcomes, and studies whether the filters are useful.
 
@@ -17,6 +20,8 @@ The goal is to learn:
 - which tokens rug,
 - which score buckets perform better over time,
 - whether any research edge exists after enough data.
+- whether paper candidates actually beat BTC, ETH, and similar-token baselines.
+- which failed candidates reveal weak scoring rules.
 
 ## What V2 Does
 
@@ -29,6 +34,29 @@ The goal is to learn:
 - Archives completed rejected-token audits after 24h, then removes the active rejected rows from the database.
 - Exports V2 CSV files for labels, outcomes, outliers, filter lessons, and score buckets.
 - Builds a static GitHub Pages dashboard that does not call APIs from the browser.
+
+## Quant Dashboard Upgrade
+
+The public dashboard now includes a quant-style research layer:
+
+- executive health and system verdict cards,
+- category performance cards with median, average, best, worst, sample size, positive rate, and audit verdict,
+- accepted failure diagnosis for weak research and paper candidates,
+- missed-winner review for rejected/watchlisted tokens that later pumped,
+- high-risk momentum routing for risky explosive setups,
+- baseline comparisons against BTC, ETH, all-scanned tokens, same-liquidity buckets, and same-age buckets,
+- 10x score failure review,
+- wallet module status and recovery guidance,
+- data quality checks for coverage, missing fields, API errors, and timing precision.
+
+The current purpose is to answer:
+
+- Are rejection filters protecting against bad tokens?
+- Are paper candidates actually better than rejected tokens?
+- Which filters block winners?
+- Which failed candidates reveal weak scoring rules?
+- Do candidates beat BTC, ETH, and similar-token baselines?
+- Is there enough evidence to improve the model?
 
 ## Smart Wallet Tracking Module
 
@@ -82,6 +110,7 @@ The scanner also works without the dashboard:
 python -m crypto_signal_autopsy.cli scan
 python -m crypto_signal_autopsy.cli track
 python -m crypto_signal_autopsy.cli wallets
+python -m crypto_signal_autopsy.cli analytics
 python -m crypto_signal_autopsy.cli export
 python -m crypto_signal_autopsy.cli static-site
 ```
@@ -127,6 +156,12 @@ GitHub Actions also runs the scanner on a schedule and publishes the static dash
 - `exports/filter_saved_us.csv`
 - `exports/filter_blocked_winners.csv`
 - `exports/score_bucket_performance.csv`
+- `exports/category_performance.csv`
+- `exports/accepted_failure_diagnosis.csv`
+- `exports/missed_winner_review.csv`
+- `exports/baseline_comparisons.csv`
+- `exports/ten_x_failure_review.csv`
+- `exports/data_quality_report.csv`
 
 Old V1 CSVs are still exported for compatibility.
 

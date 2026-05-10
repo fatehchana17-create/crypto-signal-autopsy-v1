@@ -8,4 +8,10 @@ __pycache__/
 data/*.sqlite
 data/*.sqlite-*
 exports/*.csv
+!exports/category_performance.csv
+!exports/accepted_failure_diagnosis.csv
+!exports/missed_winner_review.csv
+!exports/baseline_comparisons.csv
+!exports/ten_x_failure_review.csv
+!exports/data_quality_report.csv
 logs/

@@ -14,7 +14,7 @@ from crypto_signal_autopsy.baselines import (
 from crypto_signal_autopsy.clients.coingecko import CoinGeckoClient
 from crypto_signal_autopsy.clients.dexscreener import DexScreenerClient
 from crypto_signal_autopsy.clients.http import ApiError, JsonHttpClient
-from crypto_signal_autopsy.config import HORIZONS as HORIZON_MINUTES, Settings
+from crypto_signal_autopsy.config import DELAYED_ENTRY_SURVIVAL, HORIZONS as HORIZON_MINUTES, Settings
 from crypto_signal_autopsy.timeutils import iso_utc, parse_iso, utc_now
 
 
@@ -35,6 +35,8 @@ def run_tracking(conn: sqlite3.Connection, settings: Settings) -> dict[str, int]
         "outcomes": 0,
         "rejected_outcomes": 0,
         "outcome_snapshots": 0,
+        "pending_paper_promoted": 0,
+        "pending_paper_failed": 0,
         "rejected_audits_archived": 0,
         "api_errors": 0,
     }
@@ -254,6 +256,10 @@ def run_tracking(conn: sqlite3.Connection, settings: Settings) -> dict[str, int]
         if inserted:
             stats["outcome_snapshots"] += 1
 
+    promoted, failed = _resolve_pending_paper_candidates(conn, settings, observed_at)
+    stats["pending_paper_promoted"] = promoted
+    stats["pending_paper_failed"] = failed
+
     conn.execute(
         """
         UPDATE signals
@@ -268,6 +274,147 @@ def run_tracking(conn: sqlite3.Connection, settings: Settings) -> dict[str, int]
     conn.commit()
     stats["rejected_audits_archived"] = db.archive_completed_rejected_audits(conn, observed_at)
     return stats
+
+
+def _resolve_pending_paper_candidates(
+    conn: sqlite3.Connection,
+    settings: Settings,
+    observed_at: str,
+) -> tuple[int, int]:
+    rows = conn.execute(
+        """
+        SELECT f.*, c.chain_id, c.pair_address, c.raw_metrics
+        FROM filter_results f
+        JOIN candidate_evaluations c
+          ON c.token_address = f.token_address
+         AND c.observed_at = f.scan_time
+         AND f.pair_id = c.chain_id || ':' || c.pair_address
+        WHERE f.final_label = 'Pending Paper Candidate'
+        ORDER BY f.scan_time ASC
+        """
+    ).fetchall()
+    promoted = 0
+    failed = 0
+    for row in rows:
+        snapshot = _pending_survival_snapshot(conn, row["pair_id"], row["scan_time"])
+        if snapshot is None:
+            continue
+        try:
+            metrics = json.loads(row["raw_metrics"])
+        except json.JSONDecodeError:
+            continue
+        passed, reason = _passed_delayed_survival(snapshot, metrics)
+        if passed:
+            conn.execute(
+                """
+                UPDATE filter_results
+                SET final_label = 'Paper Trade Candidate'
+                WHERE id = ?
+                """,
+                (row["id"],),
+            )
+            conn.execute(
+                """
+                UPDATE candidate_evaluations
+                SET accepted = 1
+                WHERE observed_at = ? AND chain_id = ? AND pair_address = ?
+                """,
+                (row["scan_time"], row["chain_id"], row["pair_address"]),
+            )
+            metrics.setdefault("observed_at", row["scan_time"])
+            metrics.setdefault("chain_id", row["chain_id"])
+            metrics.setdefault("pair_address", row["pair_address"])
+            metrics.setdefault("pair_id", row["pair_id"])
+            db.insert_paper_trade_candidate(conn, row["scan_time"], metrics)
+            db.insert_signal(
+                conn,
+                metrics,
+                "paper_trade_candidate",
+                row["model_version"] or "V2",
+                iso_utc(parse_iso(observed_at) + timedelta(minutes=settings.delayed_entry_minutes)),
+                0,
+            )
+            promoted += 1
+        else:
+            reasons = _safe_list(row["reject_reasons"])
+            reasons.append(reason)
+            next_label = "Research Candidate" if (row["opportunity_score"] or 0) >= 65 else "Watchlist"
+            conn.execute(
+                """
+                UPDATE filter_results
+                SET final_label = ?, reject_reasons = ?
+                WHERE id = ?
+                """,
+                (next_label, db.to_json(sorted(set(reasons))), row["id"]),
+            )
+            conn.execute(
+                """
+                UPDATE candidate_evaluations
+                SET accepted = 0, rejection_reasons = ?
+                WHERE observed_at = ? AND chain_id = ? AND pair_address = ?
+                """,
+                (
+                    db.to_json(sorted(set(reasons))),
+                    row["scan_time"],
+                    row["chain_id"],
+                    row["pair_address"],
+                ),
+            )
+            failed += 1
+    conn.commit()
+    return promoted, failed
+
+
+def _pending_survival_snapshot(conn: sqlite3.Connection, pair_id: str, scan_time: str) -> sqlite3.Row | None:
+    rows = conn.execute(
+        """
+        SELECT *
+        FROM outcome_snapshots
+        WHERE pair_id = ? AND scan_time = ? AND horizon IN ('30m', '1h', '2h', '4h')
+        ORDER BY CASE horizon WHEN '30m' THEN 1 WHEN '1h' THEN 2 WHEN '2h' THEN 3 ELSE 4 END
+        LIMIT 1
+        """,
+        (pair_id, scan_time),
+    ).fetchall()
+    return rows[0] if rows else None
+
+
+def _passed_delayed_survival(snapshot: sqlite3.Row, metrics: dict[str, object]) -> tuple[bool, str]:
+    drawdown = _float(snapshot["max_adverse_excursion_pct"])
+    liquidity_scan = _float(snapshot["liquidity_at_scan"])
+    liquidity_horizon = _float(snapshot["liquidity_at_horizon"])
+    volume_scan = _float(snapshot["volume_at_scan"])
+    volume_horizon = _float(snapshot["volume_at_horizon"])
+    slippage = _float(metrics.get("estimated_slippage_100_usd"))
+    liquidity_retention = (
+        (liquidity_horizon / liquidity_scan) * 100
+        if liquidity_scan and liquidity_horizon is not None
+        else 100
+    )
+    volume_fade = (
+        max(0.0, 100 - ((volume_horizon / volume_scan) * 100))
+        if volume_scan and volume_horizon is not None
+        else 0
+    )
+    if drawdown is not None and drawdown < DELAYED_ENTRY_SURVIVAL["max_drawdown_during_wait_pct"]:
+        return False, "failed_delayed_entry_drawdown"
+    if liquidity_retention < DELAYED_ENTRY_SURVIVAL["min_liquidity_retention_pct"]:
+        return False, "failed_delayed_entry_liquidity_retention"
+    if volume_fade > DELAYED_ENTRY_SURVIVAL["max_volume_fade_pct"]:
+        return False, "failed_delayed_entry_volume_fade"
+    if slippage is not None and slippage > DELAYED_ENTRY_SURVIVAL["max_spread_or_slippage_pct"]:
+        return False, "failed_delayed_entry_slippage"
+    return True, ""
+
+
+def _safe_list(value: str | None) -> list[str]:
+    if not value:
+        return []
+    try:
+        parsed = json.loads(value)
+    except json.JSONDecodeError:
+        return []
+    return [str(item) for item in parsed] if isinstance(parsed, list) else []
 
 
 def _has_recent_cex_markets(conn: sqlite3.Connection, now) -> bool:

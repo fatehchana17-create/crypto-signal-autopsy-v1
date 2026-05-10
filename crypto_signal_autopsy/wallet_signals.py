@@ -229,8 +229,10 @@ def _wallet_adjusted_label(
 ) -> str:
     if hard_reject:
         return "Reject"
+    if current_label == "Paper Trade Candidate":
+        return current_label
     if final_research_score >= 75 and risk_score <= 35:
-        return "Paper Trade Candidate"
+        return "Pending Paper Candidate"
     if final_research_score >= 65 and risk_score <= 50:
         return "Research Candidate"
     if wallet_signal_score >= 55 and risk_score <= 70:
