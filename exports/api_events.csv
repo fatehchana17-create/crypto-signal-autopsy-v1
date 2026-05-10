@@ -19,4 +19,4 @@ id,observed_at,provider,endpoint,status,message,request_url
 18,2026-05-09T23:07:10+00:00,wallet_module,status,disabled,Wallet module inactive: missing MORALIS_API_KEY.,
 19,2026-05-10T00:06:26+00:00,dexscreener,candidate_discovery,empty,no base token profiles/boosts found,
 20,2026-05-10T00:06:28+00:00,wallet_module,status,disabled,Wallet module inactive: missing MORALIS_API_KEY.,
-21,2026-05-10T04:17:39+00:00,wallet_module,status,disabled,Wallet module inactive: missing MORALIS_API_KEY.,
+21,2026-05-10T06:59:18+00:00,coingecko,/coins/markets,error,"coingecko /coins/markets failed (429): {""status"":{""error_code"":429,""error_message"":""You've exceeded the Rate Limit. Please visit https://www.coingecko.com/en/api/pricing to subscribe to our API plans for higher rate limits.""}}",

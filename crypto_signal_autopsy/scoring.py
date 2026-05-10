@@ -23,6 +23,9 @@ class V2Score:
     reject_reasons: list[str]
     risk_score: float
     opportunity_score: float
+    ten_x_score: float
+    ten_x_label: str
+    ten_x_reasons: list[str]
     final_label: str
     risk_category: str
     opportunity_category: str
@@ -33,6 +36,12 @@ def score_token(metrics: dict[str, Any], security: SecurityResult) -> V2Score:
     reject_reasons = hard_reject_reasons(metrics, security)
     risk_score = calculate_risk_score(metrics, security)
     opportunity_score = calculate_opportunity_score(metrics, security)
+    ten_x_score, ten_x_reasons = calculate_ten_x_research_score(
+        metrics,
+        security,
+        risk_score,
+        opportunity_score,
+    )
     high_risk_momentum = qualifies_high_risk_momentum(metrics, security)
     final_label = choose_final_label(
         hard_reject=bool(reject_reasons),
@@ -48,6 +57,9 @@ def score_token(metrics: dict[str, Any], security: SecurityResult) -> V2Score:
         reject_reasons=reject_reasons,
         risk_score=risk_score,
         opportunity_score=opportunity_score,
+        ten_x_score=ten_x_score,
+        ten_x_label=ten_x_label(ten_x_score, risk_score),
+        ten_x_reasons=ten_x_reasons,
         final_label=final_label,
         risk_category=risk_category(risk_score),
         opportunity_category=opportunity_category(opportunity_score),
@@ -308,6 +320,155 @@ def calculate_opportunity_score(metrics: dict[str, Any], security: SecurityResul
         score += 5
 
     return min(score, 100)
+
+
+def calculate_ten_x_research_score(
+    metrics: dict[str, Any],
+    security: SecurityResult,
+    risk_score: float,
+    opportunity_score: float,
+) -> tuple[float, list[str]]:
+    if (
+        _security_bool(security, "is_honeypot")
+        or _security_bool(security, "cannot_sell")
+        or _security_bool(security, "cannot_sell_all")
+    ):
+        return 0.0, ["critical_security_risk"]
+    if _security_bool(security, "blacklist_function") or _security_bool(security, "is_blacklisted"):
+        return 0.0, ["critical_security_risk"]
+
+    score = 0.0
+    reasons: list[str] = []
+    liquidity = _num(metrics.get("liquidity_usd")) or 0
+    fdv = _num(metrics.get("fdv"))
+    market_cap = _num(metrics.get("market_cap"))
+    size = fdv or market_cap
+    volume_24h = _num(metrics.get("volume_h24_usd")) or 0
+    volume_liquidity_ratio = _num(metrics.get("volume_liquidity_ratio"))
+    buy_ratio = _buy_ratio(metrics)
+    txns_1h = _unique_buyers_1h(metrics) or 0
+    pair_age_minutes = _pair_age_minutes(metrics) or 0
+    pair_age_hours = pair_age_minutes / 60
+    price_change_1h = _num(metrics.get("price_change_h1_pct")) or 0
+    raw = metrics.get("raw_json") or {}
+    info = raw.get("info") if isinstance(raw, dict) else {}
+    socials = info.get("socials") if isinstance(info, dict) else []
+    websites = info.get("websites") if isinstance(info, dict) else []
+
+    if size is None:
+        reasons.append("size_missing")
+    elif 250_000 <= size <= 15_000_000:
+        score += 22
+        reasons.append("small_fdv_or_market_cap")
+    elif 15_000_000 < size <= 50_000_000:
+        score += 10
+        reasons.append("mid_size_still_has_room")
+    elif size < 250_000:
+        score += 6
+        reasons.append("tiny_size_high_danger")
+
+    if 50_000 <= liquidity <= 750_000:
+        score += 18
+        reasons.append("liquidity_big_enough_but_not_too_large")
+    elif 25_000 <= liquidity < 50_000:
+        score += 8
+        reasons.append("low_but_trackable_liquidity")
+    elif 750_000 < liquidity <= 2_500_000:
+        score += 7
+        reasons.append("large_liquidity_less_explosive")
+
+    if volume_liquidity_ratio is None and liquidity > 0:
+        volume_liquidity_ratio = volume_24h / liquidity
+    if volume_liquidity_ratio is None:
+        reasons.append("volume_liquidity_missing")
+    elif 1 <= volume_liquidity_ratio <= 8:
+        score += 16
+        reasons.append("strong_volume_vs_liquidity")
+    elif 8 < volume_liquidity_ratio <= 20:
+        score += 8
+        reasons.append("very_hot_volume_possible_manipulation")
+    elif 0.4 <= volume_liquidity_ratio < 1:
+        score += 6
+        reasons.append("early_volume_building")
+
+    if buy_ratio is not None:
+        if buy_ratio >= 0.65:
+            score += 12
+            reasons.append("strong_buy_pressure")
+        elif buy_ratio >= 0.55:
+            score += 8
+            reasons.append("positive_buy_pressure")
+
+    if txns_1h >= 120:
+        score += 10
+        reasons.append("many_recent_buyers")
+    elif txns_1h >= 40:
+        score += 6
+        reasons.append("some_recent_buyers")
+
+    if 0.5 <= pair_age_hours <= 48:
+        score += 10
+        reasons.append("young_but_not_instant_launch")
+    elif 10 <= pair_age_minutes < 30:
+        score += 4
+        reasons.append("very_new_high_noise")
+    elif 48 < pair_age_hours <= 168:
+        score += 3
+        reasons.append("older_but_still_early")
+
+    if 5 <= price_change_1h <= 80:
+        score += 12
+        reasons.append("momentum_not_extreme")
+    elif 80 < price_change_1h <= 150:
+        score += 5
+        reasons.append("momentum_already_hot")
+    elif -10 <= price_change_1h < 5:
+        score += 3
+        reasons.append("not_pumping_yet")
+
+    if websites:
+        score += 3
+        reasons.append("website_present")
+    if _social_present(socials, "twitter", "x"):
+        score += 3
+        reasons.append("x_or_twitter_present")
+    if _social_present(socials, "telegram") or _social_present(socials, "discord"):
+        score += 2
+        reasons.append("community_channel_present")
+    if _is_boosted(metrics):
+        score += 3
+        reasons.append("dexscreener_boosted")
+
+    if risk_score <= 35:
+        score += 12
+        reasons.append("risk_score_clean_enough")
+    elif risk_score <= 60:
+        score += 6
+        reasons.append("risk_score_trackable")
+    else:
+        score -= 20
+        reasons.append("risk_score_too_high")
+
+    if opportunity_score >= 75:
+        score += 8
+        reasons.append("strong_opportunity_score")
+    elif opportunity_score >= 55:
+        score += 4
+        reasons.append("moderate_opportunity_score")
+
+    return max(0.0, min(score, 100.0)), sorted(set(reasons))
+
+
+def ten_x_label(score: float, risk_score: float) -> str:
+    if risk_score > 75 and score >= 40:
+        return "Too Risky 10x Setup"
+    if score >= 75:
+        return "Strong 10x Research Setup"
+    if score >= 60:
+        return "Moderate 10x Research Setup"
+    if score >= 40:
+        return "Weak 10x Research Setup"
+    return "No 10x Setup"
 
 
 def choose_final_label(

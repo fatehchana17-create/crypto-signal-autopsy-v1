@@ -8,8 +8,8 @@
     "amount_usd": 792.5330632636841,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 94256.42,
-    "token_risk_score": 25.0,
-    "token_opportunity_score": 45.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -21,8 +21,8 @@
     "amount_usd": 114.45293465812397,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -34,8 +34,8 @@
     "amount_usd": 142.6768097245886,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -47,8 +47,8 @@
     "amount_usd": 229.60164342430687,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -73,8 +73,8 @@
     "amount_usd": 425.6489427500334,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 94256.42,
-    "token_risk_score": 25.0,
-    "token_opportunity_score": 45.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -86,8 +86,8 @@
     "amount_usd": 36.11051846318243,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -99,8 +99,8 @@
     "amount_usd": 810.6778083303634,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -138,8 +138,8 @@
     "amount_usd": 49.02760267868223,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -151,8 +151,8 @@
     "amount_usd": 230.7736903773617,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -164,8 +164,8 @@
     "amount_usd": 1179.1519850147401,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -177,8 +177,8 @@
     "amount_usd": 16.076036741208405,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -242,8 +242,8 @@
     "amount_usd": 469.7993385527539,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -255,21 +255,8 @@
     "amount_usd": 14.60902646397997,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 253834.77,
-    "token_risk_score": 26.0,
-    "token_opportunity_score": 30.0,
-    "wallet_signal_score": 10.0
-  },
-  {
-    "trade_time": "2026-05-09T15:28:13.000Z",
-    "wallet_address": "0x48573687867c72957926c4eb1a6e95e7ce6cf2fb",
-    "wallet_label": "Unproven Wallet",
-    "side": "buy",
-    "token": "BV7X",
-    "amount_usd": 14.60902646397997,
-    "pair_age_minutes_at_trade": null,
-    "liquidity_usd_at_trade": 253834.77,
-    "token_risk_score": 26.0,
-    "token_opportunity_score": 33.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -281,21 +268,8 @@
     "amount_usd": 0.0758934658571165,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 253834.77,
-    "token_risk_score": 26.0,
-    "token_opportunity_score": 30.0,
-    "wallet_signal_score": 10.0
-  },
-  {
-    "trade_time": "2026-05-09T15:28:13.000Z",
-    "wallet_address": "0x48573687867c72957926c4eb1a6e95e7ce6cf2fb",
-    "wallet_label": "Unproven Wallet",
-    "side": "sell",
-    "token": "BV7X",
-    "amount_usd": 0.0758934658571165,
-    "pair_age_minutes_at_trade": null,
-    "liquidity_usd_at_trade": 253834.77,
-    "token_risk_score": 26.0,
-    "token_opportunity_score": 33.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -307,8 +281,8 @@
     "amount_usd": 138.43407540949022,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -320,8 +294,8 @@
     "amount_usd": 68.14394125335863,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -346,8 +320,8 @@
     "amount_usd": 123.3612155357481,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -359,8 +333,8 @@
     "amount_usd": 0.6722002160981801,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -385,8 +359,8 @@
     "amount_usd": 514.2441079943633,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -424,8 +398,8 @@
     "amount_usd": 103.3699672194827,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -450,8 +424,8 @@
     "amount_usd": 231.9148681763334,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -463,8 +437,8 @@
     "amount_usd": 1180.481625680237,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -489,8 +463,8 @@
     "amount_usd": 138.10580468524628,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 94256.42,
-    "token_risk_score": 25.0,
-    "token_opportunity_score": 45.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -515,8 +489,8 @@
     "amount_usd": 98.23116715952703,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -528,8 +502,8 @@
     "amount_usd": 450.79481851258754,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -541,8 +515,8 @@
     "amount_usd": 11.372713015990318,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -580,8 +554,8 @@
     "amount_usd": 334.3502354828471,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 94256.42,
-    "token_risk_score": 25.0,
-    "token_opportunity_score": 45.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -593,8 +567,8 @@
     "amount_usd": 2.307247041000037,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -645,8 +619,8 @@
     "amount_usd": 457.50959226610195,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -658,8 +632,8 @@
     "amount_usd": 229.70923287960372,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -671,8 +645,8 @@
     "amount_usd": 57.1573263930555,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -684,8 +658,8 @@
     "amount_usd": 339.1111129807668,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 94256.42,
-    "token_risk_score": 25.0,
-    "token_opportunity_score": 45.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -749,8 +723,8 @@
     "amount_usd": 349.86078174658104,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 94256.42,
-    "token_risk_score": 25.0,
-    "token_opportunity_score": 45.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -775,8 +749,8 @@
     "amount_usd": 334.8713601921809,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -814,8 +788,8 @@
     "amount_usd": 225.90049047143447,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -827,8 +801,8 @@
     "amount_usd": 358.1530855496319,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -840,8 +814,8 @@
     "amount_usd": 456.9484673270049,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -853,8 +827,8 @@
     "amount_usd": 30.932784914339667,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -905,8 +879,8 @@
     "amount_usd": 696.9920858943359,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 94256.42,
-    "token_risk_score": 25.0,
-    "token_opportunity_score": 45.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -931,8 +905,8 @@
     "amount_usd": 45.67354279220092,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -944,8 +918,8 @@
     "amount_usd": 27.068373084546604,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -957,8 +931,8 @@
     "amount_usd": 515.3211047161435,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 94256.42,
-    "token_risk_score": 25.0,
-    "token_opportunity_score": 45.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -983,8 +957,8 @@
     "amount_usd": 77.62781846156409,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -1009,8 +983,8 @@
     "amount_usd": 45.56940682029631,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -1022,8 +996,8 @@
     "amount_usd": 131.04121370326035,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -1061,8 +1035,8 @@
     "amount_usd": 233.80688930793093,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 94256.42,
-    "token_risk_score": 25.0,
-    "token_opportunity_score": 45.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -1074,8 +1048,8 @@
     "amount_usd": 114.4676748087064,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -1113,8 +1087,8 @@
     "amount_usd": 55.77646165040765,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -1126,8 +1100,8 @@
     "amount_usd": 366.234242594817,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 94256.42,
-    "token_risk_score": 25.0,
-    "token_opportunity_score": 45.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -1139,8 +1113,8 @@
     "amount_usd": 66.96877119071777,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -1152,8 +1126,8 @@
     "amount_usd": 301.04596046117035,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -1165,8 +1139,8 @@
     "amount_usd": 466.1553741598415,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 94256.42,
-    "token_risk_score": 25.0,
-    "token_opportunity_score": 45.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -1178,8 +1152,8 @@
     "amount_usd": 0.6921518060499299,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -1191,8 +1165,8 @@
     "amount_usd": 179.64730515712645,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 94256.42,
-    "token_risk_score": 25.0,
-    "token_opportunity_score": 45.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -1230,8 +1204,8 @@
     "amount_usd": 558.1305925580193,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 94256.42,
-    "token_risk_score": 25.0,
-    "token_opportunity_score": 45.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -1243,8 +1217,8 @@
     "amount_usd": 674.0919871875134,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -1269,8 +1243,8 @@
     "amount_usd": 22.52094939831181,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -1282,8 +1256,8 @@
     "amount_usd": 32.09007651648132,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -1295,8 +1269,8 @@
     "amount_usd": 328.8003679170375,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -1321,8 +1295,8 @@
     "amount_usd": 202.75197509208596,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 94256.42,
-    "token_risk_score": 25.0,
-    "token_opportunity_score": 45.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -1334,8 +1308,8 @@
     "amount_usd": 251.87144546944967,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -1373,8 +1347,8 @@
     "amount_usd": 34.6312505912347,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -1386,8 +1360,8 @@
     "amount_usd": 917.93271170731,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -1412,8 +1386,8 @@
     "amount_usd": 215.7277837846204,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 94256.42,
-    "token_risk_score": 25.0,
-    "token_opportunity_score": 45.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -1464,8 +1438,8 @@
     "amount_usd": 248.18146946477708,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 94256.42,
-    "token_risk_score": 25.0,
-    "token_opportunity_score": 45.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -1477,8 +1451,8 @@
     "amount_usd": 128.09896808619806,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -1490,8 +1464,8 @@
     "amount_usd": 419.1874307512303,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -1516,8 +1490,8 @@
     "amount_usd": 222.7716162028234,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -1529,8 +1503,8 @@
     "amount_usd": 23.083453721212997,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -1542,8 +1516,8 @@
     "amount_usd": 30.010843405845456,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -1581,8 +1555,8 @@
     "amount_usd": 445.51568168343204,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -1620,8 +1594,8 @@
     "amount_usd": 229.44726029700306,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -1633,8 +1607,8 @@
     "amount_usd": 261.63416613477483,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 94256.42,
-    "token_risk_score": 25.0,
-    "token_opportunity_score": 45.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -1646,8 +1620,8 @@
     "amount_usd": 131.10489237608977,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -1659,8 +1633,8 @@
     "amount_usd": 374.51558598275665,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -1685,8 +1659,8 @@
     "amount_usd": 90.79189396476386,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -1698,8 +1672,8 @@
     "amount_usd": 272.0921619011451,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -1711,8 +1685,8 @@
     "amount_usd": 407.4326890027262,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -1776,8 +1750,8 @@
     "amount_usd": 598.1886432344886,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 94256.42,
-    "token_risk_score": 25.0,
-    "token_opportunity_score": 45.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -1789,8 +1763,8 @@
     "amount_usd": 276.4735590162089,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -1802,8 +1776,8 @@
     "amount_usd": 169.11073415011336,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -1841,8 +1815,8 @@
     "amount_usd": 26.62501634851012,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -1880,8 +1854,8 @@
     "amount_usd": 1.6150503920002997,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -1893,8 +1867,8 @@
     "amount_usd": 280.0235183373734,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -1906,8 +1880,8 @@
     "amount_usd": 227.8588412243346,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -1932,8 +1906,8 @@
     "amount_usd": 544.054209292178,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 94256.42,
-    "token_risk_score": 25.0,
-    "token_opportunity_score": 45.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -1971,8 +1945,8 @@
     "amount_usd": 79.70078162986395,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -1984,8 +1958,8 @@
     "amount_usd": 1293.2586258294111,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 94256.42,
-    "token_risk_score": 25.0,
-    "token_opportunity_score": 45.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -2010,8 +1984,8 @@
     "amount_usd": 23.05316460086642,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -2036,8 +2010,8 @@
     "amount_usd": 31.340060132801014,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -2049,8 +2023,8 @@
     "amount_usd": 365.42539728444024,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 94256.42,
-    "token_risk_score": 25.0,
-    "token_opportunity_score": 45.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -2062,8 +2036,8 @@
     "amount_usd": 344.74405625475487,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -2075,8 +2049,8 @@
     "amount_usd": 457.98611560516,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -2088,8 +2062,8 @@
     "amount_usd": 291.7796307087241,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -2127,8 +2101,8 @@
     "amount_usd": 0.19817843056192933,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 94256.42,
-    "token_risk_score": 25.0,
-    "token_opportunity_score": 45.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -2140,8 +2114,8 @@
     "amount_usd": 0.6921516143964959,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -2166,8 +2140,8 @@
     "amount_usd": 159.76162815286335,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -2205,8 +2179,8 @@
     "amount_usd": 9.657232088244049,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -2231,8 +2205,8 @@
     "amount_usd": 0.49515464182402924,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -2244,8 +2218,8 @@
     "amount_usd": 554.6085970839422,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -2257,8 +2231,8 @@
     "amount_usd": 814.0155981530645,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -2283,8 +2257,8 @@
     "amount_usd": 16.770302897538514,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -2296,8 +2270,8 @@
     "amount_usd": 1013.1230734786695,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 94256.42,
-    "token_risk_score": 25.0,
-    "token_opportunity_score": 45.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -2322,8 +2296,8 @@
     "amount_usd": 187.39131728039254,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -2335,8 +2309,8 @@
     "amount_usd": 34.33831814781267,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -2348,8 +2322,8 @@
     "amount_usd": 57.7438401291889,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -2374,8 +2348,8 @@
     "amount_usd": 251.65767636375327,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 94256.42,
-    "token_risk_score": 25.0,
-    "token_opportunity_score": 45.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -2413,8 +2387,8 @@
     "amount_usd": 463.50445011031087,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -2426,8 +2400,8 @@
     "amount_usd": 116.79346724764807,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -2439,8 +2413,8 @@
     "amount_usd": 27.038483303182936,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -2465,8 +2439,8 @@
     "amount_usd": 341.25272165655247,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 94256.42,
-    "token_risk_score": 25.0,
-    "token_opportunity_score": 45.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -2478,8 +2452,8 @@
     "amount_usd": 466.32989870579684,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -2530,8 +2504,8 @@
     "amount_usd": 138.80812623160378,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -2543,8 +2517,8 @@
     "amount_usd": 189.88389776468406,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 52320.68,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 40.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -2556,8 +2530,8 @@
     "amount_usd": 225.23199203965575,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 94256.42,
-    "token_risk_score": 25.0,
-    "token_opportunity_score": 45.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -2569,8 +2543,8 @@
     "amount_usd": 195.2708569844614,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 63581.35,
-    "token_risk_score": 43.0,
-    "token_opportunity_score": 42.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   },
   {
@@ -2582,8 +2556,8 @@
     "amount_usd": 347.30045146501465,
     "pair_age_minutes_at_trade": null,
     "liquidity_usd_at_trade": 94256.42,
-    "token_risk_score": 25.0,
-    "token_opportunity_score": 45.0,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 15.0
   },
   {
@@ -2597,6 +2571,32 @@
     "liquidity_usd_at_trade": 89528.43,
     "token_risk_score": 38.0,
     "token_opportunity_score": 47.0,
+    "wallet_signal_score": 10.0
+  },
+  {
+    "trade_time": "2026-05-09T15:23:51.000Z",
+    "wallet_address": "0x52d9ef948ce644d7a06b9201174568e2b54b8d18",
+    "wallet_label": "Unproven Wallet",
+    "side": "sell",
+    "token": "Meridia",
+    "amount_usd": 130.18414831758773,
+    "pair_age_minutes_at_trade": null,
+    "liquidity_usd_at_trade": 89528.43,
+    "token_risk_score": 38.0,
+    "token_opportunity_score": 47.0,
+    "wallet_signal_score": 10.0
+  },
+  {
+    "trade_time": "2026-05-09T15:23:49.000Z",
+    "wallet_address": "0x4567d8de44a5508a17072f8d21386463c934d312",
+    "wallet_label": "Unproven Wallet",
+    "side": "buy",
+    "token": "BLOCKTRONICS",
+    "amount_usd": 22.85265264573715,
+    "pair_age_minutes_at_trade": null,
+    "liquidity_usd_at_trade": 63581.35,
+    "token_risk_score": null,
+    "token_opportunity_score": null,
     "wallet_signal_score": 10.0
   }
 ]

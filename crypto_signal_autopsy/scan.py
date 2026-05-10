@@ -42,7 +42,10 @@ def run_scan(conn: sqlite3.Connection, settings: Settings) -> dict[str, int]:
         db.log_api_event(conn, observed_at, "coingecko", "/coins/markets", "error", str(exc))
 
     try:
-        candidate_sources = dex.discover_candidate_tokens(settings.dex_chain)
+        candidate_sources = dex.discover_candidate_tokens(
+            settings.dex_chain,
+            settings.dex_search_queries,
+        )
         stats["discovered_tokens"] = len(candidate_sources)
     except ApiError as exc:
         stats["api_errors"] += 1
@@ -56,7 +59,7 @@ def run_scan(conn: sqlite3.Connection, settings: Settings) -> dict[str, int]:
             "dexscreener",
             "candidate_discovery",
             "empty",
-            f"no {settings.dex_chain} token profiles/boosts found",
+            f"no {settings.dex_chain} token profiles/boosts/search results found",
         )
         return stats
 

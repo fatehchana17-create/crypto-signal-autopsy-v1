@@ -5,13 +5,23 @@ import json
 import sqlite3
 from typing import Any
 
-from crypto_signal_autopsy.config import Settings
+from crypto_signal_autopsy.config import HORIZONS, Settings
 from crypto_signal_autopsy.review import humanize_reason, money, pct
 
 
 TABLE_KEYS = [
+    "rejected_15m",
+    "accepted_15m",
+    "rejected_30m",
+    "accepted_30m",
     "rejected_1h",
     "accepted_1h",
+    "rejected_2h",
+    "accepted_2h",
+    "rejected_4h",
+    "accepted_4h",
+    "rejected_8h",
+    "accepted_8h",
     "rejected_24h",
     "accepted_24h",
 ]
@@ -20,12 +30,10 @@ TABLE_KEYS = [
 def build_analysis_payload(conn: sqlite3.Connection, settings: Settings) -> dict[str, Any]:
     rejected_rows = _rejected_rows(conn, settings)
     accepted_rows = _accepted_rows(conn, settings)
-    tables = {
-        "rejected_1h": [row for row in rejected_rows if row["horizon"] == "1h"],
-        "accepted_1h": [row for row in accepted_rows if row["horizon"] == "1h"],
-        "rejected_24h": [row for row in rejected_rows if row["horizon"] == "24h"],
-        "accepted_24h": [row for row in accepted_rows if row["horizon"] == "24h"],
-    }
+    tables = {}
+    for horizon in HORIZONS:
+        tables[f"rejected_{horizon}"] = [row for row in rejected_rows if row["horizon"] == horizon]
+        tables[f"accepted_{horizon}"] = [row for row in accepted_rows if row["horizon"] == horizon]
     for key in tables:
         tables[key] = sorted(tables[key], key=lambda item: item["observed_at"] or "", reverse=True)
 

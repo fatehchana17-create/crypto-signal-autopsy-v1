@@ -20,12 +20,13 @@ The goal is to learn:
 
 ## What V2 Does
 
-- Scans CoinGecko top-100 CEX market context.
-- Discovers Base-chain DEX candidates from DEX Screener profile and boost endpoints.
+- Scans CoinGecko top-300 CEX market context.
+- Discovers Base-chain DEX candidates from DEX Screener profile, boost, and pair-search endpoints.
 - Uses GoPlus security data when an access token is available.
 - Gives every scanned pair one final research label: Reject, Watchlist, High-Risk Momentum Watchlist, Research Candidate, or Paper Trade Candidate.
-- Calculates risk score and opportunity score from 0 to 100.
-- Tracks outcomes at 15m, 1h, 4h, 24h, 3d, and 7d.
+- Calculates risk score, opportunity score, and a research-only 10x setup score from 0 to 100.
+- Tracks outcomes at 15m, 30m, 1h, 2h, 4h, 8h, and 24h.
+- Archives completed rejected-token audits after 24h, then removes the active rejected rows from the database.
 - Exports V2 CSV files for labels, outcomes, outliers, filter lessons, and score buckets.
 - Builds a static GitHub Pages dashboard that does not call APIs from the browser.
 
@@ -54,6 +55,8 @@ The first V3 provider is Moralis pair swaps for EVM chains. If `MORALIS_API_KEY`
 `Paper Trade Candidate` means simulated tracking only. It does not mean buy.
 
 `High-Risk Momentum Watchlist` means a risky token is being studied because it is moving aggressively. It is not a recommendation.
+
+`10x Research Setup` means the token has some early conditions worth studying, such as small size, enough liquidity, strong volume versus liquidity, buy pressure, and security sanity. It does not mean the token will 10x.
 
 Average return can be distorted by outliers. Median return is usually more reliable.
 
@@ -116,6 +119,8 @@ GitHub Actions also runs the scanner on a schedule and publishes the static dash
 - `exports/social_catalysts.csv`
 - `exports/paper_trades.csv`
 - `exports/outcome_snapshots.csv`
+- `exports/rejected_filter_audits.csv`
+- `exports/filter_accuracy.csv`
 - `exports/review_notes.csv`
 - `exports/dashboard_summary.csv`
 - `exports/outliers.csv`

@@ -11,11 +11,12 @@ MODEL_VERSION = "V2"
 
 HORIZONS = {
     "15m": 15,
+    "30m": 30,
     "1h": 60,
+    "2h": 120,
     "4h": 240,
+    "8h": 480,
     "24h": 1440,
-    "3d": 4320,
-    "7d": 10080,
 }
 
 HARD_REJECT = {
@@ -103,6 +104,11 @@ def _env_int(name: str, default: int) -> int:
     return int(raw)
 
 
+def _env_csv(name: str, default: str) -> list[str]:
+    raw = os.getenv(name, default)
+    return [item.strip() for item in raw.split(",") if item.strip()]
+
+
 def _path_from_env(name: str, default: str) -> Path:
     raw = os.getenv(name, default)
     path = Path(raw)
@@ -117,6 +123,7 @@ class Settings:
     db_path: Path
     export_dir: Path
     dex_chain: str
+    dex_search_queries: list[str]
     goplus_chain_id: str
     cex_top_n: int
     coingecko_demo_api_key: str | None
@@ -153,8 +160,12 @@ def load_settings() -> Settings:
         db_path=_path_from_env("CSA_DB_PATH", "data/autopsy.sqlite"),
         export_dir=_path_from_env("CSA_EXPORT_DIR", "exports"),
         dex_chain=os.getenv("CSA_DEX_CHAIN", "base").strip() or "base",
+        dex_search_queries=_env_csv(
+            "CSA_DEX_SEARCH_QUERIES",
+            "base,virtual,ai,agent,meme,degen,pepe,dog,cat,coin,moon,launch",
+        ),
         goplus_chain_id=os.getenv("CSA_GOPLUS_CHAIN_ID", "8453").strip() or "8453",
-        cex_top_n=_env_int("CSA_CEX_TOP_N", 100),
+        cex_top_n=_env_int("CSA_CEX_TOP_N", 300),
         coingecko_demo_api_key=os.getenv("COINGECKO_DEMO_API_KEY") or None,
         coingecko_pro_api_key=os.getenv("COINGECKO_PRO_API_KEY") or None,
         goplus_access_token=os.getenv("GOPLUS_ACCESS_TOKEN") or os.getenv("GOPLUS_API_KEY") or None,

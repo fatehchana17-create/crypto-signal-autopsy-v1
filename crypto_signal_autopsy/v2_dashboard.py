@@ -6,7 +6,7 @@ import sqlite3
 from statistics import mean, median
 from typing import Any
 
-from crypto_signal_autopsy.config import MODEL_VERSION
+from crypto_signal_autopsy.config import HORIZONS, MODEL_VERSION
 from crypto_signal_autopsy.review import money, pct
 
 
@@ -21,6 +21,7 @@ LABELS = [
 
 def build_v2_payload(conn: sqlite3.Connection) -> dict[str, Any]:
     label_counts = _label_counts(conn)
+    filter_accuracy = _filter_accuracy(conn)
     latest_scan = _scalar(conn, "SELECT MAX(scan_time) FROM filter_results") or "No candidate found yet"
     latest_attempt = (
         _scalar(
@@ -41,8 +42,10 @@ def build_v2_payload(conn: sqlite3.Connection) -> dict[str, Any]:
         "latest_scan_attempt": latest_attempt,
         "api_errors": api_errors,
         "label_counts": label_counts,
-        "health_cards": _health_cards(label_counts, latest_scan, latest_attempt, api_errors),
+        "health_cards": _health_cards(label_counts, latest_scan, latest_attempt, api_errors, filter_accuracy),
         "bucket_tables": {label: _bucket_rows(conn, label) for label in LABELS},
+        "filter_accuracy": filter_accuracy,
+        "rejected_audits": _rejected_audit_rows(conn),
         "performance": _performance_rows(conn),
         "outliers": {
             "missed_winners": _outcome_extremes(conn, "missed_winners"),
@@ -63,6 +66,7 @@ def _health_cards(
     latest_scan: str,
     latest_attempt: str,
     api_errors: int,
+    filter_accuracy: dict[str, str],
 ) -> list[dict[str, str]]:
     return [
         {"label": "Total Tokens Scanned", "value": str(sum(label_counts.values()))},
@@ -75,6 +79,8 @@ def _health_cards(
         {"label": "Research Candidates", "value": str(label_counts.get("Research Candidate", 0))},
         {"label": "Paper Trade Candidates", "value": str(label_counts.get("Paper Trade Candidate", 0))},
         {"label": "API Errors", "value": str(api_errors)},
+        {"label": "Rejected Audit Accuracy", "value": filter_accuracy["accuracy_rate"]},
+        {"label": "Completed Rejected Audits", "value": filter_accuracy["completed"]},
         {"label": "Last Scan Attempt", "value": latest_attempt},
         {"label": "Last Candidate Found", "value": latest_scan},
         {"label": "Model Version", "value": MODEL_VERSION},
@@ -109,6 +115,9 @@ def _bucket_rows(conn: sqlite3.Connection, label: str, limit: int = 50) -> list[
                 "move1h": pct(metrics.get("price_change_h1_pct")),
                 "risk_score": _score(row["risk_score"]),
                 "opportunity_score": _score(row["opportunity_score"]),
+                "ten_x_score": _score(row["ten_x_score"]),
+                "ten_x_label": row["ten_x_label"] or "No 10x Setup",
+                "ten_x_reasons": _reason_text(row["ten_x_reasons"]),
                 "final_label": row["final_label"] or "",
                 "main_reasons": _reason_text(row["reject_reasons"]),
                 "url": f"https://dexscreener.com/{row['chain_id']}/{row['pair_address']}",
@@ -126,7 +135,7 @@ def _performance_rows(conn: sqlite3.Connection) -> list[dict[str, str]]:
     for row in rows:
         grouped[row["horizon"]].append(float(row["return_pct"]))
     output = []
-    for horizon in ["15m", "1h", "4h", "24h", "3d", "7d"]:
+    for horizon in HORIZONS:
         values = grouped.get(horizon, [])
         if not values:
             output.append(
@@ -195,7 +204,101 @@ def _filter_lesson_rows(conn: sqlite3.Connection, saved: bool) -> list[dict[str,
         LIMIT 50
         """
     ).fetchall()
-    return [_outcome_row(row) for row in rows]
+    output = [_outcome_row(row) for row in rows]
+    archived = _archived_filter_lesson_rows(conn, saved)
+    return (output + archived)[:50]
+
+
+def _filter_accuracy(conn: sqlite3.Connection) -> dict[str, str]:
+    rows = conn.execute(
+        "SELECT filter_verdict, COUNT(*) AS count FROM rejected_filter_audits GROUP BY filter_verdict"
+    ).fetchall()
+    counts = {row["filter_verdict"] or "unknown": int(row["count"]) for row in rows}
+    success = counts.get("success", 0)
+    failure = counts.get("failure", 0)
+    unknown = counts.get("unknown", 0)
+    judged = success + failure
+    completed = judged + unknown
+    accuracy = f"{success / judged * 100:.1f}%" if judged else "No data"
+    plain = (
+        f"{success} success, {failure} failure, {unknown} unknown after 24h."
+        if completed
+        else "No rejected token has finished the 24h audit yet."
+    )
+    return {
+        "completed": str(completed),
+        "judged": str(judged),
+        "successes": str(success),
+        "failures": str(failure),
+        "unknown": str(unknown),
+        "accuracy_rate": accuracy,
+        "plain": plain,
+    }
+
+
+def _rejected_audit_rows(conn: sqlite3.Connection) -> list[dict[str, str]]:
+    rows = conn.execute(
+        """
+        SELECT *
+        FROM rejected_filter_audits
+        ORDER BY completed_at DESC
+        LIMIT 50
+        """
+    ).fetchall()
+    return [
+        {
+            "symbol": row["symbol"] or "UNKNOWN",
+            "chain": row["chain"] or "",
+            "scan_time": row["scan_time"] or "",
+            "completed_at": row["completed_at"] or "",
+            "return24h": pct(row["return_24h_pct"]),
+            "best": pct(row["best_return_pct"]),
+            "worst": pct(row["worst_return_pct"]),
+            "verdict": (row["filter_verdict"] or "unknown").title(),
+            "lesson": row["lesson"] or "",
+            "ten_x_score": _score(row["ten_x_score"]),
+            "ten_x_label": row["ten_x_label"] or "",
+            "reasons": _reason_text(row["reject_reasons"]),
+            "url": _dex_url(row["pair_id"]),
+        }
+        for row in rows
+    ]
+
+
+def _archived_filter_lesson_rows(conn: sqlite3.Connection, saved: bool) -> list[dict[str, str]]:
+    if saved:
+        where = "filter_verdict = 'success'"
+        order = "return_24h_pct ASC"
+    else:
+        where = "filter_verdict = 'failure'"
+        order = "return_24h_pct DESC"
+    rows = conn.execute(
+        f"""
+        SELECT *
+        FROM rejected_filter_audits
+        WHERE {where}
+        ORDER BY {order}
+        LIMIT 50
+        """
+    ).fetchall()
+    return [
+        {
+            "token_address": row["token_address"] or "",
+            "pair_id": row["pair_id"] or "",
+            "label_at_scan": "Reject",
+            "horizon": "24h archived",
+            "return": pct(row["return_24h_pct"]),
+            "reasons": _reason_text(row["reject_reasons"]),
+            "liquidity_scan": "",
+            "liquidity_horizon": "",
+            "volume_scan": "",
+            "volume_horizon": "",
+            "became_illiquid": "Yes" if row["became_illiquid"] else "No",
+            "rugged": "Yes" if row["rugged"] else "No",
+            "volume_disappeared": "Yes" if row["volume_disappeared"] else "No",
+        }
+        for row in rows
+    ]
 
 
 def _score_bucket_rows(conn: sqlite3.Connection) -> list[dict[str, str]]:
@@ -346,3 +449,12 @@ def _rate(rows: list[sqlite3.Row], field: str) -> str:
         return "0.0%"
     count = sum(1 for row in rows if row[field])
     return pct((count / len(rows)) * 100)
+
+
+def _dex_url(pair_id: str | None) -> str:
+    if not pair_id or ":" not in pair_id:
+        return ""
+    chain, pair_address = pair_id.split(":", 1)
+    if not chain or not pair_address:
+        return ""
+    return f"https://dexscreener.com/{chain}/{pair_address}"

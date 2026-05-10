@@ -18,6 +18,9 @@ class Evaluation:
     final_label: str = "Reject"
     risk_score: float | None = None
     opportunity_score: float | None = None
+    ten_x_score: float | None = None
+    ten_x_label: str = ""
+    ten_x_reasons: list[str] | None = None
     risk_category: str = ""
     opportunity_category: str = ""
     qualifies_high_risk_momentum: bool = False
@@ -42,6 +45,9 @@ def evaluate_candidate(
         final_label=v2_score.final_label,
         risk_score=v2_score.risk_score,
         opportunity_score=v2_score.opportunity_score,
+        ten_x_score=v2_score.ten_x_score,
+        ten_x_label=v2_score.ten_x_label,
+        ten_x_reasons=v2_score.ten_x_reasons,
         risk_category=v2_score.risk_category,
         opportunity_category=v2_score.opportunity_category,
         qualifies_high_risk_momentum=v2_score.qualifies_high_risk_momentum,

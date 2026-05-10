@@ -34,6 +34,7 @@ def run_tracking(conn: sqlite3.Connection, settings: Settings) -> dict[str, int]
         "outcomes": 0,
         "rejected_outcomes": 0,
         "outcome_snapshots": 0,
+        "rejected_audits_archived": 0,
         "api_errors": 0,
     }
 
@@ -259,11 +260,12 @@ def run_tracking(conn: sqlite3.Connection, settings: Settings) -> dict[str, int]
         WHERE status = 'open'
           AND EXISTS (
             SELECT 1 FROM signal_outcomes o
-            WHERE o.signal_id = signals.signal_id AND o.horizon = '7d'
+            WHERE o.signal_id = signals.signal_id AND o.horizon = '24h'
           )
         """
     )
     conn.commit()
+    stats["rejected_audits_archived"] = db.archive_completed_rejected_audits(conn, observed_at)
     return stats
 
 

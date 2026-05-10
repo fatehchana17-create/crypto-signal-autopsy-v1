@@ -30,6 +30,8 @@ def test_strong_safe_token_becomes_paper_trade_candidate() -> None:
     assert result.final_label == "Paper Trade Candidate"
     assert result.risk_score <= 35
     assert result.opportunity_score >= 75
+    assert result.ten_x_label == "Strong 10x Research Setup"
+    assert result.ten_x_score >= 75
 
 
 def test_low_liquidity_is_hard_reject() -> None:

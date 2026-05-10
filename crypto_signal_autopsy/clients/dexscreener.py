@@ -40,7 +40,22 @@ class DexScreenerClient:
             )
         )
 
-    def discover_candidate_tokens(self, chain_id: str) -> dict[str, dict[str, Any]]:
+    def search_pairs(self, query: str) -> list[dict[str, Any]]:
+        data = self.http.get_json(
+            self.provider,
+            "/latest/dex/search",
+            f"{self.base_url}/latest/dex/search",
+            params={"q": query},
+        )
+        if not isinstance(data, dict):
+            return []
+        return self._as_list(data.get("pairs"))
+
+    def discover_candidate_tokens(
+        self,
+        chain_id: str,
+        search_queries: list[str] | None = None,
+    ) -> dict[str, dict[str, Any]]:
         candidates: dict[str, dict[str, Any]] = defaultdict(
             lambda: {"source_tags": set(), "boost_total_amount": 0.0, "raw_sources": []}
         )
@@ -51,6 +66,9 @@ class DexScreenerClient:
             self._add_candidate(candidates, item, chain_id, "boost_latest")
         for item in self.top_boosts():
             self._add_candidate(candidates, item, chain_id, "boost_top")
+        for query in search_queries or []:
+            for pair in self.search_pairs(query):
+                self._add_pair_candidate(candidates, pair, chain_id, f"search_{query}")
 
         normalized: dict[str, dict[str, Any]] = {}
         for address, payload in candidates.items():
@@ -115,6 +133,30 @@ class DexScreenerClient:
         payload["source_tags"].add(tag)
         payload["raw_sources"].append(item)
         amount = item.get("totalAmount") or item.get("amount") or 0
+        try:
+            payload["boost_total_amount"] += float(amount)
+        except (TypeError, ValueError):
+            pass
+
+    @staticmethod
+    def _add_pair_candidate(
+        candidates: dict[str, dict[str, Any]],
+        pair: dict[str, Any],
+        chain_id: str,
+        tag: str,
+    ) -> None:
+        if pair.get("chainId") != chain_id:
+            return
+        base = pair.get("baseToken") if isinstance(pair.get("baseToken"), dict) else {}
+        address = base.get("address")
+        if not address:
+            return
+        safe_tag = "".join(char if char.isalnum() else "_" for char in tag.lower())[:40]
+        payload = candidates[address]
+        payload["source_tags"].add(safe_tag)
+        payload["raw_sources"].append(pair)
+        boosts = pair.get("boosts") if isinstance(pair.get("boosts"), dict) else {}
+        amount = boosts.get("active") or boosts.get("totalAmount") or 0
         try:
             payload["boost_total_amount"] += float(amount)
         except (TypeError, ValueError):

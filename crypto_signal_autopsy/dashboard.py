@@ -279,6 +279,34 @@ def _v2_lab(conn: sqlite3.Connection) -> None:
         for col, card in zip(cols, cards[index : index + 3]):
             col.metric(card["label"], card["value"])
 
+    accuracy = payload["filter_accuracy"]
+    st.subheader("Rejected Filter Accuracy")
+    st.caption(
+        "Rejected tokens are watched at 15m, 30m, 1h, 2h, 4h, 8h, and 24h. "
+        "After 24h, the active rejected row is archived into this summary."
+    )
+    cols = st.columns(4)
+    cols[0].metric("Accuracy", accuracy["accuracy_rate"])
+    cols[1].metric("Success", accuracy["successes"])
+    cols[2].metric("Failure", accuracy["failures"])
+    cols[3].metric("Completed", accuracy["completed"])
+    st.caption(accuracy["plain"])
+    _render_simple_table(payload["rejected_audits"], "No rejected token has finished the 24h audit yet.")
+
+    st.subheader("10x Research Logic")
+    st.caption("This score only marks research conditions that can appear before large moves. It is not a prediction.")
+    _render_simple_table(
+        [
+            {"Factor": "Small size", "Plain meaning": "Lower FDV or market cap can leave more room, but also adds risk."},
+            {"Factor": "Enough liquidity", "Plain meaning": "Enough liquidity to observe real trading, not just a tiny pool."},
+            {"Factor": "Volume pressure", "Plain meaning": "Volume is strong compared with liquidity."},
+            {"Factor": "Buy pressure", "Plain meaning": "Recent buys are stronger than sells with enough activity."},
+            {"Factor": "Young but not instant", "Plain meaning": "Early pair, but not only chaotic launch minutes old."},
+            {"Factor": "Security sanity", "Plain meaning": "Critical safety flags override the score."},
+        ],
+        "No 10x logic rows.",
+    )
+
     st.subheader("Bucket Tables")
     for label in LABELS:
         with st.expander(label, expanded=label in {"Reject", "Watchlist"}):
@@ -425,15 +453,30 @@ def _render_v2_bucket_table(rows: list[dict[str, str]]) -> None:
               <td class="num">{escape(row.get("move1h", ""))}</td>
               <td class="num">{escape(row.get("risk_score", ""))}</td>
               <td class="num">{escape(row.get("opportunity_score", ""))}</td>
+              <td class="num">{escape(row.get("ten_x_score", ""))}</td>
+              <td>{escape(row.get("ten_x_label", ""))}</td>
               <td>{escape(row.get("main_reasons", ""))}</td>
               <td>{link}</td>
             </tr>
             """
         )
     _render_table(
-        headers=["Token", "Chain", "Age", "Liquidity", "24h Vol", "1h Move", "Risk", "Opp", "Main Reasons", "DEX"],
+        headers=[
+            "Token",
+            "Chain",
+            "Age",
+            "Liquidity",
+            "24h Vol",
+            "1h Move",
+            "Risk",
+            "Opp",
+            "10x",
+            "10x Label",
+            "Main Reasons",
+            "DEX",
+        ],
         body="".join(body),
-        min_width=1180,
+        min_width=1320,
     )
 
 

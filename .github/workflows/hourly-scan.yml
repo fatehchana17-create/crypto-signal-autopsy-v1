@@ -37,7 +37,8 @@ jobs:
           CSA_EXPORT_DIR: exports
           CSA_DEX_CHAIN: base
           CSA_GOPLUS_CHAIN_ID: "8453"
-          CSA_CEX_TOP_N: "100"
+          CSA_CEX_TOP_N: "300"
+          CSA_DEX_SEARCH_QUERIES: "base,virtual,ai,agent,meme,degen,pepe,dog,cat,coin,moon,launch"
           COINGECKO_DEMO_API_KEY: ${{ secrets.COINGECKO_DEMO_API_KEY }}
           COINGECKO_PRO_API_KEY: ${{ secrets.COINGECKO_PRO_API_KEY }}
           GOPLUS_ACCESS_TOKEN: ${{ secrets.GOPLUS_ACCESS_TOKEN }}

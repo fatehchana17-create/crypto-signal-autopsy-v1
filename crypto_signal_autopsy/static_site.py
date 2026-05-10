@@ -196,6 +196,7 @@ def _render_html(payload: dict[str, Any]) -> str:
     .simple-cards {{ display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }}
     .simple-card {{ border: 1px solid var(--line); border-radius: 8px; padding: 14px; background: var(--soft); }}
     .simple-card strong {{ display: block; font-size: 20px; margin-bottom: 4px; }}
+    .badge {{ display: inline-block; border: 1px solid var(--line); border-radius: 999px; padding: 4px 8px; background: var(--soft); font-size: 12px; font-weight: 850; color: var(--accent); }}
     .advanced-section {{ margin-top: 18px; }}
     .advanced-section summary {{ cursor: pointer; font-weight: 850; font-size: 20px; color: var(--ink); padding: 16px 18px; border: 1px solid var(--line); border-radius: 8px; background: #fff; box-shadow: 0 12px 30px rgba(18,53,59,.06); }}
     .advanced-section[open] summary {{ margin-bottom: 16px; }}
@@ -238,6 +239,25 @@ def _render_html(payload: dict[str, Any]) -> str:
       <h2>Token Decision Buckets</h2>
       <p class="small">Start here to see why each token was rejected, watched, or promoted to research. None of these labels are buy signals.</p>
       <div id="bucketTables"></div>
+    </section>
+
+    <section class="two">
+      <div class="card">
+        <h2>Rejected Filter Accuracy</h2>
+        <p class="small">A rejected token is watched for one day. After 24h, the app decides whether the rejection helped or missed upside, then keeps only this audit summary.</p>
+        <div id="filterAccuracy"></div>
+      </div>
+      <div class="card">
+        <h2>10x Research Logic</h2>
+        <p class="small">This is a research score for conditions that sometimes appear before large moves. It is not a prediction and not a buy signal.</p>
+        <div id="tenXLogic"></div>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <h2>Completed Rejected 24h Audits</h2>
+      <p class="small">These are rejected tokens that finished the full 15m, 30m, 1h, 2h, 4h, 8h, and 24h check cycle.</p>
+      <div id="rejectedAuditArchive"></div>
     </section>
 
     <h2 class="section-title">Smart Wallet Tracker</h2>
@@ -372,6 +392,8 @@ def _render_html(payload: dict[str, Any]) -> str:
         <div class="guide" style="margin-top:12px">
           <div class="guide-row"><div class="guide-key">What it does</div><div class="guide-copy">The system scans public crypto data, filters risky tokens, saves the reason, then checks later if the decision was good or bad.</div></div>
           <div class="guide-row"><div class="guide-key">Scan timing</div><div class="guide-copy">Last scan attempt shows the hourly job ran. Last candidate found only changes when DEX Screener returns a token worth evaluating.</div></div>
+          <div class="guide-row"><div class="guide-key">Rejected audit</div><div class="guide-copy">Rejected tokens are watched at 15m, 30m, 1h, 2h, 4h, 8h, and 24h. After that, only the accuracy summary remains.</div></div>
+          <div class="guide-row"><div class="guide-key">10x score</div><div class="guide-copy">The 10x setup score checks size, liquidity, volume, buy pressure, age, momentum, socials, and security. It is research only.</div></div>
           <div class="guide-row"><div class="guide-key">What to trust first</div><div class="guide-copy">Look at the plain labels, rejection reasons, and later performance. Do not treat any row as a buy signal.</div></div>
           <div class="guide-row"><div class="guide-key">Wallet data</div><div class="guide-copy">Wallet tables show who traded scanned tokens. A wallet buying something does not make the token safe.</div></div>
         </div>
@@ -453,7 +475,7 @@ def _render_html(payload: dict[str, Any]) -> str:
       document.getElementById("bucketTables").innerHTML = labels.map(label => `
         <h2>${{label}}</h2>
         ${{table(
-          ["Token", "Age", "Liquidity", "24h volume", "1h move", "Risk score", "Opportunity score", "Why it is here", "Chart"],
+          ["Token", "Age", "Liquidity", "24h volume", "1h move", "Risk", "Opportunity", "10x setup", "Why it is here", "Chart"],
           (v2.bucket_tables[label] || []).slice(0, 12).map(row => `<tr>
             <td><strong>${{row.symbol}}</strong><br><span class="small">${{row.scan_time}}</span></td>
             <td>${{row.pair_age}}</td>
@@ -462,11 +484,52 @@ def _render_html(payload: dict[str, Any]) -> str:
             <td>${{row.move1h}}</td>
             <td>${{row.risk_score}}</td>
             <td>${{row.opportunity_score}}</td>
+            <td><span class="badge">${{row.ten_x_score || "0"}}</span><br><span class="small">${{row.ten_x_label || "No 10x Setup"}}</span></td>
             <td class="reason">${{row.main_reasons}}</td>
             <td>${{row.url ? `<a href="${{row.url}}" target="_blank" rel="noreferrer">Open</a>` : ""}}</td>
           </tr>`)
         )}}
       `).join("");
+    }}
+
+    function renderFilterAccuracy() {{
+      const a = v2.filter_accuracy || {{}};
+      document.getElementById("filterAccuracy").innerHTML = `
+        <div class="simple-cards">
+          <div class="simple-card"><strong>${{a.accuracy_rate || "No data"}}</strong><span class="small">accuracy on judged rejected tokens</span></div>
+          <div class="simple-card"><strong>${{a.successes || 0}}</strong><span class="small">filter successes after 24h</span></div>
+          <div class="simple-card"><strong>${{a.failures || 0}}</strong><span class="small">filter failures after 24h</span></div>
+        </div>
+        <p class="small" style="margin-top:12px">${{a.plain || "No rejected token has finished the 24h audit yet."}}</p>
+      `;
+    }}
+
+    function renderTenXLogic() {{
+      const rows = [
+        ["Small size", "FDV or market cap is small enough that a large move is possible, but not so tiny that it is pure noise."],
+        ["Enough liquidity", "There is enough liquidity to observe real trading, but not so much that a 10x move becomes mathematically harder."],
+        ["Volume pressure", "24h volume is strong compared with liquidity, which can mean attention is arriving."],
+        ["Buy pressure", "Recent buys are stronger than sells, with enough transactions to matter."],
+        ["Young but not instant", "The pair is early, but not only a few chaotic launch minutes old."],
+        ["Security sanity", "Critical honeypot, cannot-sell, blacklist, or extreme-risk flags override the score."]
+      ].map(row => `<tr><td><strong>${{row[0]}}</strong></td><td>${{row[1]}}</td></tr>`);
+      document.getElementById("tenXLogic").innerHTML = table(["Factor", "Plain meaning"], rows);
+    }}
+
+    function renderRejectedAuditArchive() {{
+      document.getElementById("rejectedAuditArchive").innerHTML = table(
+        ["Token", "24h return", "Best", "Worst", "Verdict", "10x setup", "Lesson", "Chart"],
+        (v2.rejected_audits || []).slice(0, 20).map(row => `<tr>
+          <td><strong>${{row.symbol}}</strong><br><span class="small">${{row.completed_at}}</span></td>
+          <td class="${{cellClass(row.return24h)}}">${{row.return24h}}</td>
+          <td class="${{cellClass(row.best)}}">${{row.best}}</td>
+          <td class="${{cellClass(row.worst)}}">${{row.worst}}</td>
+          <td><span class="badge">${{row.verdict}}</span></td>
+          <td>${{row.ten_x_score ? `<span class="badge">${{row.ten_x_score}}</span><br>` : ""}}<span class="small">${{row.ten_x_label || ""}}</span></td>
+          <td>${{row.lesson}}</td>
+          <td>${{row.url ? `<a href="${{row.url}}" target="_blank" rel="noreferrer">Open</a>` : ""}}</td>
+        </tr>`)
+      );
     }}
 
     function renderOutcomeRows(id, rows) {{
@@ -550,6 +613,9 @@ def _render_html(payload: dict[str, Any]) -> str:
     renderLabelGuide();
     renderReadingOrder();
     renderBucketTables();
+    renderFilterAccuracy();
+    renderTenXLogic();
+    renderRejectedAuditArchive();
     renderWalletStatus();
     renderWalletTables();
     document.getElementById("v2Performance").innerHTML = table(

@@ -265,6 +265,9 @@ CREATE TABLE IF NOT EXISTS filter_results (
     reject_reasons TEXT,
     risk_score REAL,
     opportunity_score REAL,
+    ten_x_score REAL,
+    ten_x_label TEXT,
+    ten_x_reasons TEXT,
     final_label TEXT,
     risk_category TEXT,
     opportunity_category TEXT,
@@ -336,6 +339,34 @@ CREATE TABLE IF NOT EXISTS outcome_snapshots (
 
 CREATE INDEX IF NOT EXISTS idx_outcome_snapshots_horizon
   ON outcome_snapshots(horizon, label_at_scan);
+
+CREATE TABLE IF NOT EXISTS rejected_filter_audits (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    token_address TEXT,
+    pair_id TEXT,
+    chain TEXT,
+    symbol TEXT,
+    scan_time TEXT,
+    completed_at TEXT,
+    reject_reasons TEXT,
+    ten_x_score REAL,
+    ten_x_label TEXT,
+    ten_x_reasons TEXT,
+    price_at_scan REAL,
+    price_24h REAL,
+    return_24h_pct REAL,
+    best_return_pct REAL,
+    worst_return_pct REAL,
+    rugged INTEGER,
+    became_illiquid INTEGER,
+    volume_disappeared INTEGER,
+    filter_verdict TEXT,
+    lesson TEXT,
+    UNIQUE(pair_id, scan_time)
+);
+
+CREATE INDEX IF NOT EXISTS idx_rejected_filter_audits_verdict
+  ON rejected_filter_audits(filter_verdict, completed_at);
 
 CREATE TABLE IF NOT EXISTS review_notes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -497,6 +528,7 @@ def init_db(conn: sqlite3.Connection) -> None:
     migrate_schema(conn)
     conn.commit()
     backfill_v2_from_v1(conn)
+    backfill_missing_ten_x_scores(conn)
 
 
 def migrate_schema(conn: sqlite3.Connection) -> None:
@@ -507,6 +539,9 @@ def migrate_schema(conn: sqlite3.Connection) -> None:
             "wallet_signal_score": "REAL",
             "wallet_signal_label": "TEXT",
             "final_research_score": "REAL",
+            "ten_x_score": "REAL",
+            "ten_x_label": "TEXT",
+            "ten_x_reasons": "TEXT",
         },
     )
 
@@ -579,6 +614,57 @@ def backfill_v2_from_v1(conn: sqlite3.Connection) -> int:
         insert_v2_scan_records(conn, row["observed_at"], metrics, security, evaluation)
         inserted += 1
     return inserted
+
+
+def backfill_missing_ten_x_scores(conn: sqlite3.Connection) -> int:
+    from crypto_signal_autopsy.clients.goplus import SecurityResult
+    from crypto_signal_autopsy.scoring import score_token
+
+    rows = conn.execute(
+        """
+        SELECT f.id AS filter_result_id, c.raw_metrics,
+               s.status AS security_status_row, s.risk_flags AS security_risk_flags,
+               s.buy_tax_pct, s.sell_tax_pct, s.raw_json AS security_raw_json
+        FROM filter_results f
+        JOIN candidate_evaluations c
+          ON c.token_address = f.token_address
+         AND c.observed_at = f.scan_time
+         AND f.pair_id = c.chain_id || ':' || c.pair_address
+        LEFT JOIN security_snapshots s
+          ON s.token_address = c.token_address
+         AND s.observed_at = c.observed_at
+        WHERE f.ten_x_score IS NULL
+        """
+    ).fetchall()
+    updated = 0
+    for row in rows:
+        try:
+            metrics = from_json(row["raw_metrics"], {})
+            risk_flags = from_json(row["security_risk_flags"], [])
+            security_raw = from_json(row["security_raw_json"], {})
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(metrics, dict):
+            continue
+        security = SecurityResult(
+            row["security_status_row"] or "backfilled_no_security",
+            risk_flags if isinstance(risk_flags, list) else [],
+            row["buy_tax_pct"],
+            row["sell_tax_pct"],
+            security_raw if isinstance(security_raw, dict) else {},
+        )
+        score = score_token(metrics, security)
+        conn.execute(
+            """
+            UPDATE filter_results
+            SET ten_x_score = ?, ten_x_label = ?, ten_x_reasons = ?
+            WHERE id = ?
+            """,
+            (score.ten_x_score, score.ten_x_label, to_json(score.ten_x_reasons), row["filter_result_id"]),
+        )
+        updated += 1
+    conn.commit()
+    return updated
 
 
 def log_api_event(
@@ -877,10 +963,10 @@ def insert_filter_result(conn: sqlite3.Connection, observed_at: str, metrics: di
         INSERT OR IGNORE INTO filter_results (
           token_address, pair_id, scan_time, hard_reject,
           qualifies_high_risk_momentum, reject_reasons, risk_score,
-          opportunity_score, final_label, risk_category, opportunity_category,
-          model_version
+          opportunity_score, ten_x_score, ten_x_label, ten_x_reasons,
+          final_label, risk_category, opportunity_category, model_version
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             metrics["token_address"],
@@ -891,6 +977,9 @@ def insert_filter_result(conn: sqlite3.Connection, observed_at: str, metrics: di
             to_json(evaluation.rejection_reasons),
             evaluation.risk_score,
             evaluation.opportunity_score,
+            evaluation.ten_x_score,
+            evaluation.ten_x_label,
+            to_json(evaluation.ten_x_reasons or []),
             evaluation.final_label,
             evaluation.risk_category,
             evaluation.opportunity_category,
@@ -996,6 +1085,108 @@ def insert_outcome_snapshot(conn: sqlite3.Connection, row: dict[str, Any]) -> bo
     )
     conn.commit()
     return cursor.rowcount > 0
+
+
+def archive_completed_rejected_audits(conn: sqlite3.Connection, completed_at: str) -> int:
+    rows = conn.execute(
+        """
+        SELECT f.id AS filter_result_id, f.token_address, f.pair_id, f.scan_time,
+               f.reject_reasons, f.ten_x_score, f.ten_x_label, f.ten_x_reasons,
+               c.id AS candidate_evaluation_id, c.chain_id, c.pair_address, c.raw_metrics,
+               o.price_at_scan, o.price_at_horizon, o.return_pct, o.rugged,
+               o.became_illiquid, o.volume_disappeared
+        FROM filter_results f
+        JOIN candidate_evaluations c
+          ON c.token_address = f.token_address
+         AND c.observed_at = f.scan_time
+         AND f.pair_id = c.chain_id || ':' || c.pair_address
+        JOIN outcome_snapshots o
+          ON o.pair_id = f.pair_id
+         AND o.scan_time = f.scan_time
+         AND o.horizon = '24h'
+        WHERE f.final_label = 'Reject'
+        ORDER BY f.scan_time ASC
+        """
+    ).fetchall()
+    archived = 0
+    for row in rows:
+        snapshots = conn.execute(
+            """
+            SELECT return_pct, rugged, became_illiquid, volume_disappeared
+            FROM outcome_snapshots
+            WHERE pair_id = ? AND scan_time = ?
+            """,
+            (row["pair_id"], row["scan_time"]),
+        ).fetchall()
+        returns = [_as_number(snapshot["return_pct"]) for snapshot in snapshots]
+        clean_returns = [value for value in returns if value is not None]
+        best_return = max(clean_returns) if clean_returns else None
+        worst_return = min(clean_returns) if clean_returns else None
+        metrics = _safe_json(row["raw_metrics"], {})
+        symbol = metrics.get("base_symbol") if isinstance(metrics, dict) else None
+        rugged = any(bool(snapshot["rugged"]) for snapshot in snapshots) or bool(row["rugged"])
+        became_illiquid = any(bool(snapshot["became_illiquid"]) for snapshot in snapshots) or bool(row["became_illiquid"])
+        volume_disappeared = any(bool(snapshot["volume_disappeared"]) for snapshot in snapshots) or bool(
+            row["volume_disappeared"]
+        )
+        verdict = _rejected_filter_verdict(row["return_pct"], rugged, became_illiquid, volume_disappeared)
+        lesson = _rejected_filter_lesson(verdict, row["return_pct"], row["reject_reasons"])
+        cursor = conn.execute(
+            """
+            INSERT OR IGNORE INTO rejected_filter_audits (
+              token_address, pair_id, chain, symbol, scan_time, completed_at,
+              reject_reasons, ten_x_score, ten_x_label, ten_x_reasons,
+              price_at_scan, price_24h, return_24h_pct, best_return_pct,
+              worst_return_pct, rugged, became_illiquid, volume_disappeared,
+              filter_verdict, lesson
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                row["token_address"],
+                row["pair_id"],
+                row["chain_id"],
+                symbol,
+                row["scan_time"],
+                completed_at,
+                row["reject_reasons"],
+                row["ten_x_score"],
+                row["ten_x_label"],
+                row["ten_x_reasons"],
+                row["price_at_scan"],
+                row["price_at_horizon"],
+                row["return_pct"],
+                best_return,
+                worst_return,
+                1 if rugged else 0,
+                1 if became_illiquid else 0,
+                1 if volume_disappeared else 0,
+                verdict,
+                lesson,
+            ),
+        )
+        archived += cursor.rowcount
+
+        conn.execute(
+            "DELETE FROM rejected_candidate_outcomes WHERE candidate_evaluation_id = ?",
+            (row["candidate_evaluation_id"],),
+        )
+        conn.execute(
+            "DELETE FROM outcome_snapshots WHERE pair_id = ? AND scan_time = ? AND label_at_scan = 'Reject'",
+            (row["pair_id"], row["scan_time"]),
+        )
+        conn.execute("DELETE FROM filter_results WHERE id = ?", (row["filter_result_id"],))
+        conn.execute("DELETE FROM candidate_evaluations WHERE id = ?", (row["candidate_evaluation_id"],))
+        conn.execute(
+            "DELETE FROM security_checks WHERE token_address = ? AND scan_time = ?",
+            (row["token_address"], row["scan_time"]),
+        )
+        conn.execute(
+            "DELETE FROM social_catalysts WHERE token_address = ? AND scan_time = ?",
+            (row["token_address"], row["scan_time"]),
+        )
+    conn.commit()
+    return archived
 
 
 def insert_candidate_evaluation(
@@ -1138,3 +1329,50 @@ def _social_present(socials: Any, *needles: str) -> bool:
 def _is_boosted(metrics: dict[str, Any]) -> bool:
     tags = metrics.get("source_tags") or []
     return bool(metrics.get("boost_total_amount")) or any(str(tag).startswith("boost_") for tag in tags)
+
+
+def _safe_json(value: str | None, default: Any) -> Any:
+    if not value:
+        return default
+    try:
+        return json.loads(value)
+    except json.JSONDecodeError:
+        return default
+
+
+def _as_number(value: Any) -> float | None:
+    if value in {None, "", "null"}:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _rejected_filter_verdict(
+    return_24h_pct: Any,
+    rugged: bool,
+    became_illiquid: bool,
+    volume_disappeared: bool,
+) -> str:
+    value = _as_number(return_24h_pct)
+    if rugged or became_illiquid or volume_disappeared:
+        return "success"
+    if value is None:
+        return "unknown"
+    if value <= 0:
+        return "success"
+    return "failure"
+
+
+def _rejected_filter_lesson(verdict: str, return_24h_pct: Any, reject_reasons: str | None) -> str:
+    reasons = _safe_json(reject_reasons, [])
+    reason_text = ", ".join(str(reason).replace("_", " ") for reason in reasons[:3]) if reasons else "rules failed"
+    value = _as_number(return_24h_pct)
+    if verdict == "success":
+        if value is not None and value <= -25:
+            return f"Filter helped: rejected token lost hard after 24h; main reasons were {reason_text}."
+        return f"Filter was acceptable: rejected token did not beat zero after 24h; main reasons were {reason_text}."
+    if verdict == "failure":
+        return f"Filter missed upside: rejected token was positive after 24h; review {reason_text}."
+    return f"Could not judge cleanly after 24h; review data quality and {reason_text}."

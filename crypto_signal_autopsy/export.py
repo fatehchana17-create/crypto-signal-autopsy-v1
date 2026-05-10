@@ -22,6 +22,7 @@ EXPORTS = {
     "social_catalysts": "social_catalysts",
     "paper_trades": "paper_trades",
     "outcome_snapshots": "outcome_snapshots",
+    "rejected_filter_audits": "rejected_filter_audits",
     "review_notes": "review_notes",
 }
 
@@ -36,6 +37,7 @@ def export_all(conn: sqlite3.Connection, export_dir: Path) -> dict[str, int]:
     counts["outliers"] = _export_outliers(conn, export_dir / "outliers.csv")
     counts["filter_saved_us"] = _export_filter_saved_us(conn, export_dir / "filter_saved_us.csv")
     counts["filter_blocked_winners"] = _export_filter_blocked_winners(conn, export_dir / "filter_blocked_winners.csv")
+    counts["filter_accuracy"] = _export_filter_accuracy(conn, export_dir / "filter_accuracy.csv")
     counts["score_bucket_performance"] = _export_score_bucket_performance(
         conn, export_dir / "score_bucket_performance.csv"
     )
@@ -55,6 +57,9 @@ def _export_dashboard_summary(conn: sqlite3.Connection, out_path: Path) -> int:
         "research_candidates": str(labels.get("Research Candidate", 0)),
         "paper_trade_candidates": str(labels.get("Paper Trade Candidate", 0)),
         "api_errors": str(api_errors),
+        "completed_rejected_audits": str(
+            conn.execute("SELECT COUNT(*) AS value FROM rejected_filter_audits").fetchone()["value"] or 0
+        ),
         "last_scan_time": latest_scan or "",
         "model_version": "V2",
     }
@@ -94,6 +99,7 @@ def _export_filter_saved_us(conn: sqlite3.Connection, out_path: Path) -> int:
         """
     ).fetchall()
     output = [_filter_lesson_row(row, "saved_from_bad_token") for row in rows]
+    output.extend(_archived_filter_lesson_rows(conn, "saved_from_bad_token"))
     _write_rows(out_path, output)
     return len(output)
 
@@ -111,8 +117,30 @@ def _export_filter_blocked_winners(conn: sqlite3.Connection, out_path: Path) -> 
         """
     ).fetchall()
     output = [_filter_lesson_row(row, "blocked_or_watchlisted_winner") for row in rows]
+    output.extend(_archived_filter_lesson_rows(conn, "blocked_or_watchlisted_winner"))
     _write_rows(out_path, output)
     return len(output)
+
+
+def _export_filter_accuracy(conn: sqlite3.Connection, out_path: Path) -> int:
+    rows = conn.execute(
+        "SELECT filter_verdict, COUNT(*) AS count FROM rejected_filter_audits GROUP BY filter_verdict"
+    ).fetchall()
+    counts = {row["filter_verdict"] or "unknown": int(row["count"]) for row in rows}
+    success = counts.get("success", 0)
+    failure = counts.get("failure", 0)
+    unknown = counts.get("unknown", 0)
+    judged = success + failure
+    row = {
+        "completed_rejected_audits": str(judged + unknown),
+        "judged_rejected_audits": str(judged),
+        "filter_successes": str(success),
+        "filter_failures": str(failure),
+        "unknown": str(unknown),
+        "accuracy_rate_pct": _fmt((success / judged) * 100) if judged else "",
+    }
+    _write_rows(out_path, [row])
+    return 1
 
 
 def _export_score_bucket_performance(conn: sqlite3.Connection, out_path: Path) -> int:
@@ -188,6 +216,39 @@ def _filter_lesson_row(row: sqlite3.Row, lesson_type: str) -> dict[str, str]:
         "rugged": str(row["rugged"] or 0),
         "volume_disappeared": str(row["volume_disappeared"] or 0),
     }
+
+
+def _archived_filter_lesson_rows(conn: sqlite3.Connection, lesson_type: str) -> list[dict[str, str]]:
+    if lesson_type == "saved_from_bad_token":
+        where = "filter_verdict = 'success'"
+        order = "return_24h_pct ASC"
+    else:
+        where = "filter_verdict = 'failure'"
+        order = "return_24h_pct DESC"
+    rows = conn.execute(
+        f"""
+        SELECT *
+        FROM rejected_filter_audits
+        WHERE {where}
+        ORDER BY {order}
+        LIMIT 200
+        """
+    ).fetchall()
+    return [
+        {
+            "lesson_type": f"{lesson_type}_archived_24h",
+            "token_address": row["token_address"] or "",
+            "pair_id": row["pair_id"] or "",
+            "label_at_scan": "Reject",
+            "horizon": "24h",
+            "return_pct": _fmt(row["return_24h_pct"]),
+            "reject_reasons": row["reject_reasons"] or "",
+            "became_illiquid": str(row["became_illiquid"] or 0),
+            "rugged": str(row["rugged"] or 0),
+            "volume_disappeared": str(row["volume_disappeared"] or 0),
+        }
+        for row in rows
+    ]
 
 
 def _write_rows(out_path: Path, rows: list[dict[str, str]]) -> None:
