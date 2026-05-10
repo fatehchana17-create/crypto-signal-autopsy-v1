@@ -21,15 +21,27 @@ LABELS = [
 
 def build_v2_payload(conn: sqlite3.Connection) -> dict[str, Any]:
     label_counts = _label_counts(conn)
-    latest_scan = _scalar(conn, "SELECT MAX(scan_time) FROM filter_results") or "No V2 scan yet"
+    latest_scan = _scalar(conn, "SELECT MAX(scan_time) FROM filter_results") or "No candidate found yet"
+    latest_attempt = (
+        _scalar(
+            conn,
+            """
+            SELECT MAX(observed_at)
+            FROM api_events
+            WHERE provider IN ('coingecko', 'dexscreener')
+            """,
+        )
+        or latest_scan
+    )
     api_errors = int(_scalar(conn, "SELECT COUNT(*) FROM api_events WHERE status = 'error'") or 0)
     return {
         "model_version": MODEL_VERSION,
         "disclaimer": "Research only. No financial advice. No buy signals. No sell signals. No auto trading.",
         "latest_scan": latest_scan,
+        "latest_scan_attempt": latest_attempt,
         "api_errors": api_errors,
         "label_counts": label_counts,
-        "health_cards": _health_cards(label_counts, latest_scan, api_errors),
+        "health_cards": _health_cards(label_counts, latest_scan, latest_attempt, api_errors),
         "bucket_tables": {label: _bucket_rows(conn, label) for label in LABELS},
         "performance": _performance_rows(conn),
         "outliers": {
@@ -46,7 +58,12 @@ def build_v2_payload(conn: sqlite3.Connection) -> dict[str, Any]:
     }
 
 
-def _health_cards(label_counts: dict[str, int], latest_scan: str, api_errors: int) -> list[dict[str, str]]:
+def _health_cards(
+    label_counts: dict[str, int],
+    latest_scan: str,
+    latest_attempt: str,
+    api_errors: int,
+) -> list[dict[str, str]]:
     return [
         {"label": "Total Tokens Scanned", "value": str(sum(label_counts.values()))},
         {"label": "Rejected Tokens", "value": str(label_counts.get("Reject", 0))},
@@ -58,7 +75,8 @@ def _health_cards(label_counts: dict[str, int], latest_scan: str, api_errors: in
         {"label": "Research Candidates", "value": str(label_counts.get("Research Candidate", 0))},
         {"label": "Paper Trade Candidates", "value": str(label_counts.get("Paper Trade Candidate", 0))},
         {"label": "API Errors", "value": str(api_errors)},
-        {"label": "Last Scan Time", "value": latest_scan},
+        {"label": "Last Scan Attempt", "value": latest_attempt},
+        {"label": "Last Candidate Found", "value": latest_scan},
         {"label": "Model Version", "value": MODEL_VERSION},
     ]
 

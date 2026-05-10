@@ -371,6 +371,7 @@ def _render_html(payload: dict[str, Any]) -> str:
         </div>
         <div class="guide" style="margin-top:12px">
           <div class="guide-row"><div class="guide-key">What it does</div><div class="guide-copy">The system scans public crypto data, filters risky tokens, saves the reason, then checks later if the decision was good or bad.</div></div>
+          <div class="guide-row"><div class="guide-key">Scan timing</div><div class="guide-copy">Last scan attempt shows the hourly job ran. Last candidate found only changes when DEX Screener returns a token worth evaluating.</div></div>
           <div class="guide-row"><div class="guide-key">What to trust first</div><div class="guide-copy">Look at the plain labels, rejection reasons, and later performance. Do not treat any row as a buy signal.</div></div>
           <div class="guide-row"><div class="guide-key">Wallet data</div><div class="guide-copy">Wallet tables show who traded scanned tokens. A wallet buying something does not make the token safe.</div></div>
         </div>
