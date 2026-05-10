@@ -529,6 +529,7 @@ def init_db(conn: sqlite3.Connection) -> None:
     conn.commit()
     backfill_v2_from_v1(conn)
     backfill_missing_ten_x_scores(conn)
+    prune_resolved_api_events(conn)
 
 
 def migrate_schema(conn: sqlite3.Connection) -> None:
@@ -1291,6 +1292,25 @@ def active_api_errors(conn: sqlite3.Connection) -> list[sqlite3.Row]:
         """
     ).fetchall()
     return [row for row in rows if not _api_error_recovered(conn, row)]
+
+
+def prune_resolved_api_events(conn: sqlite3.Connection) -> int:
+    rows = conn.execute(
+        """
+        SELECT *
+        FROM api_events
+        ORDER BY observed_at ASC
+        """
+    ).fetchall()
+    stale_ids: list[int] = []
+    for row in rows:
+        if row["status"] != "error" or _api_error_recovered(conn, row):
+            stale_ids.append(int(row["id"]))
+    if not stale_ids:
+        return 0
+    conn.executemany("DELETE FROM api_events WHERE id = ?", [(row_id,) for row_id in stale_ids])
+    conn.commit()
+    return len(stale_ids)
 
 
 def export_table(conn: sqlite3.Connection, table: str, out_path: Path) -> int:

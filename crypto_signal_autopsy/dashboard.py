@@ -114,7 +114,8 @@ def main() -> None:
     with tab_raw:
         st.subheader("Candidate Evaluations")
         st.dataframe(evaluations, use_container_width=True, hide_index=True)
-        st.subheader("API Events")
+        st.subheader("API Notice History")
+        st.caption("This table keeps current API problems only. Old recovered rate limits and harmless notices are pruned automatically.")
         st.dataframe(api_events, use_container_width=True, hide_index=True)
     with tab_config:
         _config_panel(settings, accepted_count)
@@ -200,7 +201,7 @@ def _overview(
             )
 
     if not api_events.empty:
-        st.subheader("Recent API Events")
+        st.subheader("Current API Problems")
         st.dataframe(api_events.head(25), use_container_width=True, hide_index=True)
 
     if rejected_records:

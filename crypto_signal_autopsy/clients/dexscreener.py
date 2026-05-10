@@ -96,16 +96,29 @@ class DexScreenerClient:
             pairs.extend(self._as_list(data))
         return pairs
 
+    def fetch_pairs_by_addresses(
+        self,
+        chain_id: str,
+        pair_addresses: list[str],
+    ) -> dict[str, dict[str, Any]]:
+        unique_addresses = list(dict.fromkeys(address for address in pair_addresses if address))
+        pairs_by_address: dict[str, dict[str, Any]] = {}
+        for chunk in _chunks(unique_addresses, 30):
+            joined = ",".join(chunk)
+            data = self.http.get_json(
+                self.provider,
+                "/latest/dex/pairs/{chainId}/{pairId}",
+                f"{self.base_url}/latest/dex/pairs/{chain_id}/{joined}",
+            )
+            pairs = data.get("pairs") if isinstance(data, dict) else None
+            for pair in self._as_list(pairs):
+                pair_address = pair.get("pairAddress")
+                if pair_address:
+                    pairs_by_address[str(pair_address).lower()] = pair
+        return pairs_by_address
+
     def fetch_pair(self, chain_id: str, pair_address: str) -> dict[str, Any] | None:
-        data = self.http.get_json(
-            self.provider,
-            "/latest/dex/pairs/{chainId}/{pairId}",
-            f"{self.base_url}/latest/dex/pairs/{chain_id}/{pair_address}",
-        )
-        pairs = data.get("pairs") if isinstance(data, dict) else None
-        if not pairs:
-            return None
-        return pairs[0]
+        return self.fetch_pairs_by_addresses(chain_id, [pair_address]).get(pair_address.lower())
 
     @staticmethod
     def _as_list(data: Any) -> list[dict[str, Any]]:

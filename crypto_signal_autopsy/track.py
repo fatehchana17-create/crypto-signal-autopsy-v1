@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import defaultdict
 from datetime import timedelta
 import json
 import sqlite3
@@ -38,19 +39,32 @@ def run_tracking(conn: sqlite3.Connection, settings: Settings) -> dict[str, int]
         "api_errors": 0,
     }
 
-    try:
-        markets = coingecko.fetch_top_markets(settings.cex_top_n)
-        stats["cex_markets"] = db.insert_cex_markets(conn, observed_at, markets)
-    except (ApiError, ValueError) as exc:
-        stats["api_errors"] += 1
-        db.log_api_event(conn, observed_at, "coingecko", "/coins/markets", "error", str(exc))
-
-    for signal in _signals_needing_delayed_entry(conn, observed_at):
+    if not _has_recent_cex_markets(conn, now):
         try:
-            pair = dex.fetch_pair(signal["chain_id"], signal["pair_address"])
-        except ApiError as exc:
+            markets = coingecko.fetch_top_markets(settings.cex_top_n)
+            stats["cex_markets"] = db.insert_cex_markets(conn, observed_at, markets)
+        except (ApiError, ValueError) as exc:
             stats["api_errors"] += 1
-            db.log_api_event(conn, observed_at, "dexscreener", "/latest/dex/pairs", "error", str(exc))
+            db.log_api_event(conn, observed_at, "coingecko", "/coins/markets", "error", str(exc))
+
+    delayed_signals = _signals_needing_delayed_entry(conn, observed_at)
+    due = _due_signal_horizons(conn, now)
+    rejected_due = _due_rejected_horizons(conn, now)
+    v2_due = _due_v2_outcome_horizons(conn, now)
+    pair_cache = _prefetch_pairs(
+        conn,
+        dex,
+        observed_at,
+        stats,
+        delayed_signals,
+        due,
+        rejected_due,
+        v2_due,
+    )
+
+    for signal in delayed_signals:
+        pair = _cached_pair(pair_cache, signal["chain_id"], signal["pair_address"])
+        if pair is None:
             continue
         price = _price_from_pair(pair)
         if price is None:
@@ -66,13 +80,9 @@ def run_tracking(conn: sqlite3.Connection, settings: Settings) -> dict[str, int]
         conn.commit()
         stats["delayed_entries"] += 1
 
-    due = _due_signal_horizons(conn, now)
     for signal, horizon, target_at in due:
-        try:
-            pair = dex.fetch_pair(signal["chain_id"], signal["pair_address"])
-        except ApiError as exc:
-            stats["api_errors"] += 1
-            db.log_api_event(conn, observed_at, "dexscreener", "/latest/dex/pairs", "error", str(exc))
+        pair = _cached_pair(pair_cache, signal["chain_id"], signal["pair_address"])
+        if pair is None:
             continue
         price = _price_from_pair(pair)
         if price is None:
@@ -125,7 +135,6 @@ def run_tracking(conn: sqlite3.Connection, settings: Settings) -> dict[str, int]
         conn.commit()
         stats["outcomes"] += 1
 
-    rejected_due = _due_rejected_horizons(conn, now)
     for candidate, horizon, target_at in rejected_due:
         try:
             raw_metrics = json.loads(candidate["raw_metrics"])
@@ -140,11 +149,8 @@ def run_tracking(conn: sqlite3.Connection, settings: Settings) -> dict[str, int]
             )
             continue
 
-        try:
-            pair = dex.fetch_pair(candidate["chain_id"], candidate["pair_address"])
-        except ApiError as exc:
-            stats["api_errors"] += 1
-            db.log_api_event(conn, observed_at, "dexscreener", "/latest/dex/pairs", "error", str(exc))
+        pair = _cached_pair(pair_cache, candidate["chain_id"], candidate["pair_address"])
+        if pair is None:
             continue
 
         price = _price_from_pair(pair)
@@ -181,7 +187,7 @@ def run_tracking(conn: sqlite3.Connection, settings: Settings) -> dict[str, int]
         conn.commit()
         stats["rejected_outcomes"] += 1
 
-    for filter_result, horizon, target_at in _due_v2_outcome_horizons(conn, now):
+    for filter_result, horizon, target_at in v2_due:
         try:
             raw_metrics = json.loads(filter_result["raw_metrics"])
         except json.JSONDecodeError:
@@ -194,13 +200,8 @@ def run_tracking(conn: sqlite3.Connection, settings: Settings) -> dict[str, int]
                 f"pair_id={filter_result['pair_id']}",
             )
             continue
-        try:
-            pair = dex.fetch_pair(filter_result["chain_id"], filter_result["pair_address"])
-        except ApiError as exc:
-            stats["api_errors"] += 1
-            db.log_api_event(conn, observed_at, "dexscreener", "/latest/dex/pairs", "error", str(exc))
-            continue
-        if not pair:
+        pair = _cached_pair(pair_cache, filter_result["chain_id"], filter_result["pair_address"])
+        if pair is None:
             continue
         price = _price_from_pair(pair)
         liquidity = _liquidity_from_pair(pair)
@@ -267,6 +268,61 @@ def run_tracking(conn: sqlite3.Connection, settings: Settings) -> dict[str, int]
     conn.commit()
     stats["rejected_audits_archived"] = db.archive_completed_rejected_audits(conn, observed_at)
     return stats
+
+
+def _has_recent_cex_markets(conn: sqlite3.Connection, now) -> bool:
+    latest = conn.execute("SELECT MAX(observed_at) AS value FROM cex_market_snapshots").fetchone()["value"]
+    if not latest:
+        return False
+    return now - parse_iso(latest) <= timedelta(minutes=30)
+
+
+def _prefetch_pairs(
+    conn: sqlite3.Connection,
+    dex: DexScreenerClient,
+    observed_at: str,
+    stats: dict[str, int],
+    delayed_signals: list[sqlite3.Row],
+    due_signals: list[tuple[sqlite3.Row, str, object]],
+    rejected_due: list[tuple[sqlite3.Row, str, object]],
+    v2_due: list[tuple[sqlite3.Row, str, object]],
+) -> dict[tuple[str, str], dict]:
+    refs: dict[str, set[str]] = defaultdict(set)
+    for signal in delayed_signals:
+        _add_pair_ref(refs, signal["chain_id"], signal["pair_address"])
+    for signal, _horizon, _target_at in due_signals:
+        _add_pair_ref(refs, signal["chain_id"], signal["pair_address"])
+    for candidate, _horizon, _target_at in rejected_due:
+        _add_pair_ref(refs, candidate["chain_id"], candidate["pair_address"])
+    for filter_result, _horizon, _target_at in v2_due:
+        _add_pair_ref(refs, filter_result["chain_id"], filter_result["pair_address"])
+
+    cache: dict[tuple[str, str], dict] = {}
+    for chain_id, pair_addresses in refs.items():
+        try:
+            pairs = dex.fetch_pairs_by_addresses(chain_id, sorted(pair_addresses))
+        except ApiError as exc:
+            stats["api_errors"] += 1
+            db.log_api_event(conn, observed_at, "dexscreener", "/latest/dex/pairs", "error", str(exc))
+            continue
+        for pair_address, pair in pairs.items():
+            cache[(chain_id, pair_address.lower())] = pair
+    return cache
+
+
+def _add_pair_ref(refs: dict[str, set[str]], chain_id: str | None, pair_address: str | None) -> None:
+    if chain_id and pair_address:
+        refs[str(chain_id)].add(str(pair_address))
+
+
+def _cached_pair(
+    pair_cache: dict[tuple[str, str], dict],
+    chain_id: str | None,
+    pair_address: str | None,
+) -> dict | None:
+    if not chain_id or not pair_address:
+        return None
+    return pair_cache.get((str(chain_id), str(pair_address).lower()))
 
 
 def _signals_needing_delayed_entry(conn: sqlite3.Connection, observed_at: str) -> list[sqlite3.Row]:

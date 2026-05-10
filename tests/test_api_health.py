@@ -30,6 +30,8 @@ def test_active_api_error_is_cleared_after_later_success():
     conn.commit()
 
     assert db.active_api_error_count(conn) == 0
+    assert db.prune_resolved_api_events(conn) == 1
+    assert conn.execute("SELECT COUNT(*) FROM api_events").fetchone()[0] == 0
 
 
 def test_active_dexscreener_error_is_cleared_after_later_pair_data():
@@ -66,3 +68,29 @@ def test_active_dexscreener_error_is_cleared_after_later_pair_data():
     conn.commit()
 
     assert db.active_api_error_count(conn) == 0
+
+
+def test_prune_removes_non_error_notices():
+    conn = sqlite3.connect(":memory:")
+    conn.row_factory = sqlite3.Row
+    db.init_db(conn)
+
+    db.log_api_event(
+        conn,
+        "2026-05-10T07:00:00+00:00",
+        "dexscreener",
+        "candidate_discovery",
+        "empty",
+        "no results found",
+    )
+    db.log_api_event(
+        conn,
+        "2026-05-10T07:01:00+00:00",
+        "wallet_module",
+        "status",
+        "disabled",
+        "missing key",
+    )
+
+    assert db.prune_resolved_api_events(conn) == 2
+    assert conn.execute("SELECT COUNT(*) FROM api_events").fetchone()[0] == 0
