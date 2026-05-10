@@ -60,3 +60,4 @@ token_address,chain,symbol,name,decimals,created_at_scan,first_seen_at,source
 0x1c93d155bD388241F9AB5Df500D69eb529cE9583,base,FLNCHY,Flaunchy,,2026-05-10T06:58:43+00:00,2026-05-10T06:58:43+00:00,search_launch
 0x8be807073C8b9831cB4afe98CDb407E8B7896Ba3,base,AGENT,Agent,,2026-05-10T09:49:09+00:00,2026-05-10T09:49:09+00:00,search_agent
 0x8f9e7ce623e99C789dc01579a42522CF9077CC8a,base,RoboX,RoboX Token,,2026-05-10T11:15:30+00:00,2026-05-10T11:15:30+00:00,profile_latest
+0xf41FaaCdD6b1D0Db127Ec16572B1CAC861F75544,base,bLend,BaseLend,,2026-05-10T12:06:48+00:00,2026-05-10T12:06:48+00:00,profile_latest
