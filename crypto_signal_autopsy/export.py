@@ -48,7 +48,7 @@ def export_all(conn: sqlite3.Connection, export_dir: Path) -> dict[str, int]:
 def _export_dashboard_summary(conn: sqlite3.Connection, out_path: Path) -> int:
     labels = _label_counts(conn)
     latest_scan = conn.execute("SELECT MAX(scan_time) AS value FROM filter_results").fetchone()["value"]
-    api_errors = conn.execute("SELECT COUNT(*) AS value FROM api_events WHERE status = 'error'").fetchone()["value"]
+    api_errors = db.active_api_error_count(conn)
     row = {
         "total_tokens_scanned": str(sum(labels.values())),
         "rejected_tokens": str(labels.get("Reject", 0)),

@@ -6,6 +6,7 @@ import sqlite3
 from statistics import mean, median
 from typing import Any
 
+from crypto_signal_autopsy import db
 from crypto_signal_autopsy.config import HORIZONS, MODEL_VERSION
 from crypto_signal_autopsy.review import money, pct
 
@@ -34,7 +35,7 @@ def build_v2_payload(conn: sqlite3.Connection) -> dict[str, Any]:
         )
         or latest_scan
     )
-    api_errors = int(_scalar(conn, "SELECT COUNT(*) FROM api_events WHERE status = 'error'") or 0)
+    api_errors = db.active_api_error_count(conn)
     return {
         "model_version": MODEL_VERSION,
         "disclaimer": "Research only. No financial advice. No buy signals. No sell signals. No auto trading.",
@@ -78,7 +79,7 @@ def _health_cards(
         },
         {"label": "Research Candidates", "value": str(label_counts.get("Research Candidate", 0))},
         {"label": "Paper Trade Candidates", "value": str(label_counts.get("Paper Trade Candidate", 0))},
-        {"label": "API Errors", "value": str(api_errors)},
+        {"label": "Active API Errors", "value": str(api_errors)},
         {"label": "Rejected Audit Accuracy", "value": filter_accuracy["accuracy_rate"]},
         {"label": "Completed Rejected Audits", "value": filter_accuracy["completed"]},
         {"label": "Last Scan Attempt", "value": latest_attempt},

@@ -1277,6 +1277,22 @@ def latest_dex_snapshot_before(
     ).fetchone()
 
 
+def active_api_error_count(conn: sqlite3.Connection) -> int:
+    return len(active_api_errors(conn))
+
+
+def active_api_errors(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    rows = conn.execute(
+        """
+        SELECT *
+        FROM api_events
+        WHERE status = 'error'
+        ORDER BY observed_at DESC
+        """
+    ).fetchall()
+    return [row for row in rows if not _api_error_recovered(conn, row)]
+
+
 def export_table(conn: sqlite3.Connection, table: str, out_path: Path) -> int:
     out_path.parent.mkdir(parents=True, exist_ok=True)
     rows = conn.execute(f"SELECT * FROM {table}").fetchall()
@@ -1347,6 +1363,39 @@ def _as_number(value: Any) -> float | None:
         return float(value)
     except (TypeError, ValueError):
         return None
+
+
+def _api_error_recovered(conn: sqlite3.Connection, row: sqlite3.Row) -> bool:
+    recovered_at = _latest_api_success_after(conn, str(row["provider"]), str(row["observed_at"]))
+    return recovered_at is not None and recovered_at > row["observed_at"]
+
+
+def _latest_api_success_after(conn: sqlite3.Connection, provider: str, observed_at: str) -> str | None:
+    if provider == "coingecko":
+        return conn.execute(
+            """
+            SELECT MAX(observed_at) AS value
+            FROM cex_market_snapshots
+            WHERE observed_at > ?
+            """,
+            (observed_at,),
+        ).fetchone()["value"]
+    if provider == "dexscreener":
+        row = conn.execute(
+            """
+            SELECT MAX(value) AS value
+            FROM (
+              SELECT MAX(observed_at) AS value FROM dex_token_snapshots WHERE observed_at > ?
+              UNION ALL
+              SELECT MAX(scan_time) AS value FROM filter_results WHERE scan_time > ?
+              UNION ALL
+              SELECT MAX(snapshot_time) AS value FROM outcome_snapshots WHERE snapshot_time > ?
+            )
+            """,
+            (observed_at, observed_at, observed_at),
+        ).fetchone()
+        return row["value"] if row else None
+    return None
 
 
 def _rejected_filter_verdict(

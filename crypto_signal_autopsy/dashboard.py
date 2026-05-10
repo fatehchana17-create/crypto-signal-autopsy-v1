@@ -10,7 +10,7 @@ import streamlit as st
 
 from crypto_signal_autopsy.analysis_tables import build_analysis_payload
 from crypto_signal_autopsy.config import Settings, load_settings
-from crypto_signal_autopsy.db import connect, init_db
+from crypto_signal_autopsy.db import active_api_error_count, connect, init_db
 from crypto_signal_autopsy.review import (
     build_rejection_record,
     build_requirement_rows,
@@ -36,6 +36,7 @@ def main() -> None:
     rejected_outcomes = _read(conn, "SELECT * FROM rejected_candidate_outcomes ORDER BY observed_at DESC")
     evaluations = _read(conn, "SELECT * FROM candidate_evaluations ORDER BY observed_at DESC")
     api_events = _read(conn, "SELECT * FROM api_events ORDER BY observed_at DESC LIMIT 200")
+    active_api_errors = active_api_error_count(conn)
     rejected_records = _rejected_records(evaluations, settings)
 
     st.markdown(
@@ -64,7 +65,7 @@ def main() -> None:
     col1.metric("Accepted Signals", len(signals))
     col2.metric("Rejected Tokens", rejected_count)
     col3.metric("Rejected Outcomes", len(rejected_outcomes))
-    col4.metric("API Events", len(api_events))
+    col4.metric("Active API Errors", active_api_errors)
     st.markdown("</div>", unsafe_allow_html=True)
 
     tab_start, tab_v2, tab_wallets, tab_overview, tab_analysis, tab_manual, tab_signals, tab_outcomes, tab_rejected_audit, tab_raw, tab_config = st.tabs(
@@ -90,7 +91,16 @@ def main() -> None:
     with tab_wallets:
         _wallet_lab(conn, settings)
     with tab_overview:
-        _overview(signals, outcomes, rejected_outcomes, evaluations, api_events, rejected_records, settings)
+        _overview(
+            signals,
+            outcomes,
+            rejected_outcomes,
+            evaluations,
+            api_events,
+            rejected_records,
+            settings,
+            active_api_errors,
+        )
     with tab_analysis:
         _analysis_workspace(conn, settings)
     with tab_manual:
@@ -118,8 +128,9 @@ def _overview(
     api_events: pd.DataFrame,
     rejected_records: list[dict],
     settings: Settings,
+    active_api_errors: int,
 ) -> None:
-    _overview_status(signals, outcomes, rejected_outcomes, evaluations, api_events)
+    _overview_status(signals, outcomes, rejected_outcomes, evaluations, api_events, active_api_errors)
 
     left, right = st.columns([1.1, 1])
     with left:
@@ -824,6 +835,7 @@ def _overview_status(
     rejected_outcomes: pd.DataFrame,
     evaluations: pd.DataFrame,
     api_events: pd.DataFrame,
+    active_api_errors: int,
 ) -> None:
     accepted = len(signals)
     rejected = int((evaluations["accepted"] == 0).sum()) if not evaluations.empty else 0
@@ -838,12 +850,16 @@ def _overview_status(
     if len(rejected_outcomes):
         audit_body = "Rejected-token audit has matured rows. Compare rejected vs accepted performance."
 
-    api_body = "No API errors logged." if api_events.empty else f"{len(api_events)} API event rows need review."
+    api_body = (
+        "No active API errors."
+        if active_api_errors == 0
+        else f"{active_api_errors} active API error rows need review."
+    )
     cards = [
         ("Current stage", stage_title, stage_body),
         ("Last scan seen", latest_seen, f"{rejected} rejected candidates, {accepted} accepted signals."),
         ("Rejected audit", f"{len(rejected_outcomes)} outcomes", audit_body),
-        ("API health", "Clean" if api_events.empty else "Review", api_body),
+        ("API health", "Clean" if active_api_errors == 0 else "Review", api_body),
     ]
     card_html = "".join(
         f"""
