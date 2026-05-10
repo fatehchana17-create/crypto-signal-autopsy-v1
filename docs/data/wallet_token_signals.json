@@ -203,9 +203,9 @@
     "net_wallet_flow_usd": -3413.4118031814346,
     "wallet_signal_score": 10.0,
     "wallet_signal_label": "No Useful Wallet Signal",
-    "token_final_label": "Reject",
-    "risk_score": 50.0,
-    "opportunity_score": 39.0
+    "token_final_label": null,
+    "risk_score": null,
+    "opportunity_score": null
   },
   {
     "token": "UORE",
