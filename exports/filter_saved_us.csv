@@ -14,6 +14,7 @@ saved_from_bad_token,0x188Af2a5d8eB00e7D7Ad6e2611A3024345a6fB07,base:0xf059302a5
 saved_from_bad_token,0x188Af2a5d8eB00e7D7Ad6e2611A3024345a6fB07,base:0xf059302a533f0e21667ed1a136df8ab6f53c5172c6c6eff013aaa7d49e2bae55,Reject,1h,-81.6345,"[""unique_buyers_below_10""]",1,1,1
 saved_from_bad_token,0x188Af2a5d8eB00e7D7Ad6e2611A3024345a6fB07,base:0xf059302a533f0e21667ed1a136df8ab6f53c5172c6c6eff013aaa7d49e2bae55,Reject,24h,-81.6345,"[""unique_buyers_below_10""]",1,1,1
 saved_from_bad_token,0x188Af2a5d8eB00e7D7Ad6e2611A3024345a6fB07,base:0xf059302a533f0e21667ed1a136df8ab6f53c5172c6c6eff013aaa7d49e2bae55,Reject,4h,-81.6345,"[""unique_buyers_below_10""]",1,1,1
+saved_from_bad_token,0x4FeC17D74Fa249D00B26f16a0934A99D983ab82C,base:0x10c468342db55a8d80ad1451e08e8a85458cef209b7b4739cf6d7f9de09ab562,Reject,24h,-80.6794,"[""score_below_v2_thresholds""]",0,1,0
 saved_from_bad_token,0x6A7602bB307a661705b0f53DD493E6A5067E4778,base:0x37dF215c79EF81D7Aaf73D12B32F473f707cE0F0,Reject,15m,-76.0193,"[""liquidity_below_10000""]",1,0,1
 saved_from_bad_token,0x6A7602bB307a661705b0f53DD493E6A5067E4778,base:0x37dF215c79EF81D7Aaf73D12B32F473f707cE0F0,Reject,1h,-76.0193,"[""liquidity_below_10000""]",1,0,1
 saved_from_bad_token,0x6A7602bB307a661705b0f53DD493E6A5067E4778,base:0x37dF215c79EF81D7Aaf73D12B32F473f707cE0F0,Reject,24h,-76.0193,"[""liquidity_below_10000""]",1,0,1

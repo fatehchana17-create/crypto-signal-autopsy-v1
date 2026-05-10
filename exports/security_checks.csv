@@ -57,3 +57,4 @@ id,token_address,chain,provider,security_score,is_honeypot,cannot_sell,is_blackl
 56,0x10c56F005a379f8eAfc88ff5c3f40d30F0031AC9,base,goplus,,0,0,0,0,0,0,0,0,0,,,,,,,[],{},2026-05-09T18:07:27+00:00
 57,0xb66e76F9Ed3e13F24C5b68F68BE631CD82AffbA3,base,goplus,,0,0,0,0,0,0,0,0,0,,,,,,,[],{},2026-05-09T19:35:41+00:00
 58,0x10c56F005a379f8eAfc88ff5c3f40d30F0031AC9,base,goplus,,0,0,0,0,0,0,0,0,0,,,,,,,[],{},2026-05-09T19:35:41+00:00
+59,0xe9AA9a9091C524F9a29382829a51e6b12cF5f573,base,goplus,,0,0,0,0,0,0,0,0,0,,,,,,,[],{},2026-05-10T04:17:35+00:00
