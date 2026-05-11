@@ -15,6 +15,8 @@ LABELS = [
     "Reject",
     "Watchlist",
     "High-Risk Momentum Watchlist",
+    "Momentum Trap",
+    "Weak Overextended Pump",
     "Research Candidate",
     "Pending Paper Candidate",
     "Paper Trade Candidate",
@@ -78,6 +80,8 @@ def _health_cards(
             "label": "High-Risk Momentum",
             "value": str(label_counts.get("High-Risk Momentum Watchlist", 0)),
         },
+        {"label": "Momentum Traps", "value": str(label_counts.get("Momentum Trap", 0))},
+        {"label": "Weak Overextended Pumps", "value": str(label_counts.get("Weak Overextended Pump", 0))},
         {"label": "Research Candidates", "value": str(label_counts.get("Research Candidate", 0))},
         {"label": "Pending Paper Candidates", "value": str(label_counts.get("Pending Paper Candidate", 0))},
         {"label": "Paper Trade Candidates", "value": str(label_counts.get("Paper Trade Candidate", 0))},
@@ -171,7 +175,7 @@ def _performance_rows(conn: sqlite3.Connection) -> list[dict[str, str]]:
 
 def _outcome_extremes(conn: sqlite3.Connection, kind: str) -> list[dict[str, str]]:
     where = {
-        "missed_winners": "o.label_at_scan IN ('Reject','Watchlist') AND o.return_pct >= 50",
+        "missed_winners": "o.label_at_scan IN ('Reject','Watchlist','Momentum Trap','Weak Overextended Pump') AND o.return_pct >= 50",
         "avoided_losers": "o.label_at_scan = 'Reject' AND o.return_pct <= -50",
         "high_risk_pumps": "o.label_at_scan = 'High-Risk Momentum Watchlist' AND o.return_pct >= 50",
         "rugs_dumps": "(o.rugged = 1 OR o.became_illiquid = 1 OR o.return_pct <= -80)",
@@ -195,7 +199,7 @@ def _filter_lesson_rows(conn: sqlite3.Connection, saved: bool) -> list[dict[str,
         where = "f.final_label = 'Reject' AND (o.return_pct <= -50 OR o.rugged = 1 OR o.became_illiquid = 1 OR o.volume_disappeared = 1)"
         order = "o.return_pct ASC"
     else:
-        where = "f.final_label IN ('Reject','Watchlist','High-Risk Momentum Watchlist') AND o.return_pct >= 50"
+        where = "f.final_label IN ('Reject','Watchlist','High-Risk Momentum Watchlist','Momentum Trap','Weak Overextended Pump') AND o.return_pct >= 50"
         order = "o.return_pct DESC"
     rows = conn.execute(
         f"""

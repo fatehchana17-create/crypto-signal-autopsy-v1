@@ -60,6 +60,8 @@ def _export_dashboard_summary(conn: sqlite3.Connection, out_path: Path) -> int:
         "rejected_tokens": str(labels.get("Reject", 0)),
         "watchlist_tokens": str(labels.get("Watchlist", 0)),
         "high_risk_momentum_tokens": str(labels.get("High-Risk Momentum Watchlist", 0)),
+        "momentum_trap_tokens": str(labels.get("Momentum Trap", 0)),
+        "weak_overextended_pump_tokens": str(labels.get("Weak Overextended Pump", 0)),
         "research_candidates": str(labels.get("Research Candidate", 0)),
         "pending_paper_candidates": str(labels.get("Pending Paper Candidate", 0)),
         "paper_trade_candidates": str(labels.get("Paper Trade Candidate", 0)),
@@ -117,7 +119,10 @@ def _export_filter_blocked_winners(conn: sqlite3.Connection, out_path: Path) -> 
         SELECT o.*, f.reject_reasons
         FROM outcome_snapshots o
         JOIN filter_results f ON f.pair_id = o.pair_id AND f.scan_time = o.scan_time
-        WHERE f.final_label IN ('Reject', 'Watchlist', 'High-Risk Momentum Watchlist')
+        WHERE f.final_label IN (
+          'Reject', 'Watchlist', 'High-Risk Momentum Watchlist',
+          'Momentum Trap', 'Weak Overextended Pump'
+        )
           AND o.return_pct >= 50
         ORDER BY o.return_pct DESC
         LIMIT 200

@@ -54,7 +54,10 @@ HIGH_RISK_MOMENTUM = {
 MOMENTUM_TRAP_GUARD = {
     "max_hot_launch_age_hours": 3,
     "min_hot_price_change_1h": 80,
+    "min_healthy_age_hours": 0.75,
+    "min_hot_unique_buyers_1h": 50,
     "min_hot_buy_ratio": 0.45,
+    "danger_buy_ratio": 0.35,
     "min_extreme_price_change_1h": 700,
     "max_too_early_age_hours": 0.75,
     "high_volume_liquidity_ratio": 12,
@@ -82,9 +85,11 @@ PAPER_TRADE_GATE = {
 
 DELAYED_ENTRY_SURVIVAL = {
     "required_wait_minutes": 30,
-    "max_drawdown_during_wait_pct": -15,
-    "min_liquidity_retention_pct": 80,
-    "max_volume_fade_pct": 60,
+    "max_drawdown_during_wait_pct": -12,
+    "min_return_during_wait_pct": -5,
+    "min_liquidity_retention_pct": 85,
+    "max_volume_fade_pct": 50,
+    "max_bearish_volume_expansion_pct": 50,
     "max_spread_or_slippage_pct": 5,
 }
 

@@ -412,6 +412,9 @@ def _render_html(payload: dict[str, Any]) -> str:
       const rows = [
         ["Reject", "The token failed safety or quality rules.", "Usually ignore it, then check later if the filter saved us or missed a winner."],
         ["Watchlist", "Not clean enough for paper trading, but interesting enough to observe.", "Study only. Wait for more evidence."],
+        ["High-Risk Momentum Watchlist", "Healthy but risky early momentum.", "Research only. Check whether buyer pressure survives."],
+        ["Momentum Trap", "Dangerous early pump pattern.", "Study as a trap bucket, not a clean candidate."],
+        ["Weak Overextended Pump", "Momentum exists, but the setup failed strength checks.", "Watch whether the guard blocked a bad setup."],
         ["Research Candidate", "Cleaner than most rows, but still not a buy signal.", "Read the details and compare later performance."],
         ["Paper Trade Candidate", "Strongest simulated-tracking bucket.", "Paper tracking only. No real trade instruction."],
         ["Unproven Wallet", "A wallet with too little history.", "Do not call it smart yet."]
@@ -479,7 +482,7 @@ def _render_html(payload: dict[str, Any]) -> str:
     }}
 
     function renderBucketTables() {{
-      const labels = ["Reject", "Watchlist", "High-Risk Momentum Watchlist", "Research Candidate", "Paper Trade Candidate"];
+      const labels = ["Reject", "Watchlist", "High-Risk Momentum Watchlist", "Momentum Trap", "Weak Overextended Pump", "Research Candidate", "Pending Paper Candidate", "Paper Trade Candidate"];
       document.getElementById("bucketTables").innerHTML = labels.map(label => `
         <h2>${{label}}</h2>
         ${{table(
@@ -945,7 +948,7 @@ def _render_html(payload: dict[str, Any]) -> str:
     const v2 = payload.v2 || {{}};
     const quant = payload.quant || {{}};
     const wallets = payload.wallets || {{}};
-    const labels = ["Reject","Watchlist","High-Risk Momentum Watchlist","Research Candidate","Paper Trade Candidate"];
+    const labels = ["Reject","Watchlist","High-Risk Momentum Watchlist","Momentum Trap","Weak Overextended Pump","Research Candidate","Pending Paper Candidate","Paper Trade Candidate"];
     const fmtPct = value => value === null || value === undefined || value === "" ? "No data" : `${{Number(value).toFixed(2)}}%`;
     const money = value => value === null || value === undefined || value === "" ? "No data" : `$${{Number(value).toLocaleString(undefined, {{maximumFractionDigits: 0}})}}`;
     const cls = value => {{

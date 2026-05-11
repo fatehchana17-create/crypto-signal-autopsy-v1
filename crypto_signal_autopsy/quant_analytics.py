@@ -18,6 +18,8 @@ LABELS = [
     "Reject",
     "Watchlist",
     "High-Risk Momentum Watchlist",
+    "Momentum Trap",
+    "Weak Overextended Pump",
     "Research Candidate",
     "Pending Paper Candidate",
     "Paper Trade Candidate",
@@ -126,13 +128,13 @@ def category_verdict(
     worst_return: float | None,
     category: str,
 ) -> str:
-    if category == "High-Risk Momentum Watchlist" and count == 0:
+    if count == 0:
         return "Inactive"
     if count < 10 and category != "Reject":
         return "Too Small Sample"
     if median_24h is None or positive_rate is None:
         return "Too Small Sample" if count else "Inactive"
-    if category == "Reject":
+    if category in {"Reject", "Momentum Trap", "Weak Overextended Pump"}:
         if median_24h < 0 and positive_rate < 0.40:
             return "Good"
         return "Mixed"
@@ -200,7 +202,7 @@ def _refresh_accepted_failure_diagnosis(conn: sqlite3.Connection, created_at: st
 
 def _refresh_missed_winner_review(conn: sqlite3.Connection, created_at: str) -> int:
     _clear(conn, "missed_winner_review")
-    rows = _outcome_rows(conn, labels=("Reject", "Watchlist"))
+    rows = _outcome_rows(conn, labels=("Reject", "Watchlist", "Momentum Trap", "Weak Overextended Pump"))
     inserted = 0
     for row in rows:
         return_pct = _num(row["return_pct"])

@@ -227,10 +227,15 @@ def _wallet_adjusted_label(
     final_research_score: float,
     wallet_signal_score: float,
 ) -> str:
+    if current_label in {
+        "Momentum Trap",
+        "Weak Overextended Pump",
+        "Pending Paper Candidate",
+        "Paper Trade Candidate",
+    }:
+        return current_label
     if hard_reject:
         return "Reject"
-    if current_label == "Paper Trade Candidate":
-        return current_label
     if final_research_score >= 75 and risk_score <= 35:
         return "Pending Paper Candidate"
     if final_research_score >= 65 and risk_score <= 50:

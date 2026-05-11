@@ -338,7 +338,7 @@ def _resolve_pending_paper_candidates(
         else:
             reasons = _safe_list(row["reject_reasons"])
             reasons.append(reason)
-            next_label = "Research Candidate" if (row["opportunity_score"] or 0) >= 65 else "Watchlist"
+            next_label = _failed_pending_label(row, reason)
             conn.execute(
                 """
                 UPDATE filter_results
@@ -380,6 +380,7 @@ def _pending_survival_snapshot(conn: sqlite3.Connection, pair_id: str, scan_time
 
 
 def _passed_delayed_survival(snapshot: sqlite3.Row, metrics: dict[str, object]) -> tuple[bool, str]:
+    return_pct = _float(snapshot["return_pct"])
     drawdown = _float(snapshot["max_adverse_excursion_pct"])
     liquidity_scan = _float(snapshot["liquidity_at_scan"])
     liquidity_horizon = _float(snapshot["liquidity_at_horizon"])
@@ -396,15 +397,40 @@ def _passed_delayed_survival(snapshot: sqlite3.Row, metrics: dict[str, object]) 
         if volume_scan and volume_horizon is not None
         else 0
     )
+    volume_expansion = (
+        max(0.0, ((volume_horizon / volume_scan) * 100) - 100)
+        if volume_scan and volume_horizon is not None
+        else 0
+    )
     if drawdown is not None and drawdown < DELAYED_ENTRY_SURVIVAL["max_drawdown_during_wait_pct"]:
         return False, "failed_delayed_entry_drawdown"
+    if return_pct is not None and return_pct < DELAYED_ENTRY_SURVIVAL["min_return_during_wait_pct"]:
+        return False, "failed_delayed_entry_return"
     if liquidity_retention < DELAYED_ENTRY_SURVIVAL["min_liquidity_retention_pct"]:
         return False, "failed_delayed_entry_liquidity_retention"
     if volume_fade > DELAYED_ENTRY_SURVIVAL["max_volume_fade_pct"]:
         return False, "failed_delayed_entry_volume_fade"
+    if (
+        return_pct is not None
+        and return_pct < -10
+        and volume_expansion > DELAYED_ENTRY_SURVIVAL["max_bearish_volume_expansion_pct"]
+    ):
+        return False, "failed_delayed_entry_bearish_volume_expansion"
     if slippage is not None and slippage > DELAYED_ENTRY_SURVIVAL["max_spread_or_slippage_pct"]:
         return False, "failed_delayed_entry_slippage"
     return True, ""
+
+
+def _failed_pending_label(row: sqlite3.Row, reason: str) -> str:
+    severe_survival_failures = {
+        "failed_delayed_entry_drawdown",
+        "failed_delayed_entry_return",
+        "failed_delayed_entry_liquidity_retention",
+        "failed_delayed_entry_bearish_volume_expansion",
+    }
+    if reason in severe_survival_failures:
+        return "Weak Overextended Pump"
+    return "Research Candidate" if (row["opportunity_score"] or 0) >= 65 else "Watchlist"
 
 
 def _safe_list(value: str | None) -> list[str]:

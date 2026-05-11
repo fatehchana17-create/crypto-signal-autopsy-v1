@@ -52,7 +52,31 @@ def test_honeypot_is_rejected() -> None:
     assert "honeypot_detected" in result.reject_reasons
 
 
-def test_hot_launch_with_weak_buy_pressure_is_rejected() -> None:
+def test_hot_launch_with_weak_buy_pressure_routes_to_weak_overextended_pump() -> None:
+    metrics = _strong_metrics()
+    metrics.update(
+        {
+            "liquidity_usd": 60_000,
+            "volume_h24_usd": 225_000,
+            "volume_liquidity_ratio": 3.75,
+            "pair_age_hours": 1.3,
+            "pair_age_minutes": 78,
+            "price_change_h1_pct": 95,
+            "buys_h1": 80,
+            "sells_h1": 120,
+            "unique_buyers_1h": 118,
+            "fdv_liquidity_ratio": 3,
+        }
+    )
+
+    result = score_token(metrics, SecurityResult("ok", [], 0, 0, {"security_score": 85}))
+
+    assert result.final_label == "Weak Overextended Pump"
+    assert "weak_overextended_pump" in result.reject_reasons
+    assert "hot_momentum_weak_buy_pressure" in result.reject_reasons
+
+
+def test_hot_launch_with_dangerously_low_buy_pressure_routes_to_momentum_trap() -> None:
     metrics = _strong_metrics()
     metrics.update(
         {
@@ -71,8 +95,8 @@ def test_hot_launch_with_weak_buy_pressure_is_rejected() -> None:
 
     result = score_token(metrics, SecurityResult("ok", [], 0, 0, {"security_score": 85}))
 
-    assert result.final_label == "Reject"
-    assert "hot_launch_buy_pressure_below_45_percent" in result.reject_reasons
+    assert result.final_label == "Momentum Trap"
+    assert "dangerous_low_buy_pressure" in result.reject_reasons
 
 
 def test_clean_hot_momentum_routes_to_high_risk_watchlist() -> None:
@@ -119,6 +143,6 @@ def test_too_early_extreme_pump_is_rejected() -> None:
 
     result = score_token(metrics, SecurityResult("ok", [], 0, 0, {"security_score": 85}))
 
-    assert result.final_label == "Reject"
+    assert result.final_label == "Momentum Trap"
     assert "early_extreme_overextension" in result.reject_reasons
     assert "too_early_after_large_pump" in result.reject_reasons

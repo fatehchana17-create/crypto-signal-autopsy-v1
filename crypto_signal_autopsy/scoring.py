@@ -17,10 +17,24 @@ FINAL_LABELS = [
     "Reject",
     "Watchlist",
     "High-Risk Momentum Watchlist",
+    "Momentum Trap",
+    "Weak Overextended Pump",
     "Research Candidate",
     "Pending Paper Candidate",
     "Paper Trade Candidate",
 ]
+
+MOMENTUM_CLASSIFICATION_REASONS = {
+    "early_extreme_overextension",
+    "too_early_after_large_pump",
+    "hot_launch_buy_pressure_below_45_percent",
+    "dangerous_low_buy_pressure",
+    "hot_momentum_weak_buy_pressure",
+    "buy_pressure_below_30_percent",
+    "hot_volume_liquidity_rotation_risk",
+    "hot_momentum_low_unique_buyers",
+    "weak_overextended_pump",
+}
 
 
 @dataclass(frozen=True)
@@ -50,11 +64,16 @@ def score_token(metrics: dict[str, Any], security: SecurityResult) -> V2Score:
         opportunity_score,
     )
     high_risk_momentum = qualifies_high_risk_momentum(metrics, security)
+    momentum_label, momentum_reasons = classify_momentum_setup(metrics, security)
+    if momentum_label:
+        reject_reasons = sorted(set(reject_reasons + momentum_reasons))
     paper_gate = qualifies_paper_trade_gate(metrics, security, risk_score, opportunity_score, ten_x_score)
     final_label = choose_final_label(
         hard_reject=bool(reject_reasons),
         qualifies_high_risk_momentum=high_risk_momentum,
         qualifies_paper_trade_gate=paper_gate,
+        momentum_label=momentum_label,
+        reject_reasons=reject_reasons,
         risk_score=risk_score,
         opportunity_score=opportunity_score,
     )
@@ -186,6 +205,66 @@ def qualifies_high_risk_momentum(metrics: dict[str, Any], security: SecurityResu
         _lte_missing_ok(_num(security.sell_tax_pct), HIGH_RISK_MOMENTUM["max_sell_tax"]),
     ]
     return all(checks)
+
+
+def classify_momentum_setup(metrics: dict[str, Any], security: SecurityResult) -> tuple[str | None, list[str]]:
+    price_change_1h = _num(metrics.get("price_change_h1_pct"))
+    if price_change_1h is None or price_change_1h < MOMENTUM_TRAP_GUARD["min_hot_price_change_1h"]:
+        return None, []
+
+    pair_age_hours = _pair_age_hours(metrics)
+    buy_ratio = _buy_ratio(metrics)
+    unique_buyers_1h = _unique_buyers_1h(metrics)
+    volume_liquidity_ratio = _num(metrics.get("volume_liquidity_ratio"))
+    liquidity = _num(metrics.get("liquidity_usd"))
+    volume_24h = _num(metrics.get("volume_h24_usd"))
+    security_score = _security_score(security)
+    fdv_liquidity_ratio = _num(metrics.get("fdv_liquidity_ratio"))
+
+    trap_reasons: list[str] = []
+    if price_change_1h >= MOMENTUM_TRAP_GUARD["min_extreme_price_change_1h"]:
+        trap_reasons.append("early_extreme_overextension")
+    if (
+        pair_age_hours is not None
+        and pair_age_hours < MOMENTUM_TRAP_GUARD["max_too_early_age_hours"]
+    ):
+        trap_reasons.append("too_early_after_large_pump")
+    if buy_ratio is not None and buy_ratio < MOMENTUM_TRAP_GUARD["danger_buy_ratio"]:
+        trap_reasons.append("dangerous_low_buy_pressure")
+    if (
+        volume_liquidity_ratio is not None
+        and volume_liquidity_ratio > MOMENTUM_TRAP_GUARD["high_volume_liquidity_ratio"]
+        and (buy_ratio is None or buy_ratio < MOMENTUM_TRAP_GUARD["min_hot_buy_ratio"])
+    ):
+        trap_reasons.append("hot_volume_liquidity_rotation_risk")
+
+    if trap_reasons:
+        return "Momentum Trap", sorted(set(trap_reasons))
+
+    weak_reasons: list[str] = []
+    if pair_age_hours is None or pair_age_hours < MOMENTUM_TRAP_GUARD["min_healthy_age_hours"]:
+        weak_reasons.append("too_early_after_large_pump")
+    if buy_ratio is None or buy_ratio < MOMENTUM_TRAP_GUARD["min_hot_buy_ratio"]:
+        weak_reasons.append("hot_momentum_weak_buy_pressure")
+    if unique_buyers_1h is None or unique_buyers_1h < MOMENTUM_TRAP_GUARD["min_hot_unique_buyers_1h"]:
+        weak_reasons.append("hot_momentum_low_unique_buyers")
+    if (
+        volume_liquidity_ratio is not None
+        and volume_liquidity_ratio > MOMENTUM_TRAP_GUARD["high_volume_liquidity_ratio"]
+    ):
+        weak_reasons.append("hot_volume_liquidity_rotation_risk")
+    if liquidity is not None and liquidity < HIGH_RISK_MOMENTUM["min_liquidity_usd"]:
+        weak_reasons.append("liquidity_below_10000")
+    if volume_24h is not None and volume_24h < HIGH_RISK_MOMENTUM["min_volume_24h"]:
+        weak_reasons.append("volume_24h_below_15000")
+    if fdv_liquidity_ratio is not None and fdv_liquidity_ratio > HIGH_RISK_MOMENTUM["max_fdv_liquidity_ratio"]:
+        weak_reasons.append("fdv_liquidity_ratio_above_200")
+    if security_score is not None and security_score < HIGH_RISK_MOMENTUM["min_security_score"]:
+        weak_reasons.append("security_score_below_60")
+
+    if weak_reasons:
+        return "Weak Overextended Pump", sorted(set(weak_reasons + ["weak_overextended_pump"]))
+    return None, []
 
 
 def qualifies_paper_trade_gate(
@@ -603,13 +682,22 @@ def choose_final_label(
     hard_reject: bool,
     qualifies_high_risk_momentum: bool,
     qualifies_paper_trade_gate: bool,
+    momentum_label: str | None,
+    reject_reasons: list[str],
     risk_score: float,
     opportunity_score: float,
 ) -> str:
-    if hard_reject and not qualifies_high_risk_momentum:
+    non_momentum_reasons = set(reject_reasons) - MOMENTUM_CLASSIFICATION_REASONS
+    if hard_reject and non_momentum_reasons and not qualifies_high_risk_momentum:
         return "Reject"
+    if momentum_label == "Momentum Trap":
+        return "Momentum Trap"
     if qualifies_high_risk_momentum and opportunity_score >= 50:
         return "High-Risk Momentum Watchlist"
+    if momentum_label == "Weak Overextended Pump":
+        return "Weak Overextended Pump"
+    if hard_reject and not qualifies_high_risk_momentum:
+        return "Reject"
     if risk_score > 75:
         return "Reject"
     if qualifies_paper_trade_gate:
@@ -647,6 +735,14 @@ def _pair_age_minutes(metrics: dict[str, Any]) -> float | None:
         return value
     hours = _num(metrics.get("pair_age_hours"))
     return hours * 60 if hours is not None else None
+
+
+def _pair_age_hours(metrics: dict[str, Any]) -> float | None:
+    value = _num(metrics.get("pair_age_hours"))
+    if value is not None:
+        return value
+    minutes = _num(metrics.get("pair_age_minutes"))
+    return minutes / 60 if minutes is not None else None
 
 
 def _buy_ratio(metrics: dict[str, Any]) -> float | None:
