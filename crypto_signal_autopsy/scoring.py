@@ -4,7 +4,13 @@ from dataclasses import dataclass
 from typing import Any
 
 from crypto_signal_autopsy.clients.goplus import SecurityResult
-from crypto_signal_autopsy.config import HARD_REJECT, HIGH_RISK_MOMENTUM, MODEL_VERSION, PAPER_TRADE_GATE
+from crypto_signal_autopsy.config import (
+    HARD_REJECT,
+    HIGH_RISK_MOMENTUM,
+    MODEL_VERSION,
+    MOMENTUM_TRAP_GUARD,
+    PAPER_TRADE_GATE,
+)
 
 
 FINAL_LABELS = [
@@ -89,6 +95,10 @@ def hard_reject_reasons(metrics: dict[str, Any], security: SecurityResult) -> li
     liquidity = _num(metrics.get("liquidity_usd"))
     volume_24h = _num(metrics.get("volume_h24_usd"))
     pair_age_minutes = _pair_age_minutes(metrics)
+    pair_age_hours = _num(metrics.get("pair_age_hours"))
+    if pair_age_hours is None and pair_age_minutes is not None:
+        pair_age_hours = pair_age_minutes / 60
+    price_change_1h = _num(metrics.get("price_change_h1_pct"))
     fdv_liquidity_ratio = _num(metrics.get("fdv_liquidity_ratio"))
     buy_ratio = _buy_ratio(metrics)
     unique_buyers_1h = _unique_buyers_1h(metrics)
@@ -115,6 +125,29 @@ def hard_reject_reasons(metrics: dict[str, Any], security: SecurityResult) -> li
         reasons.append("buy_pressure_below_30_percent")
     if unique_buyers_1h is not None and unique_buyers_1h < HARD_REJECT["min_unique_buyers_1h"]:
         reasons.append("unique_buyers_below_10")
+    if (
+        pair_age_hours is not None
+        and price_change_1h is not None
+        and pair_age_hours < MOMENTUM_TRAP_GUARD["max_hot_launch_age_hours"]
+        and price_change_1h >= MOMENTUM_TRAP_GUARD["min_extreme_price_change_1h"]
+    ):
+        reasons.append("early_extreme_overextension")
+    if (
+        pair_age_hours is not None
+        and price_change_1h is not None
+        and pair_age_hours < MOMENTUM_TRAP_GUARD["max_too_early_age_hours"]
+        and price_change_1h >= MOMENTUM_TRAP_GUARD["min_hot_price_change_1h"]
+    ):
+        reasons.append("too_early_after_large_pump")
+    if (
+        pair_age_hours is not None
+        and price_change_1h is not None
+        and buy_ratio is not None
+        and pair_age_hours < MOMENTUM_TRAP_GUARD["max_hot_launch_age_hours"]
+        and price_change_1h >= MOMENTUM_TRAP_GUARD["min_hot_price_change_1h"]
+        and buy_ratio < MOMENTUM_TRAP_GUARD["min_hot_buy_ratio"]
+    ):
+        reasons.append("hot_launch_buy_pressure_below_45_percent")
     if (buy_tax is not None and buy_tax > HARD_REJECT["max_buy_tax"]) or (
         sell_tax is not None and sell_tax > HARD_REJECT["max_sell_tax"]
     ):
@@ -205,6 +238,7 @@ def calculate_risk_score(metrics: dict[str, Any], security: SecurityResult) -> f
     volume_24h = _num(metrics.get("volume_h24_usd")) or 0
     volume_liquidity_ratio = _num(metrics.get("volume_liquidity_ratio")) or 0
     price_change_1h = _num(metrics.get("price_change_h1_pct")) or 0
+    buy_ratio = _buy_ratio(metrics)
 
     if security_score is None:
         score += 20
@@ -265,14 +299,31 @@ def calculate_risk_score(metrics: dict[str, Any], security: SecurityResult) -> f
     elif volume_liquidity_ratio > 10:
         score += 5
 
-    if price_change_1h > 300:
-        score += 10
+    if price_change_1h > MOMENTUM_TRAP_GUARD["min_extreme_price_change_1h"]:
+        score += 20
+    elif price_change_1h > 300:
+        score += 12
     elif price_change_1h > 150:
         score += 8
     elif price_change_1h > 80:
         score += 5
     elif price_change_1h > 40:
         score += 2
+
+    if pair_age_hours < MOMENTUM_TRAP_GUARD["max_too_early_age_hours"] and price_change_1h >= 80:
+        score += 10
+    if (
+        pair_age_hours < MOMENTUM_TRAP_GUARD["max_hot_launch_age_hours"]
+        and price_change_1h >= MOMENTUM_TRAP_GUARD["min_hot_price_change_1h"]
+        and buy_ratio is not None
+        and buy_ratio < MOMENTUM_TRAP_GUARD["min_hot_buy_ratio"]
+    ):
+        score += 12
+    if (
+        pair_age_hours < MOMENTUM_TRAP_GUARD["max_hot_launch_age_hours"]
+        and volume_liquidity_ratio > MOMENTUM_TRAP_GUARD["high_volume_liquidity_ratio"]
+    ):
+        score += 8
 
     if _is_boosted(metrics) and liquidity < 25_000:
         score += 5
@@ -477,6 +528,31 @@ def calculate_ten_x_research_score(
     elif -10 <= price_change_1h < 5:
         score += 3
         reasons.append("not_pumping_yet")
+
+    if price_change_1h > MOMENTUM_TRAP_GUARD["min_extreme_price_change_1h"]:
+        score -= 20
+        reasons.append("extreme_overextension")
+    if (
+        pair_age_hours < MOMENTUM_TRAP_GUARD["max_too_early_age_hours"]
+        and price_change_1h >= MOMENTUM_TRAP_GUARD["min_hot_price_change_1h"]
+    ):
+        score -= 15
+        reasons.append("too_early_after_large_pump")
+    if (
+        pair_age_hours < MOMENTUM_TRAP_GUARD["max_hot_launch_age_hours"]
+        and price_change_1h >= MOMENTUM_TRAP_GUARD["min_hot_price_change_1h"]
+        and buy_ratio is not None
+        and buy_ratio < MOMENTUM_TRAP_GUARD["min_hot_buy_ratio"]
+    ):
+        score -= 20
+        reasons.append("hot_momentum_weak_buy_pressure")
+    if (
+        pair_age_hours < MOMENTUM_TRAP_GUARD["max_hot_launch_age_hours"]
+        and volume_liquidity_ratio is not None
+        and volume_liquidity_ratio > MOMENTUM_TRAP_GUARD["high_volume_liquidity_ratio"]
+    ):
+        score -= 10
+        reasons.append("hot_volume_liquidity_rotation_risk")
 
     if websites:
         score += 3

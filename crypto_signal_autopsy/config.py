@@ -35,20 +35,29 @@ HARD_REJECT = {
 HIGH_RISK_MOMENTUM = {
     "min_liquidity_usd": 25_000,
     "min_volume_24h": 40_000,
-    "min_pair_age_minutes": 15,
+    "min_pair_age_minutes": 45,
     "max_pair_age_hours": 6,
     "min_price_change_1h": 80,
     "max_price_change_1h": 700,
     "min_txns_15m": 10,
     "min_unique_buyers_15m": 10,
-    "min_unique_buyers_1h": 10,
+    "min_unique_buyers_1h": 50,
     "max_top_holder_pct": 25,
     "max_top_10_holder_pct": 60,
     "max_fdv_liquidity_ratio": 200,
-    "min_buy_ratio": 0.35,
+    "min_buy_ratio": 0.45,
     "min_security_score": 60,
     "max_buy_tax": 10,
     "max_sell_tax": 10,
+}
+
+MOMENTUM_TRAP_GUARD = {
+    "max_hot_launch_age_hours": 3,
+    "min_hot_price_change_1h": 80,
+    "min_hot_buy_ratio": 0.45,
+    "min_extreme_price_change_1h": 700,
+    "max_too_early_age_hours": 0.75,
+    "high_volume_liquidity_ratio": 12,
 }
 
 PAPER_TRADE_GATE = {
