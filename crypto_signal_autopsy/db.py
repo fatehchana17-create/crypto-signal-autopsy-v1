@@ -21,6 +21,19 @@ CREATE TABLE IF NOT EXISTS api_events (
   request_url TEXT
 );
 
+CREATE TABLE IF NOT EXISTS ux_blank_input_events (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  event_time TEXT,
+  page_context TEXT,
+  input_type TEXT,
+  blank_count_in_session INTEGER,
+  recovery_message TEXT,
+  suggestions TEXT,
+  suggestion_clicked TEXT,
+  recovered INTEGER,
+  time_to_next_valid_input_seconds REAL
+);
+
 CREATE TABLE IF NOT EXISTS cex_market_snapshots (
   snapshot_id INTEGER PRIMARY KEY AUTOINCREMENT,
   observed_at TEXT NOT NULL,

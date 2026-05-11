@@ -19,6 +19,7 @@ from crypto_signal_autopsy.quant_analytics import (
     write_public_quant_json_data,
 )
 from crypto_signal_autopsy.review import build_rejection_record, humanize_reason, money, pct
+from crypto_signal_autopsy.ux_recovery import ux_blank_input_event_rows
 from crypto_signal_autopsy.v2_dashboard import build_v2_payload
 from crypto_signal_autopsy.wallet_exports import build_wallet_dashboard_payload, write_public_wallet_json_data
 
@@ -38,6 +39,7 @@ def build_static_site(conn: sqlite3.Connection, settings: Settings, out_dir: Pat
     payload = _build_payload(conn, settings)
     write_public_wallet_json_data(conn, target_dir / "data")
     write_public_quant_json_data(conn, target_dir / "data")
+    _write_public_ux_json_data(conn, target_dir / "data")
     html = _render_html(payload)
     out_path = target_dir / "index.html"
     out_path.write_text(html, encoding="utf-8")
@@ -85,7 +87,16 @@ def _build_payload(conn: sqlite3.Connection, settings: Settings) -> dict[str, An
         "v2": build_v2_payload(conn),
         "wallets": build_wallet_dashboard_payload(conn, settings),
         "quant": build_quant_payload(conn),
+        "ux_blank_input": {"event_count": len(ux_blank_input_event_rows(conn, limit=500))},
     }
+
+
+def _write_public_ux_json_data(conn: sqlite3.Connection, data_dir: Path) -> None:
+    data_dir.mkdir(parents=True, exist_ok=True)
+    (data_dir / "ux_blank_input_events.json").write_text(
+        json.dumps(ux_blank_input_event_rows(conn, limit=500), indent=2, sort_keys=True, default=str),
+        encoding="utf-8",
+    )
 
 
 def _outcome_summary(rows: list[sqlite3.Row]) -> list[dict[str, str]]:
@@ -834,6 +845,13 @@ def _render_html(payload: dict[str, Any]) -> str:
     .scroll {{ overflow:auto; max-width:100%; }}
     .small {{ color:var(--muted); font-size:12px; line-height:1.45; }}
     .warning {{ border:1px solid rgba(245,158,11,.38); background:rgba(245,158,11,.08); color:#ffd38a; border-radius:8px; padding:12px; font-weight:800; }}
+    .guided-search {{ display:grid; grid-template-columns:minmax(240px, 1fr) auto; gap:10px; align-items:start; margin-top:12px; }}
+    .blank-input-warning {{ border:1px solid rgba(245,158,11,.4); background:rgba(245,158,11,.08); color:#fbbf24; border-radius:8px; padding:10px 12px; font-size:14px; margin-top:10px; line-height:1.45; }}
+    .blank-input-warning[hidden] {{ display:none; }}
+    .quick-replies {{ display:flex; flex-wrap:wrap; gap:8px; margin-top:9px; }}
+    .quick-reply-button {{ border:1px solid rgba(6,182,212,.35); background:rgba(6,182,212,.08); color:#67e8f9; border-radius:999px; padding:6px 10px; font-size:13px; cursor:pointer; }}
+    .quick-reply-button:hover {{ border-color:rgba(34,197,94,.5); color:#bbf7d0; }}
+    .search-results {{ margin-top:12px; }}
     .tabs {{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }}
     button, select, input {{ background:#0b1020; color:var(--text); border:1px solid var(--border); border-radius:6px; padding:9px 10px; font:inherit; }}
     button {{ cursor:pointer; color:var(--muted); font-weight:900; }}
@@ -848,7 +866,7 @@ def _render_html(payload: dict[str, Any]) -> str:
     <nav class="topnav">
       <div class="brand"><div class="mark">Σ</div><span>Crypto Signal Autopsy</span></div>
       <div class="navlinks">
-        <a href="#overview">Overview</a><a href="#categories">Categories</a><a href="#charts">Charts</a>
+        <a href="#overview">Overview</a><a href="#guided-search">Search</a><a href="#categories">Categories</a><a href="#charts">Charts</a>
         <a href="#failures">Failures</a><a href="#missed">Missed Winners</a><a href="#baselines">Baselines</a>
         <a href="#wallets">Wallets</a><a href="#quality">Data Quality</a>
       </div>
@@ -862,6 +880,19 @@ def _render_html(payload: dict[str, Any]) -> str:
         <p class="disclaimer">Research only. No buy/sell signals. No financial advice. Paper candidates are simulated research labels only.</p>
       </div>
       <div class="terminal" id="executiveTerminal"></div>
+    </section>
+
+    <section class="section" id="guided-search">
+      <div class="panel">
+        <div class="section-head"><div><h2>Guided Dashboard Search</h2><p class="section-copy">Search token symbols, labels, wallet rows, missed winners, or reasons. Blank searches show quick recovery options instead of failing silently.</p></div></div>
+        <div class="guided-search">
+          <input id="globalSearch" aria-label="Search dashboard" placeholder="Search token, wallet, label, pair, or reason">
+          <button id="globalSearchButton" type="button">Search</button>
+        </div>
+        <div id="blankRecovery" class="blank-input-warning" aria-live="polite" hidden></div>
+        <div id="guidedQuickReplies" class="quick-replies" aria-label="Suggested recovery actions"></div>
+        <div id="searchResults" class="search-results"></div>
+      </div>
     </section>
 
     <section class="section">
@@ -964,6 +995,277 @@ def _render_html(payload: dict[str, Any]) -> str:
     const byCategory = category => (quant.category_performance || []).filter(row => row.category === category);
     const perf = (category, horizon) => byCategory(category).find(row => row.horizon === horizon) || {{}};
     const labelCounts = v2.label_counts || {{}};
+    const RECOVERY_CONTEXTS = {{
+      dashboard_overview: {{
+        message: "Your input came through empty. Try one:",
+        suggestions: [
+          ["View latest candidates", "latest_candidates"],
+          ["Review missed winners", "missed_winners"],
+          ["Open momentum traps", "momentum_traps"]
+        ]
+      }},
+      token_search: {{
+        message: "Search is empty. Try a token symbol, pair address, or wallet address.",
+        suggestions: [
+          ["Latest candidates", "latest_candidates"],
+          ["Momentum traps", "momentum_traps"],
+          ["Missed winners", "missed_winners"]
+        ]
+      }},
+      wallet_intelligence: {{
+        message: "Wallet search is empty. Paste a wallet address or choose a wallet category.",
+        suggestions: [
+          ["Tracked wallets", "tracked_wallets"],
+          ["Suspicious wallets", "suspicious_wallets"],
+          ["Smart wallet status", "wallet_status"]
+        ]
+      }},
+      pump_trap_engine: {{
+        message: "Your input came through empty. Try one:",
+        suggestions: [
+          ["Strong pump setups", "high_risk_momentum"],
+          ["Momentum traps", "momentum_traps"],
+          ["Explain pump score", "explain_scores"]
+        ]
+      }},
+      missed_winner_lab: {{
+        message: "Your input came through empty. Try one:",
+        suggestions: [
+          ["+100% missed winners", "missed_winners"],
+          ["High-risk momentum misses", "high_risk_momentum"],
+          ["Rejected tokens that pumped", "blocked_winners"]
+        ]
+      }},
+      paper_candidate_review: {{
+        message: "Your input came through empty. Try one:",
+        suggestions: [
+          ["Failed paper candidates", "paper_failures"],
+          ["Pending candidates", "pending_candidates"],
+          ["Explain survival check", "explain_survival"]
+        ]
+      }},
+      default: {{
+        message: "Your input came through empty. Try one:",
+        suggestions: [
+          ["Analyze a token", "latest_candidates"],
+          ["Review signal performance", "review_signals"],
+          ["Explain dashboard scores", "explain_scores"]
+        ]
+      }}
+    }};
+
+    function isBlankInput(value) {{
+      return !value || value.trim().length === 0;
+    }}
+
+    function currentRecoveryContext() {{
+      const hash = (location.hash || "").replace("#", "");
+      if (hash === "wallets") return "wallet_intelligence";
+      if (hash === "missed") return "missed_winner_lab";
+      if (hash === "failures") return "paper_candidate_review";
+      if (hash === "categories" || hash === "charts") return "pump_trap_engine";
+      if (hash === "guided-search") return "token_search";
+      if (hash === "overview" || !hash) return "dashboard_overview";
+      return "default";
+    }}
+
+    function blankRecoveryResponse(pageContext, inputType, blankCount) {{
+      const config = RECOVERY_CONTEXTS[pageContext] || RECOVERY_CONTEXTS.default;
+      const count = Math.max(1, Number(blankCount || 1));
+      let message = config.message;
+      if (count >= 3) message = "Still empty. Choose a starter to continue.";
+      else if (count === 2) message = "Still empty. Pick one option below.";
+      return {{
+        status: "blank_input",
+        message,
+        page_context: pageContext,
+        input_type: inputType,
+        blank_count_in_session: count,
+        suggestions: config.suggestions.slice(0, 3).map(([label, action]) => ({{label, action}}))
+      }};
+    }}
+
+    function storedUxEvents() {{
+      try {{ return JSON.parse(localStorage.getItem("csaUxBlankInputEvents") || "[]"); }}
+      catch {{ return []; }}
+    }}
+
+    function saveUxEvents(events) {{
+      localStorage.setItem("csaUxBlankInputEvents", JSON.stringify(events.slice(-250)));
+    }}
+
+    function logBlankRecoveryEvent(response) {{
+      const events = storedUxEvents();
+      const event = {{
+        id: (crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()),
+        event_time: new Date().toISOString(),
+        page_context: response.page_context,
+        input_type: response.input_type,
+        blank_count_in_session: response.blank_count_in_session,
+        recovery_message: response.message,
+        suggestions: response.suggestions,
+        suggestion_clicked: "",
+        recovered: 0,
+        time_to_next_valid_input_seconds: null
+      }};
+      events.push(event);
+      saveUxEvents(events);
+      sessionStorage.setItem("csaLastBlankEventId", event.id);
+      sessionStorage.setItem("csaLastBlankAt", String(Date.now()));
+    }}
+
+    function markBlankRecovered(suggestionClicked = "") {{
+      const eventId = sessionStorage.getItem("csaLastBlankEventId");
+      if (!eventId) return;
+      const started = Number(sessionStorage.getItem("csaLastBlankAt") || 0);
+      const events = storedUxEvents();
+      const event = events.find(row => row.id === eventId);
+      if (!event || event.recovered) return;
+      event.recovered = 1;
+      event.suggestion_clicked = suggestionClicked;
+      event.time_to_next_valid_input_seconds = started ? Math.max(0, (Date.now() - started) / 1000) : null;
+      saveUxEvents(events);
+    }}
+
+    function renderQuickReplies(targetId, suggestions) {{
+      document.getElementById(targetId).innerHTML = suggestions.slice(0, 3).map(suggestion =>
+        `<button type="button" class="quick-reply-button" data-action="${{suggestion.action}}">${{suggestion.label}}</button>`
+      ).join("");
+    }}
+
+    function renderBlankRecovery(response) {{
+      const warning = document.getElementById("blankRecovery");
+      warning.hidden = false;
+      warning.textContent = response.message;
+      renderQuickReplies("guidedQuickReplies", response.suggestions);
+      logBlankRecoveryEvent(response);
+    }}
+
+    function clearBlankRecovery() {{
+      document.getElementById("blankRecovery").hidden = true;
+      document.getElementById("blankRecovery").textContent = "";
+      document.getElementById("guidedQuickReplies").innerHTML = "";
+    }}
+
+    function dashboardSearchRows(query) {{
+      const q = query.toLowerCase();
+      const rows = [];
+      labels.forEach(label => {{
+        (v2.bucket_tables?.[label] || []).forEach(row => rows.push({{
+          type: "Token",
+          title: row.symbol || "UNKNOWN",
+          label,
+          detail: [row.main_reasons, row.ten_x_label, row.scan_time].filter(Boolean).join(" | "),
+          url: row.url || "",
+          haystack: `${{row.symbol}} ${{label}} ${{row.main_reasons}} ${{row.ten_x_label}} ${{row.scan_time}}`
+        }}));
+      }});
+      (quant.missed_winner_review || []).forEach(row => rows.push({{
+        type: "Missed winner",
+        title: row.symbol || "UNKNOWN",
+        label: row.original_label || "",
+        detail: row.main_lesson || row.tradability_label || "",
+        url: "",
+        haystack: `${{row.symbol}} ${{row.original_label}} ${{row.main_lesson}} ${{row.tradability_label}}`
+      }}));
+      (wallets.leaderboard || []).forEach(row => rows.push({{
+        type: "Wallet",
+        title: row.wallet || "Wallet",
+        label: row.label || "",
+        detail: `Quality ${{row.quality}} | Risk ${{row.risk}} | Win rate ${{row.win_rate}}`,
+        url: "",
+        haystack: `${{row.wallet}} ${{row.wallet_full}} ${{row.label}} ${{row.quality}} ${{row.risk}}`
+      }}));
+      (wallets.token_signals || []).forEach(row => rows.push({{
+        type: "Wallet token",
+        title: row.token || "Token",
+        label: row.wallet_label || "",
+        detail: `Money flow ${{row.net_flow}} | Token status ${{row.token_label}}`,
+        url: "",
+        haystack: `${{row.token}} ${{row.wallet_label}} ${{row.token_label}} ${{row.net_flow}}`
+      }}));
+      return rows.filter(row => row.haystack.toLowerCase().includes(q)).slice(0, 12);
+    }}
+
+    function renderSearchResults(rows, emptyMessage = "No matching dashboard rows found.") {{
+      document.getElementById("searchResults").innerHTML = table(
+        ["Type", "Name", "Label", "Detail", "Open"],
+        rows.map(row => `<tr><td>${{row.type}}</td><td><strong>${{row.title}}</strong></td><td>${{row.label}}</td><td>${{row.detail}}</td><td>${{row.url ? `<a href="${{row.url}}" target="_blank" rel="noreferrer">Chart</a>` : ""}}</td></tr>`),
+        emptyMessage
+      );
+    }}
+
+    function renderBucketSearch(label) {{
+      const rows = (v2.bucket_tables?.[label] || []).slice(0, 12).map(row => ({{
+        type: "Token",
+        title: row.symbol || "UNKNOWN",
+        label,
+        detail: [row.liquidity, row.volume24h, row.move1h, row.main_reasons].filter(Boolean).join(" | "),
+        url: row.url || ""
+      }}));
+      renderSearchResults(rows, `No ${{label}} rows yet.`);
+    }}
+
+    function runQuickAction(action) {{
+      markBlankRecovered(action);
+      sessionStorage.setItem("csaBlankInputCount", "0");
+      clearBlankRecovery();
+      if (action === "momentum_traps") {{
+        renderBucketSearch("Momentum Trap");
+        location.hash = "guided-search";
+      }} else if (action === "high_risk_momentum" || action === "latest_candidates") {{
+        renderBucketSearch("High-Risk Momentum Watchlist");
+        location.hash = "guided-search";
+      }} else if (action === "pending_candidates") {{
+        renderBucketSearch("Pending Paper Candidate");
+        location.hash = "guided-search";
+      }} else if (action === "paper_failures" || action === "explain_survival") {{
+        location.hash = "failures";
+        document.getElementById("searchResults").innerHTML = `<p class="small">Opened the paper-candidate failure/survival area.</p>`;
+      }} else if (action === "missed_winners" || action === "blocked_winners") {{
+        location.hash = "missed";
+        document.getElementById("searchResults").innerHTML = `<p class="small">Opened the missed-winner lab.</p>`;
+      }} else if (action === "tracked_wallets" || action === "suspicious_wallets" || action === "wallet_status") {{
+        location.hash = "wallets";
+        document.getElementById("searchResults").innerHTML = `<p class="small">Opened wallet intelligence.</p>`;
+      }} else if (action === "review_signals" || action === "explain_scores") {{
+        location.hash = "categories";
+        document.getElementById("searchResults").innerHTML = `<p class="small">Opened category scores and performance cards.</p>`;
+      }} else {{
+        location.hash = "guided-search";
+        document.getElementById("globalSearch").focus();
+      }}
+    }}
+
+    function performGuidedSearch() {{
+      const input = document.getElementById("globalSearch");
+      const raw = input.value;
+      const context = currentRecoveryContext();
+      if (isBlankInput(raw)) {{
+        const count = Number(sessionStorage.getItem("csaBlankInputCount") || 0) + 1;
+        sessionStorage.setItem("csaBlankInputCount", String(count));
+        const response = blankRecoveryResponse(context, "global_dashboard_search", count);
+        renderBlankRecovery(response);
+        input.focus();
+        return;
+      }}
+      markBlankRecovered("valid_search");
+      sessionStorage.setItem("csaBlankInputCount", "0");
+      clearBlankRecovery();
+      const rows = dashboardSearchRows(raw.trim());
+      renderSearchResults(rows, "No match found. Try a token symbol, label, wallet, or reason.");
+    }}
+
+    function downloadUxEvents() {{
+      const events = storedUxEvents();
+      const blob = new Blob([JSON.stringify(events, null, 2)], {{type: "application/json"}});
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "ux_blank_input_events.json";
+      link.click();
+      URL.revokeObjectURL(url);
+    }}
 
     const paper1h = perf("Paper Trade Candidate", "1h");
     const activeErrors = Number(v2.api_errors || 0);
@@ -1104,8 +1406,18 @@ def _render_html(payload: dict[str, Any]) -> str:
       (quant.data_quality_report || []).map(row => `<tr><td>${{row.metric}}</td><td>${{row.value}}</td><td class="${{row.status === "OK" ? "good" : "Mixed"}}">${{row.status}}</td><td>${{row.detail || ""}}</td></tr>`)
     );
     const repoExports = "https://github.com/fatehchana17-create/crypto-signal-autopsy-v1/blob/main/exports/";
-    const exportNames = ["category_performance","accepted_failure_diagnosis","missed_winner_review","baseline_comparisons","ten_x_failure_review","data_quality_report","filter_results","outcome_snapshots","paper_trades","wallets"];
-    document.getElementById("exports").innerHTML = exportNames.map(name => `<a href="${{repoExports}}${{name}}.csv">${{name}}.csv</a><a href="data/${{name}}.json">${{name}}.json</a>`).join("");
+    const exportNames = ["category_performance","accepted_failure_diagnosis","missed_winner_review","baseline_comparisons","ten_x_failure_review","data_quality_report","filter_results","outcome_snapshots","paper_trades","wallets","ux_blank_input_events"];
+    document.getElementById("exports").innerHTML = exportNames.map(name => `<a href="${{repoExports}}${{name}}.csv">${{name}}.csv</a><a href="data/${{name}}.json">${{name}}.json</a>`).join("") + `<button id="downloadUxEvents" type="button">Download local blank-input events</button>`;
+    renderQuickReplies("guidedQuickReplies", RECOVERY_CONTEXTS.default.suggestions.map(([label, action]) => ({{label, action}})));
+    document.getElementById("globalSearchButton").addEventListener("click", performGuidedSearch);
+    document.getElementById("globalSearch").addEventListener("keydown", event => {{
+      if (event.key === "Enter") performGuidedSearch();
+    }});
+    document.getElementById("guidedQuickReplies").addEventListener("click", event => {{
+      const button = event.target.closest("button[data-action]");
+      if (button) runQuickAction(button.dataset.action);
+    }});
+    document.getElementById("downloadUxEvents").addEventListener("click", downloadUxEvents);
   </script>
 </body>
 </html>

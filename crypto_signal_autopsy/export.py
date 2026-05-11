@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import json
 import sqlite3
 from pathlib import Path
 from statistics import mean, median
@@ -8,6 +9,7 @@ from statistics import mean, median
 from crypto_signal_autopsy import db
 from crypto_signal_autopsy.config import load_settings
 from crypto_signal_autopsy.quant_analytics import export_quant_data, refresh_quant_analytics
+from crypto_signal_autopsy.ux_recovery import ux_blank_input_event_rows
 from crypto_signal_autopsy.wallet_exports import export_wallet_data
 
 
@@ -42,6 +44,7 @@ def export_all(conn: sqlite3.Connection, export_dir: Path) -> dict[str, int]:
     counts["filter_saved_us"] = _export_filter_saved_us(conn, export_dir / "filter_saved_us.csv")
     counts["filter_blocked_winners"] = _export_filter_blocked_winners(conn, export_dir / "filter_blocked_winners.csv")
     counts["filter_accuracy"] = _export_filter_accuracy(conn, export_dir / "filter_accuracy.csv")
+    counts["ux_blank_input_events"] = _export_ux_blank_input_events(conn, export_dir)
     counts["score_bucket_performance"] = _export_score_bucket_performance(
         conn, export_dir / "score_bucket_performance.csv"
     )
@@ -74,6 +77,35 @@ def _export_dashboard_summary(conn: sqlite3.Connection, out_path: Path) -> int:
     }
     _write_rows(out_path, [row])
     return 1
+
+
+def _export_ux_blank_input_events(conn: sqlite3.Connection, export_dir: Path) -> int:
+    rows = [_ux_event_export_row(row) for row in ux_blank_input_event_rows(conn)]
+    csv_path = export_dir / "ux_blank_input_events.csv"
+    _write_rows_with_header(
+        csv_path,
+        rows,
+        [
+            "id",
+            "event_time",
+            "page_context",
+            "input_type",
+            "blank_count_in_session",
+            "recovery_message",
+            "suggestions",
+            "suggestion_clicked",
+            "recovered",
+            "time_to_next_valid_input_seconds",
+        ],
+    )
+    json_rows = ux_blank_input_event_rows(conn)
+    for data_dir in (export_dir / "dashboard" / "data", export_dir.parent / "docs" / "data"):
+        data_dir.mkdir(parents=True, exist_ok=True)
+        (data_dir / "ux_blank_input_events.json").write_text(
+            json.dumps(json_rows, indent=2, sort_keys=True, default=str),
+            encoding="utf-8",
+        )
+    return len(rows)
 
 
 def _export_outliers(conn: sqlite3.Connection, out_path: Path) -> int:
@@ -272,6 +304,29 @@ def _write_rows(out_path: Path, rows: list[dict[str, str]]) -> None:
         writer = csv.DictWriter(handle, fieldnames=list(rows[0].keys()), lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
+
+
+def _write_rows_with_header(out_path: Path, rows: list[dict[str, str]], fieldnames: list[str]) -> None:
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with out_path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames, lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def _ux_event_export_row(row: dict[str, object]) -> dict[str, str]:
+    return {
+        "id": str(row.get("id") or ""),
+        "event_time": str(row.get("event_time") or ""),
+        "page_context": str(row.get("page_context") or ""),
+        "input_type": str(row.get("input_type") or ""),
+        "blank_count_in_session": str(row.get("blank_count_in_session") or 0),
+        "recovery_message": str(row.get("recovery_message") or ""),
+        "suggestions": str(row.get("suggestions") or ""),
+        "suggestion_clicked": str(row.get("suggestion_clicked") or ""),
+        "recovered": str(row.get("recovered") or 0),
+        "time_to_next_valid_input_seconds": _fmt(row.get("time_to_next_valid_input_seconds")),
+    }
 
 
 def _bucket(value) -> str:

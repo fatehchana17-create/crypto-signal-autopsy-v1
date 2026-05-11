@@ -14,4 +14,5 @@ exports/*.csv
 !exports/baseline_comparisons.csv
 !exports/ten_x_failure_review.csv
 !exports/data_quality_report.csv
+!exports/ux_blank_input_events.csv
 logs/

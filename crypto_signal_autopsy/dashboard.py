@@ -17,6 +17,12 @@ from crypto_signal_autopsy.review import (
     money,
     pct,
 )
+from crypto_signal_autopsy.ux_recovery import (
+    blank_recovery_response,
+    is_blank_input,
+    log_blank_input_event,
+    mark_latest_blank_input_recovered,
+)
 from crypto_signal_autopsy.v2_dashboard import LABELS, build_v2_payload
 from crypto_signal_autopsy.wallet_exports import build_wallet_dashboard_payload
 
@@ -104,7 +110,7 @@ def main() -> None:
     with tab_analysis:
         _analysis_workspace(conn, settings)
     with tab_manual:
-        _manual_review(rejected_records, settings)
+        _manual_review(conn, rejected_records, settings)
     with tab_signals:
         st.dataframe(signals, use_container_width=True, hide_index=True)
     with tab_outcomes:
@@ -492,18 +498,42 @@ def _render_v2_bucket_table(rows: list[dict[str, str]]) -> None:
     )
 
 
-def _manual_review(records: list[dict], settings: Settings) -> None:
+def _manual_review(conn: sqlite3.Connection, records: list[dict], settings: Settings) -> None:
     if not records:
         st.info("No rejected tokens yet.")
         return
 
     st.markdown('<div class="section-title">Manual Review Workspace</div>', unsafe_allow_html=True)
-    top = st.columns([1.25, 1, 0.8, 0.8])
-    search = top[0].text_input("Search token, symbol, pair, or reason", "")
+    top = st.columns([1.25, 1, 0.8, 0.8, 0.72])
+    search = top[0].text_input("Search token, symbol, pair, or reason", "", key="manual_review_search")
     reason_options = sorted({reason for record in records for reason in record["rejection_reasons"]})
     selected_reasons = top[1].multiselect("Filter rejection reason", reason_options)
     sort_mode = top[2].selectbox("Sort", ["Newest", "Most failed", "Lowest liquidity", "Closest to pass"])
     near_miss_only = top[3].toggle("Near misses only", value=False)
+    apply_filters = top[4].button("Apply", use_container_width=True)
+
+    has_filter_input = not is_blank_input(search) or bool(selected_reasons) or near_miss_only
+    if apply_filters and not has_filter_input:
+        count = int(st.session_state.get("manual_review_blank_count", 0)) + 1
+        st.session_state["manual_review_blank_count"] = count
+        response = blank_recovery_response("manual_review", "manual_review_filters", count)
+        log_blank_input_event(
+            conn,
+            page_context=response["page_context"],
+            input_type=response["input_type"],
+            blank_count_in_session=response["blank_count_in_session"],
+            recovery_message=response["message"],
+            suggestions=response["suggestions"],
+        )
+        _render_blank_input_recovery(conn, response)
+    elif has_filter_input and int(st.session_state.get("manual_review_blank_count", 0)):
+        mark_latest_blank_input_recovered(
+            conn,
+            page_context="manual_review",
+            input_type="manual_review_filters",
+            suggestion_clicked="valid_filter",
+        )
+        st.session_state["manual_review_blank_count"] = 0
 
     filtered = _filter_records(records, search, selected_reasons, near_miss_only)
     filtered = _sort_records(filtered, sort_mode)
@@ -521,6 +551,33 @@ def _manual_review(records: list[dict], settings: Settings) -> None:
     _render_review_table(filtered)
 
     _rejection_detail(selected_record, settings)
+
+
+def _render_blank_input_recovery(conn: sqlite3.Connection, response: dict) -> None:
+    st.markdown(
+        f"""
+        <div class="blank-input-warning" aria-live="polite">
+          {escape(response["message"])}
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    suggestions = response.get("suggestions", [])[:3]
+    if not suggestions:
+        return
+    cols = st.columns(len(suggestions))
+    for index, suggestion in enumerate(suggestions):
+        label = str(suggestion.get("label") or "Open")
+        action = str(suggestion.get("action") or "")
+        if cols[index].button(label, key=f"manual_blank_recovery_{action}_{response['blank_count_in_session']}"):
+            mark_latest_blank_input_recovered(
+                conn,
+                page_context=str(response["page_context"]),
+                input_type=str(response["input_type"]),
+                suggestion_clicked=action,
+            )
+            st.session_state["manual_review_blank_count"] = 0
+            st.info(f"Starter selected: {label}.")
 
 
 def _rejection_detail(record: dict, settings: Settings) -> None:
@@ -1175,6 +1232,16 @@ def _style(header_uri: str) -> None:
           color: #111827;
           display: block;
           margin-bottom: 8px;
+        }
+        .blank-input-warning {
+          border: 1px solid rgba(245, 158, 11, 0.4);
+          background: rgba(245, 158, 11, 0.08);
+          color: #92400e;
+          border-radius: 8px;
+          padding: 10px 12px;
+          font-size: 14px;
+          font-weight: 760;
+          margin: 8px 0 10px;
         }
         .reason-chip {
           display: inline-flex;
