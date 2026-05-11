@@ -87,3 +87,4 @@ token_address,chain,symbol,name,decimals,created_at_scan,first_seen_at,source
 0x4225658360C731a2b4c34555E45fea3b4b0181D5,base,PORT,DataPort Navigator by Virtuals,,2026-05-11T16:12:30+00:00,2026-05-11T16:12:30+00:00,boost_latest
 0xEc4787e367210786e9B042804f3011119ce9fbA3,base,AGENT,Agent Token,,2026-05-11T16:12:30+00:00,2026-05-11T16:12:30+00:00,search_agent
 0x9595e1e41a9f78Ba84ccf6488Bff7E3EA45162D9,base,launch,launch,,2026-05-11T16:12:30+00:00,2026-05-11T16:12:30+00:00,search_launch
+0x63c8028099f01C01ef153827984D1FA8e7576b07,base,TROLL,TrollAgent,,2026-05-11T18:06:40+00:00,2026-05-11T18:06:40+00:00,boost_latest
