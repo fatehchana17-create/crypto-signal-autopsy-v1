@@ -5,6 +5,7 @@ from collections import Counter
 from html import escape
 import sqlite3
 from pathlib import Path
+from urllib.parse import quote
 
 import pandas as pd
 import streamlit as st
@@ -398,26 +399,50 @@ def _tradable_lab(conn: sqlite3.Connection, settings: Settings) -> None:
     cols[1].metric("Strong Candidates", strong)
     cols[2].metric("Cautious Watch", len(rows) - strong)
     cols[3].metric("Avg Score", f"{avg_score:.1f}" if avg_score is not None else "No data")
-    _render_simple_table(
-        [
-            {
-                "Token": row.get("symbol") or "UNKNOWN",
-                "Tier": row.get("tradable_tier") or "",
-                "Score": f"{float(row.get('tradable_score') or 0):.0f}",
-                "Latest": f"{row.get('latest_horizon') or ''} {pct(row.get('latest_return_pct'))}",
-                "Best": pct(row.get("best_return_pct")),
-                "Worst": pct(row.get("worst_return_pct")),
-                "Liquidity": money(row.get("liquidity_usd")),
-                "Volume": money(row.get("volume_24h_usd")),
-                "Risk": f"{float(row.get('risk_score') or 0):.0f}",
-                "Survival": f"{float(row.get('survival_score') or 0):.0f}",
-                "Why": row.get("reasons") or "",
-                "Caution": row.get("risk_notes") or "",
-            }
-            for row in rows[:80]
-        ],
-        "No tradable candidates yet. This section stays empty unless stricter liquidity, risk, and survival checks pass.",
-    )
+    if not rows:
+        st.info("No tradable candidates yet. This section stays empty unless stricter liquidity, risk, and survival checks pass.")
+    else:
+        body = []
+        for row in rows[:80]:
+            actions = _trade_action_links(row)
+            body.append(
+                f"""
+                <tr>
+                  <td><strong>{escape(str(row.get("symbol") or "UNKNOWN"))}</strong><br><span class="muted-cell">{escape(str(row.get("scan_time") or ""))}</span></td>
+                  <td>{escape(str(row.get("tradable_tier") or ""))}</td>
+                  <td class="num">{float(row.get("tradable_score") or 0):.0f}</td>
+                  <td>{escape(str(row.get("latest_horizon") or ""))} {escape(pct(row.get("latest_return_pct")))}</td>
+                  <td class="num">{escape(pct(row.get("best_return_pct")))}</td>
+                  <td class="num">{escape(pct(row.get("worst_return_pct")))}</td>
+                  <td class="num">{escape(money(row.get("liquidity_usd")))}</td>
+                  <td class="num">{escape(money(row.get("volume_24h_usd")))}</td>
+                  <td class="num">{float(row.get("risk_score") or 0):.0f}</td>
+                  <td class="num">{float(row.get("survival_score") or 0):.0f}</td>
+                  <td>{escape(str(row.get("reasons") or ""))}</td>
+                  <td>{escape(str(row.get("risk_notes") or ""))}</td>
+                  <td>{actions}</td>
+                </tr>
+                """
+            )
+        _render_table(
+            headers=[
+                "Token",
+                "Tier",
+                "Score",
+                "Latest",
+                "Best",
+                "Worst",
+                "Liquidity",
+                "Volume",
+                "Risk",
+                "Survival",
+                "Why",
+                "Caution",
+                "Open",
+            ],
+            body="".join(body),
+            min_width=1450,
+        )
     st.info("Manual risk management is still required. This section is a research shortlist, not a trading command.")
 
 
@@ -668,6 +693,54 @@ def _render_v2_bucket_table(rows: list[dict[str, str]]) -> None:
         body="".join(body),
         min_width=1320,
     )
+
+
+def _trade_action_links(row: dict[str, object]) -> str:
+    chart_url = _chart_url(row)
+    swap_url = _swap_url(row)
+    links = []
+    if chart_url:
+        links.append(
+            f'<a class="table-action" href="{escape(chart_url)}" target="_blank" rel="noreferrer">Chart</a>'
+        )
+    if swap_url:
+        links.append(
+            f'<a class="table-action trade" href="{escape(swap_url)}" target="_blank" rel="noreferrer">Swap Page</a>'
+        )
+    return '<div class="table-actions">' + "".join(links) + "</div>"
+
+
+def _chart_url(row: dict[str, object]) -> str:
+    chain, pair = _pair_parts(str(row.get("pair_id") or ""))
+    if not chain or not pair:
+        return ""
+    return f"https://dexscreener.com/{quote(chain)}/{quote(pair)}"
+
+
+def _swap_url(row: dict[str, object]) -> str:
+    token = str(row.get("token_address") or "").strip()
+    if not token:
+        return _chart_url(row)
+    chain, _pair = _pair_parts(str(row.get("pair_id") or ""))
+    if chain == "solana":
+        return f"https://jup.ag/swap/SOL-{quote(token)}"
+    chain_map = {
+        "base": "base",
+        "ethereum": "mainnet",
+        "eth": "mainnet",
+        "arbitrum": "arbitrum",
+        "optimism": "optimism",
+        "polygon": "polygon",
+    }
+    swap_chain = chain_map.get(chain, "base")
+    return f"https://app.uniswap.org/swap?chain={quote(swap_chain)}&outputCurrency={quote(token)}"
+
+
+def _pair_parts(pair_id: str) -> tuple[str, str]:
+    if ":" not in pair_id:
+        return "", ""
+    chain, pair = pair_id.split(":", 1)
+    return chain.strip().lower(), pair.strip()
 
 
 def _manual_review(conn: sqlite3.Connection, records: list[dict], settings: Settings) -> None:
@@ -1570,6 +1643,20 @@ def _style(header_uri: str) -> None:
         }
         .table-action:hover {
           background: #ccfbf1;
+        }
+        .table-actions {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          min-width: 140px;
+        }
+        .table-action.trade {
+          border-color: #15803d;
+          color: #166534 !important;
+          background: #ecfdf3;
+        }
+        .table-action.trade:hover {
+          background: #dcfce7;
         }
         .return-good {
           color: #0f766e !important;

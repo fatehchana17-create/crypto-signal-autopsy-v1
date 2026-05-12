@@ -856,6 +856,10 @@ def _render_html(payload: dict[str, Any]) -> str:
     button, select, input {{ background:#0b1020; color:var(--text); border:1px solid var(--border); border-radius:6px; padding:9px 10px; font:inherit; }}
     button {{ cursor:pointer; color:var(--muted); font-weight:900; }}
     button.active {{ color:var(--green); border-color:var(--border-hot); background:rgba(34,197,94,.08); }}
+    .table-actions {{ display:flex; flex-wrap:wrap; gap:6px; min-width:130px; }}
+    .table-action {{ display:inline-flex; align-items:center; justify-content:center; border:1px solid var(--border); border-radius:6px; padding:6px 8px; color:var(--muted); font-size:12px; white-space:nowrap; }}
+    .table-action.trade {{ border-color:rgba(34,197,94,.35); color:#bbf7d0; background:rgba(34,197,94,.08); }}
+    .table-action:hover {{ border-color:var(--border-hot); color:var(--text); }}
     .exports a {{ display:inline-flex; margin:4px 7px 4px 0; padding:7px 9px; border:1px solid var(--border); border-radius:6px; color:var(--muted); }}
     @media (max-width: 1050px) {{ .grid {{ grid-template-columns: repeat(2, minmax(0, 1fr)); }} .hero, .two, .grid3 {{ grid-template-columns:1fr; }} }}
     @media (max-width: 680px) {{ .shell {{ padding:16px 12px 50px; }} .grid {{ grid-template-columns:1fr; }} .hero {{ padding:20px; }} th:nth-child(n+5), td:nth-child(n+5) {{ display:none; }} }}
@@ -1040,6 +1044,35 @@ def _render_html(payload: dict[str, Any]) -> str:
       if (Array.isArray(value)) return value;
       try {{ return JSON.parse(value || "[]"); }} catch {{ return []; }}
     }};
+    function pairParts(pairId) {{
+      const [chain = "", pair = ""] = String(pairId || "").split(":");
+      return {{ chain, pair }};
+    }}
+    function chartUrl(row) {{
+      const parts = pairParts(row.pair_id);
+      return parts.chain && parts.pair ? `https://dexscreener.com/${{parts.chain}}/${{parts.pair}}` : "";
+    }}
+    function swapUrl(row) {{
+      const parts = pairParts(row.pair_id);
+      const token = row.token_address || "";
+      if (!token) return chartUrl(row);
+      const chainMap = {{
+        base: "base",
+        ethereum: "mainnet",
+        eth: "mainnet",
+        arbitrum: "arbitrum",
+        optimism: "optimism",
+        polygon: "polygon"
+      }};
+      if (parts.chain === "solana") return `https://jup.ag/swap/SOL-${{encodeURIComponent(token)}}`;
+      const swapChain = chainMap[parts.chain] || "base";
+      return `https://app.uniswap.org/swap?chain=${{swapChain}}&outputCurrency=${{encodeURIComponent(token)}}`;
+    }}
+    function actionLinks(row) {{
+      const chart = chartUrl(row);
+      const swap = swapUrl(row);
+      return `<div class="table-actions">${{chart ? `<a class="table-action" href="${{chart}}" target="_blank" rel="noreferrer">Chart</a>` : ""}}${{swap ? `<a class="table-action trade" href="${{swap}}" target="_blank" rel="noreferrer">Swap Page</a>` : ""}}</div>`;
+    }}
     const byCategory = category => (quant.category_performance || []).filter(row => row.category === category);
     const perf = (category, horizon) => byCategory(category).find(row => row.horizon === horizon) || {{}};
     const labelCounts = v2.label_counts || {{}};
@@ -1247,7 +1280,7 @@ def _render_html(payload: dict[str, Any]) -> str:
         title: row.symbol || "UNKNOWN",
         label: row.tradable_tier || row.source_label || "",
         detail: [row.research_window, row.action_note, row.risk_notes].filter(Boolean).join(" | "),
-        url: "",
+        url: chartUrl(row),
         haystack: `${{row.symbol}} ${{row.source_label}} ${{row.tradable_tier}} ${{row.reasons}} ${{row.risk_notes}}`
       }}));
       (quant.winner_loser_dna || []).forEach(row => rows.push({{
@@ -1421,7 +1454,7 @@ def _render_html(payload: dict[str, Any]) -> str:
       ["Avg tradable score", avgTradableScore == null ? "No data" : avgTradableScore.toFixed(1), "Composite score from liquidity, volume, risk, trap, and survival."]
     ].map(([label, value, copy]) => `<div class="metric-card"><div class="metric-label">${{label}}</div><div class="metric-value">${{value}}</div><p class="small">${{copy}}</p></div>`).join("");
     document.getElementById("tradableCoins").innerHTML = table(
-      ["Token","Tier","Score","Latest","Best","Worst","Liquidity","Volume","Buy","Risk","Survival","Why","Caution"],
+      ["Token","Tier","Score","Latest","Best","Worst","Liquidity","Volume","Buy","Risk","Survival","Why","Caution","Open"],
       tradableRows.slice(0,30).map(row => `<tr>
         <td><strong>${{row.symbol}}</strong><br><span class="small">${{row.scan_time || ""}}</span></td>
         <td>${{row.tradable_tier || ""}}</td>
@@ -1436,6 +1469,7 @@ def _render_html(payload: dict[str, Any]) -> str:
         <td>${{Number(row.survival_score || 0).toFixed(0)}}</td>
         <td>${{asJsonList(row.reasons).join(", ")}}</td>
         <td>${{asJsonList(row.risk_notes).join(", ")}}<br><span class="small">${{row.action_note || ""}}</span></td>
+        <td>${{actionLinks(row)}}</td>
       </tr>`),
       "No tradable candidates yet. This section stays empty unless stricter liquidity, risk, and survival checks pass."
     );
