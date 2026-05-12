@@ -109,3 +109,7 @@ token_address,chain,symbol,name,decimals,created_at_scan,first_seen_at,source
 0x115c92fd34A7E6cc8eBCe8C4897cAEF7D4Be41dd,base,VEIL,VEIL,,2026-05-12T18:19:00+00:00,2026-05-12T18:19:00+00:00,profile_latest
 0xE31700c6BD46638D207991fB5CC5c0daD3D1e3DA,base,ROO,Ratehopper AI,,2026-05-12T18:19:00+00:00,2026-05-12T18:19:00+00:00,profile_latest
 0x89DA201E6f8b256906752ED7d7Fa7E9F16Ec3B07,base,solvrbot,solvrbot,,2026-05-12T18:19:00+00:00,2026-05-12T18:19:00+00:00,boost_latest
+0xa8f7eEb6A633dAcA9d370a51ed52eb67e0A8b48d,base,BLUE,Blueperp,,2026-05-12T20:51:19+00:00,2026-05-12T20:51:19+00:00,profile_latest
+0x41a5e4E0209ddA19587F509983bC995b07d58b07,base,CHARMS,Charms Agent,,2026-05-12T20:51:19+00:00,2026-05-12T20:51:19+00:00,boost_latest
+0x175df8D81ceF1DAbF0568797176DCE68A9977BA3,base,BASE,"Base Batches 003 is officially here  Building the future onchain? Join one of our three tracks: 💡 Startup 🎓 Student 🤖 Robotics by  @virtuals_io   Get expert mentorship, up to $50k in funding, and a stage at Demo Day in San Francisco 🧵",,2026-05-12T20:51:19+00:00,2026-05-12T20:51:19+00:00,search_base
+0xe1E295C1Fa050E4aE77ca70e938C24d3221196D4,base,BASE,basedliquid,,2026-05-12T20:51:19+00:00,2026-05-12T20:51:19+00:00,search_base
