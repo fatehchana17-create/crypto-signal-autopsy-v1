@@ -867,7 +867,7 @@ def _render_html(payload: dict[str, Any]) -> str:
       <div class="brand"><div class="mark">Σ</div><span>Crypto Signal Autopsy</span></div>
       <div class="navlinks">
         <a href="#overview">Overview</a><a href="#guided-search">Search</a><a href="#categories">Categories</a><a href="#charts">Charts</a>
-        <a href="#failures">Failures</a><a href="#missed">Missed Winners</a><a href="#baselines">Baselines</a>
+        <a href="#tradable">Tradable</a><a href="#dna-delay">DNA/Delay</a><a href="#survival">Survival</a><a href="#failures">Failures</a><a href="#missed">Missed Winners</a><a href="#baselines">Baselines</a>
         <a href="#wallets">Wallets</a><a href="#quality">Data Quality</a>
       </div>
     </nav>
@@ -898,6 +898,46 @@ def _render_html(payload: dict[str, Any]) -> str:
     <section class="section">
       <div class="section-head"><div><h2>System Verdict Cards</h2><p class="section-copy">The scanner is working, but candidate edge is not proven yet.</p></div></div>
       <div class="grid" id="healthCards"></div>
+    </section>
+
+    <section class="section" id="tradable">
+      <div class="section-head"><div><h2>Tradable Coins</h2><p class="section-copy">These are research-only candidates that passed stricter liquidity, volume, trap-risk, and survival checks for small-move study. This is not a buy signal.</p></div></div>
+      <div class="grid" id="tradableSummary"></div>
+      <div class="panel section">
+        <h2>Tradable Research Candidates</h2>
+        <p class="section-copy">Designed for cautious manual review of possible 5-30% small-move setups. The dashboard never promises a target.</p>
+        <div id="tradableCoins"></div>
+      </div>
+    </section>
+
+    <section class="section two" id="dna-delay">
+      <div class="panel">
+        <h2>Winner DNA vs Loser DNA</h2>
+        <p class="section-copy">Compares the common shape of winners and losers so filters can improve from evidence.</p>
+        <div id="winnerLoserDna"></div>
+      </div>
+      <div class="panel">
+        <h2>Delayed Entry Simulator</h2>
+        <p class="section-copy">Tests whether waiting 15m, 30m, or 1h still worked before later horizons.</p>
+        <div id="delayedEntry"></div>
+      </div>
+    </section>
+
+    <section class="section" id="survival">
+      <div class="section-head"><div><h2>Early Winner Survival Lab</h2><p class="section-copy">This is the new winner-vs-loser research engine. It studies whether early momentum survived after detection instead of pretending a pump is automatically safe.</p></div></div>
+      <div class="grid" id="survivalSummary"></div>
+      <div class="two section">
+        <div class="panel">
+          <h2>Survival Pattern Engine</h2>
+          <p class="section-copy">Pump strength, trap risk, and survival are research scores only. They are not buy or sell signals.</p>
+          <div id="survivalLab"></div>
+        </div>
+        <div class="panel">
+          <h2>Rules To Test Next</h2>
+          <p class="section-copy">The app turns failures and missed winners into specific filter experiments.</p>
+          <div id="survivalRules"></div>
+        </div>
+      </div>
     </section>
 
     <section class="section" id="categories">
@@ -956,6 +996,10 @@ def _render_html(payload: dict[str, Any]) -> str:
       <div class="panel"><h2>10x Candidate Engine</h2><div id="tenXEngine"></div></div>
     </section>
 
+    <section class="section">
+      <div class="panel"><h2>Wallet Memory / Reputation</h2><p class="section-copy">Free wallet memory ranks wallets already seen around scanned tokens. It is not copy trading.</p><div id="walletMemory"></div></div>
+    </section>
+
     <section class="section" id="quality">
       <div class="panel">
         <h2>Data Quality Panel</h2>
@@ -992,6 +1036,10 @@ def _render_html(payload: dict[str, Any]) -> str:
       ? `<div class="scroll"><table><thead><tr>${{headers.map(h=>`<th>${{h}}</th>`).join("")}}</tr></thead><tbody>${{rows.join("")}}</tbody></table></div>`
       : `<p class="small">${{empty}}</p>`;
     const parsePct = value => Number(String(value ?? "0").replace("%","")) || 0;
+    const asJsonList = value => {{
+      if (Array.isArray(value)) return value;
+      try {{ return JSON.parse(value || "[]"); }} catch {{ return []; }}
+    }};
     const byCategory = category => (quant.category_performance || []).filter(row => row.category === category);
     const perf = (category, horizon) => byCategory(category).find(row => row.horizon === horizon) || {{}};
     const labelCounts = v2.label_counts || {{}};
@@ -999,7 +1047,7 @@ def _render_html(payload: dict[str, Any]) -> str:
       dashboard_overview: {{
         message: "Your input came through empty. Try one:",
         suggestions: [
-          ["View latest candidates", "latest_candidates"],
+          ["Tradable coins", "tradable_coins"],
           ["Review missed winners", "missed_winners"],
           ["Open momentum traps", "momentum_traps"]
         ]
@@ -1044,6 +1092,22 @@ def _render_html(payload: dict[str, Any]) -> str:
           ["Explain survival check", "explain_survival"]
         ]
       }},
+      survival_lab: {{
+        message: "Your input came through empty. Try one:",
+        suggestions: [
+          ["Open survival lab", "winner_survival"],
+          ["Review missed winners", "missed_winners"],
+          ["Paper failures", "paper_failures"]
+        ]
+      }},
+      tradable_lab: {{
+        message: "Your input came through empty. Try one:",
+        suggestions: [
+          ["Tradable coins", "tradable_coins"],
+          ["Winner DNA", "winner_dna"],
+          ["Delayed entry", "delayed_entry"]
+        ]
+      }},
       default: {{
         message: "Your input came through empty. Try one:",
         suggestions: [
@@ -1063,6 +1127,8 @@ def _render_html(payload: dict[str, Any]) -> str:
       if (hash === "wallets") return "wallet_intelligence";
       if (hash === "missed") return "missed_winner_lab";
       if (hash === "failures") return "paper_candidate_review";
+      if (hash === "survival") return "survival_lab";
+      if (hash === "tradable" || hash === "dna-delay") return "tradable_lab";
       if (hash === "categories" || hash === "charts") return "pump_trap_engine";
       if (hash === "guided-search") return "token_search";
       if (hash === "overview" || !hash) return "dashboard_overview";
@@ -1168,6 +1234,46 @@ def _render_html(payload: dict[str, Any]) -> str:
         url: "",
         haystack: `${{row.symbol}} ${{row.original_label}} ${{row.main_lesson}} ${{row.tradability_label}}`
       }}));
+      (quant.winner_survival_lab || []).forEach(row => rows.push({{
+        type: "Survival lab",
+        title: row.symbol || "UNKNOWN",
+        label: row.setup_type || row.original_label || "",
+        detail: [row.survival_label, row.learning_note, row.next_rule_to_test].filter(Boolean).join(" | "),
+        url: "",
+        haystack: `${{row.symbol}} ${{row.original_label}} ${{row.setup_type}} ${{row.survival_label}} ${{row.learning_note}} ${{row.next_rule_to_test}}`
+      }}));
+      (quant.tradable_candidates || []).forEach(row => rows.push({{
+        type: "Tradable coin",
+        title: row.symbol || "UNKNOWN",
+        label: row.tradable_tier || row.source_label || "",
+        detail: [row.research_window, row.action_note, row.risk_notes].filter(Boolean).join(" | "),
+        url: "",
+        haystack: `${{row.symbol}} ${{row.source_label}} ${{row.tradable_tier}} ${{row.reasons}} ${{row.risk_notes}}`
+      }}));
+      (quant.winner_loser_dna || []).forEach(row => rows.push({{
+        type: "DNA profile",
+        title: row.dna_type || "DNA",
+        label: `${{row.sample_count || 0}} samples`,
+        detail: row.rule_implication || row.pattern_summary || "",
+        url: "",
+        haystack: `${{row.dna_type}} ${{row.pattern_summary}} ${{row.rule_implication}}`
+      }}));
+      (quant.delayed_entry_simulator || []).forEach(row => rows.push({{
+        type: "Delayed entry",
+        title: `${{row.entry_delay}} -> ${{row.exit_horizon}}`,
+        label: row.source_label || "",
+        detail: [row.verdict, row.lesson].filter(Boolean).join(" | "),
+        url: "",
+        haystack: `${{row.source_label}} ${{row.entry_delay}} ${{row.exit_horizon}} ${{row.verdict}} ${{row.lesson}}`
+      }}));
+      (quant.wallet_reputation_memory || []).forEach(row => rows.push({{
+        type: "Wallet memory",
+        title: row.wallet_address || "Wallet",
+        label: row.memory_tier || "",
+        detail: [row.reputation_note, row.caution_note].filter(Boolean).join(" | "),
+        url: "",
+        haystack: `${{row.wallet_address}} ${{row.wallet_label}} ${{row.memory_tier}} ${{row.reputation_note}} ${{row.caution_note}}`
+      }}));
       (wallets.leaderboard || []).forEach(row => rows.push({{
         type: "Wallet",
         title: row.wallet || "Wallet",
@@ -1219,6 +1325,15 @@ def _render_html(payload: dict[str, Any]) -> str:
       }} else if (action === "pending_candidates") {{
         renderBucketSearch("Pending Paper Candidate");
         location.hash = "guided-search";
+      }} else if (action === "winner_survival") {{
+        location.hash = "survival";
+        document.getElementById("searchResults").innerHTML = `<p class="small">Opened the Early Winner Survival Lab.</p>`;
+      }} else if (action === "tradable_coins") {{
+        location.hash = "tradable";
+        document.getElementById("searchResults").innerHTML = `<p class="small">Opened Tradable Coins research candidates.</p>`;
+      }} else if (action === "winner_dna" || action === "delayed_entry") {{
+        location.hash = "dna-delay";
+        document.getElementById("searchResults").innerHTML = `<p class="small">Opened Winner DNA and Delayed Entry Simulator.</p>`;
       }} else if (action === "paper_failures" || action === "explain_survival") {{
         location.hash = "failures";
         document.getElementById("searchResults").innerHTML = `<p class="small">Opened the paper-candidate failure/survival area.</p>`;
@@ -1293,6 +1408,123 @@ def _render_html(payload: dict[str, Any]) -> str:
     document.getElementById("healthCards").innerHTML = healthCards.map(([label,value,copy]) => `
       <div class="metric-card"><div class="metric-label">${{label}}</div><div class="metric-value">${{value}}</div><p class="small">${{copy}}</p></div>
     `).join("");
+
+    const tradableRows = quant.tradable_candidates || [];
+    const strongTradable = tradableRows.filter(row => row.tradable_tier === "Tradable Research Candidate").length;
+    const avgTradableScore = tradableRows.length
+      ? tradableRows.reduce((sum, row) => sum + Number(row.tradable_score || 0), 0) / tradableRows.length
+      : null;
+    document.getElementById("tradableSummary").innerHTML = [
+      ["Tradable rows", tradableRows.length, "Candidates passing stricter small-move research checks."],
+      ["Strong candidates", strongTradable, "Higher-score rows that still require manual risk management."],
+      ["Cautious watch", tradableRows.length - strongTradable, "Possible setups that need extra confirmation."],
+      ["Avg tradable score", avgTradableScore == null ? "No data" : avgTradableScore.toFixed(1), "Composite score from liquidity, volume, risk, trap, and survival."]
+    ].map(([label, value, copy]) => `<div class="metric-card"><div class="metric-label">${{label}}</div><div class="metric-value">${{value}}</div><p class="small">${{copy}}</p></div>`).join("");
+    document.getElementById("tradableCoins").innerHTML = table(
+      ["Token","Tier","Score","Latest","Best","Worst","Liquidity","Volume","Buy","Risk","Survival","Why","Caution"],
+      tradableRows.slice(0,30).map(row => `<tr>
+        <td><strong>${{row.symbol}}</strong><br><span class="small">${{row.scan_time || ""}}</span></td>
+        <td>${{row.tradable_tier || ""}}</td>
+        <td>${{Number(row.tradable_score || 0).toFixed(0)}}</td>
+        <td>${{row.latest_horizon || ""}} ${{fmtPct(row.latest_return_pct)}}</td>
+        ${{cell(fmtPct(row.best_return_pct))}}
+        ${{cell(fmtPct(row.worst_return_pct))}}
+        <td>${{money(row.liquidity_usd)}}</td>
+        <td>${{money(row.volume_24h_usd)}}</td>
+        <td>${{row.buy_ratio == null ? "No data" : `${{(Number(row.buy_ratio)*100).toFixed(1)}}%`}}</td>
+        <td>${{Number(row.risk_score || 0).toFixed(0)}}</td>
+        <td>${{Number(row.survival_score || 0).toFixed(0)}}</td>
+        <td>${{asJsonList(row.reasons).join(", ")}}</td>
+        <td>${{asJsonList(row.risk_notes).join(", ")}}<br><span class="small">${{row.action_note || ""}}</span></td>
+      </tr>`),
+      "No tradable candidates yet. This section stays empty unless stricter liquidity, risk, and survival checks pass."
+    );
+
+    document.getElementById("winnerLoserDna").innerHTML = table(
+      ["DNA","Samples","Liq","Volume","Age","1h move","Buy","Pump","Trap","Survival","Best","Worst","Rule"],
+      (quant.winner_loser_dna || []).map(row => `<tr>
+        <td><strong>${{row.dna_type}}</strong><br><span class="small">${{row.common_source_labels || ""}}</span></td>
+        <td>${{row.sample_count || 0}}</td>
+        <td>${{money(row.median_liquidity_usd)}}</td>
+        <td>${{money(row.median_volume_24h_usd)}}</td>
+        <td>${{row.median_pair_age_hours == null ? "No data" : `${{Number(row.median_pair_age_hours).toFixed(1)}}h`}}</td>
+        <td>${{fmtPct(row.median_price_change_1h_pct)}}</td>
+        <td>${{row.median_buy_ratio == null ? "No data" : `${{(Number(row.median_buy_ratio)*100).toFixed(1)}}%`}}</td>
+        <td>${{Number(row.median_pump_strength_score || 0).toFixed(0)}}</td>
+        <td>${{Number(row.median_trap_risk_score || 0).toFixed(0)}}</td>
+        <td>${{Number(row.median_survival_score || 0).toFixed(0)}}</td>
+        ${{cell(fmtPct(row.median_best_return_pct))}}
+        ${{cell(fmtPct(row.median_worst_return_pct))}}
+        <td>${{row.rule_implication || ""}}</td>
+      </tr>`),
+      "No DNA profiles yet."
+    );
+    document.getElementById("delayedEntry").innerHTML = table(
+      ["Label","Entry","Exit","Rows","Median","Average","Positive","Best","Worst","Verdict","Lesson"],
+      (quant.delayed_entry_simulator || []).slice(0,40).map(row => `<tr>
+        <td>${{row.source_label || ""}}</td>
+        <td>${{row.entry_delay}}</td>
+        <td>${{row.exit_horizon}}</td>
+        <td>${{row.sample_count || 0}}</td>
+        ${{cell(fmtPct(row.median_return_pct))}}
+        ${{cell(fmtPct(row.average_return_pct))}}
+        <td>${{row.positive_rate == null ? "No data" : `${{(Number(row.positive_rate)*100).toFixed(1)}}%`}}</td>
+        ${{cell(fmtPct(row.best_return_pct))}}
+        ${{cell(fmtPct(row.worst_return_pct))}}
+        <td>${{row.verdict || ""}}</td>
+        <td>${{row.lesson || ""}}</td>
+      </tr>`),
+      "No delayed entry simulations yet."
+    );
+
+    const survivalRows = quant.winner_survival_lab || [];
+    const survivalCounts = survivalRows.reduce((acc, row) => {{
+      const key = row.setup_type || "Needs More Evidence";
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }}, {{}});
+    const winnerSurvivors = survivalRows.filter(row => Number(row.best_return_pct || 0) >= 50 && Number(row.survival_score || 0) >= 50).length;
+    const acceptedFailures = survivalRows.filter(row => row.setup_type === "Accepted Failure").length;
+    const avgSurvival = survivalRows.length
+      ? survivalRows.reduce((sum, row) => sum + Number(row.survival_score || 0), 0) / survivalRows.length
+      : null;
+    document.getElementById("survivalSummary").innerHTML = [
+      ["Rows studied", survivalRows.length, "Tokens with post-detection outcomes in the survival engine."],
+      ["Winner survivors", winnerSurvivors, "Rows with strong upside and enough survival evidence."],
+      ["Accepted failures", acceptedFailures, "Accepted/research labels that faded badly after detection."],
+      ["Avg survival score", avgSurvival == null ? "No data" : avgSurvival.toFixed(1), "Higher means the token held up after detection."]
+    ].map(([label, value, copy]) => `<div class="metric-card"><div class="metric-label">${{label}}</div><div class="metric-value">${{value}}</div><p class="small">${{copy}}</p></div>`).join("");
+
+    document.getElementById("survivalLab").innerHTML = table(
+      ["Token","Setup","Label","Latest","Best","Worst","Pump","Trap","Survival","Horizons","Lesson"],
+      survivalRows.slice(0,30).map(row => `<tr>
+        <td><strong>${{row.symbol}}</strong><br><span class="small">${{row.scan_time || ""}}</span></td>
+        <td>${{row.setup_type || ""}}</td>
+        <td>${{row.original_label || ""}}</td>
+        <td>${{row.latest_horizon || ""}} ${{fmtPct(row.latest_return_pct)}}</td>
+        ${{cell(fmtPct(row.best_return_pct))}}
+        ${{cell(fmtPct(row.worst_return_pct))}}
+        <td>${{Number(row.pump_strength_score || 0).toFixed(0)}}</td>
+        <td>${{Number(row.trap_risk_score || 0).toFixed(0)}}</td>
+        <td>${{Number(row.survival_score || 0).toFixed(0)}}<br><span class="small">${{row.survival_label || ""}}</span></td>
+        <td>${{asJsonList(row.matured_horizons).join(", ")}}</td>
+        <td>${{row.learning_note || ""}}</td>
+      </tr>`),
+      "No survival rows yet. It fills when tracked candidates have 15m, 30m, 1h, 2h, 4h, 8h, or 24h outcomes."
+    );
+    const ruleCounts = survivalRows.reduce((acc, row) => {{
+      const key = row.next_rule_to_test || "Keep research-only until more horizons mature.";
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }}, {{}});
+    document.getElementById("survivalRules").innerHTML = table(
+      ["Rule experiment","Rows"],
+      Object.entries(ruleCounts)
+        .sort((a,b) => b[1] - a[1])
+        .slice(0,12)
+        .map(([rule, count]) => `<tr><td>${{rule}}</td><td>${{count}}</td></tr>`),
+      "No rule experiments yet."
+    ) + `<p class="small">Pattern counts: ${{Object.entries(survivalCounts).map(([key, value]) => `${{key}}: ${{value}}`).join(" | ") || "No data yet."}}</p>`;
 
     function categoryVerdictClass(verdict) {{
       if ((verdict || "").includes("Good")) return "Good";
@@ -1401,12 +1633,30 @@ def _render_html(payload: dict[str, Any]) -> str:
       ["Label","Rows"],
       Object.entries((v2.bucket_tables || {{}})).map(([label, rows]) => `<tr><td>${{label}}</td><td>${{rows.length}}</td></tr>`)
     ) + `<p class="small">10x Potential Score, Risk-Adjusted 10x Score, Manipulation Risk Score, and Tradability Score are audit metrics only. They are not predictions.</p>`;
+    document.getElementById("walletMemory").innerHTML = table(
+      ["Wallet","Tier","Quality","Risk","Tokens","Exits","Win rate","Median return","Rug","Quick dump","Note","Caution"],
+      (quant.wallet_reputation_memory || []).slice(0,35).map(row => `<tr>
+        <td><strong>${{String(row.wallet_address || "").slice(0,10)}}...</strong><br><span class="small">${{row.wallet_label || ""}}</span></td>
+        <td>${{row.memory_tier || ""}}</td>
+        <td>${{Number(row.wallet_quality_score || 0).toFixed(0)}}</td>
+        <td>${{Number(row.wallet_risk_score || 0).toFixed(0)}}</td>
+        <td>${{row.tokens_traded || 0}}</td>
+        <td>${{row.realized_exits || 0}}</td>
+        <td>${{row.win_rate == null ? "No data" : `${{(Number(row.win_rate)*100).toFixed(1)}}%`}}</td>
+        ${{cell(fmtPct(row.median_realized_return_pct))}}
+        <td>${{row.rug_exposure_rate == null ? "No data" : `${{(Number(row.rug_exposure_rate)*100).toFixed(1)}}%`}}</td>
+        <td>${{row.quick_dump_rate == null ? "No data" : `${{(Number(row.quick_dump_rate)*100).toFixed(1)}}%`}}</td>
+        <td>${{row.reputation_note || ""}}</td>
+        <td>${{row.caution_note || ""}}</td>
+      </tr>`),
+      "No wallet memory yet. The wallet module needs tracked wallet history first."
+    );
     document.getElementById("dataQuality").innerHTML = table(
       ["Metric","Value","Status","Detail"],
       (quant.data_quality_report || []).map(row => `<tr><td>${{row.metric}}</td><td>${{row.value}}</td><td class="${{row.status === "OK" ? "good" : "Mixed"}}">${{row.status}}</td><td>${{row.detail || ""}}</td></tr>`)
     );
     const repoExports = "https://github.com/fatehchana17-create/crypto-signal-autopsy-v1/blob/main/exports/";
-    const exportNames = ["category_performance","accepted_failure_diagnosis","missed_winner_review","baseline_comparisons","ten_x_failure_review","data_quality_report","filter_results","outcome_snapshots","paper_trades","wallets","ux_blank_input_events"];
+    const exportNames = ["category_performance","accepted_failure_diagnosis","missed_winner_review","baseline_comparisons","ten_x_failure_review","winner_survival_lab","tradable_candidates","winner_loser_dna","delayed_entry_simulator","wallet_reputation_memory","data_quality_report","filter_results","outcome_snapshots","paper_trades","wallets","ux_blank_input_events"];
     document.getElementById("exports").innerHTML = exportNames.map(name => `<a href="${{repoExports}}${{name}}.csv">${{name}}.csv</a><a href="data/${{name}}.json">${{name}}.json</a>`).join("") + `<button id="downloadUxEvents" type="button">Download local blank-input events</button>`;
     renderQuickReplies("guidedQuickReplies", RECOVERY_CONTEXTS.default.suggestions.map(([label, action]) => ({{label, action}})));
     document.getElementById("globalSearchButton").addEventListener("click", performGuidedSearch);

@@ -13,6 +13,11 @@ exports/*.csv
 !exports/missed_winner_review.csv
 !exports/baseline_comparisons.csv
 !exports/ten_x_failure_review.csv
+!exports/winner_survival_lab.csv
+!exports/tradable_candidates.csv
+!exports/winner_loser_dna.csv
+!exports/delayed_entry_simulator.csv
+!exports/wallet_reputation_memory.csv
 !exports/data_quality_report.csv
 !exports/ux_blank_input_events.csv
 logs/

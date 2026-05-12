@@ -622,6 +622,126 @@ CREATE TABLE IF NOT EXISTS ten_x_failure_review (
     created_at TEXT
 );
 
+CREATE TABLE IF NOT EXISTS winner_survival_lab (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    token_address TEXT,
+    symbol TEXT,
+    pair_id TEXT,
+    original_label TEXT,
+    scan_time TEXT,
+    setup_type TEXT,
+    pump_strength_score REAL,
+    trap_risk_score REAL,
+    survival_score REAL,
+    survival_label TEXT,
+    matured_horizons TEXT,
+    latest_horizon TEXT,
+    latest_return_pct REAL,
+    best_return_pct REAL,
+    worst_return_pct REAL,
+    liquidity_retention_pct REAL,
+    volume_retention_pct REAL,
+    buy_ratio_at_scan REAL,
+    pair_age_hours_at_scan REAL,
+    price_change_1h_at_scan REAL,
+    ten_x_score REAL,
+    learning_note TEXT,
+    next_rule_to_test TEXT,
+    created_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS tradable_candidates (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    token_address TEXT,
+    symbol TEXT,
+    pair_id TEXT,
+    source_label TEXT,
+    scan_time TEXT,
+    tradable_score REAL,
+    tradable_tier TEXT,
+    research_window TEXT,
+    latest_horizon TEXT,
+    latest_return_pct REAL,
+    best_return_pct REAL,
+    worst_return_pct REAL,
+    liquidity_usd REAL,
+    volume_24h_usd REAL,
+    buy_ratio REAL,
+    pair_age_hours REAL,
+    price_change_1h_pct REAL,
+    risk_score REAL,
+    opportunity_score REAL,
+    ten_x_score REAL,
+    pump_strength_score REAL,
+    trap_risk_score REAL,
+    survival_score REAL,
+    liquidity_retention_pct REAL,
+    volume_retention_pct REAL,
+    reasons TEXT,
+    risk_notes TEXT,
+    action_note TEXT,
+    created_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS winner_loser_dna (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    dna_type TEXT,
+    sample_count INTEGER,
+    median_liquidity_usd REAL,
+    median_volume_24h_usd REAL,
+    median_pair_age_hours REAL,
+    median_price_change_1h_pct REAL,
+    median_buy_ratio REAL,
+    median_pump_strength_score REAL,
+    median_trap_risk_score REAL,
+    median_survival_score REAL,
+    median_best_return_pct REAL,
+    median_worst_return_pct REAL,
+    common_source_labels TEXT,
+    pattern_summary TEXT,
+    rule_implication TEXT,
+    created_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS delayed_entry_simulator (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    source_label TEXT,
+    entry_delay TEXT,
+    exit_horizon TEXT,
+    sample_count INTEGER,
+    median_return_pct REAL,
+    average_return_pct REAL,
+    positive_rate REAL,
+    best_return_pct REAL,
+    worst_return_pct REAL,
+    verdict TEXT,
+    lesson TEXT,
+    created_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS wallet_reputation_memory (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    wallet_address TEXT,
+    chain TEXT,
+    wallet_label TEXT,
+    memory_tier TEXT,
+    wallet_quality_score REAL,
+    wallet_risk_score REAL,
+    tokens_traded INTEGER,
+    realized_exits INTEGER,
+    win_rate REAL,
+    median_realized_return_pct REAL,
+    avg_realized_return_pct REAL,
+    rug_exposure_rate REAL,
+    quick_dump_rate REAL,
+    first_minute_entry_rate REAL,
+    avg_hold_time_minutes REAL,
+    reputation_note TEXT,
+    caution_note TEXT,
+    last_seen_at TEXT,
+    created_at TEXT
+);
+
 CREATE TABLE IF NOT EXISTS data_quality_report (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     metric TEXT,

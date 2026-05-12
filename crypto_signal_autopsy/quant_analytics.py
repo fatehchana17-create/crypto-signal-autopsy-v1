@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections import defaultdict
+from collections import Counter, defaultdict
 from datetime import datetime, timezone
 import csv
 import json
@@ -31,6 +31,11 @@ QUANT_TABLES = [
     "missed_winner_review",
     "baseline_comparisons",
     "ten_x_failure_review",
+    "winner_survival_lab",
+    "tradable_candidates",
+    "winner_loser_dna",
+    "delayed_entry_simulator",
+    "wallet_reputation_memory",
     "data_quality_report",
 ]
 
@@ -44,6 +49,11 @@ def refresh_quant_analytics(conn: sqlite3.Connection, settings: Settings) -> dic
         "missed_winner_review": _refresh_missed_winner_review(conn, updated_at),
         "baseline_comparisons": _refresh_baseline_comparisons(conn, updated_at),
         "ten_x_failure_review": _refresh_ten_x_failure_review(conn, updated_at),
+        "winner_survival_lab": _refresh_winner_survival_lab(conn, updated_at),
+        "tradable_candidates": _refresh_tradable_candidates(conn, updated_at),
+        "winner_loser_dna": _refresh_winner_loser_dna(conn, updated_at),
+        "delayed_entry_simulator": _refresh_delayed_entry_simulator(conn, updated_at),
+        "wallet_reputation_memory": _refresh_wallet_reputation_memory(conn, updated_at),
         "data_quality_report": _refresh_data_quality_report(conn, updated_at, settings),
     }
     conn.commit()
@@ -75,6 +85,11 @@ def build_quant_payload(conn: sqlite3.Connection) -> dict[str, Any]:
         "missed_winner_review": _table_rows(conn, "missed_winner_review"),
         "baseline_comparisons": _table_rows(conn, "baseline_comparisons"),
         "ten_x_failure_review": _table_rows(conn, "ten_x_failure_review"),
+        "winner_survival_lab": _table_rows(conn, "winner_survival_lab"),
+        "tradable_candidates": _table_rows(conn, "tradable_candidates"),
+        "winner_loser_dna": _table_rows(conn, "winner_loser_dna"),
+        "delayed_entry_simulator": _table_rows(conn, "delayed_entry_simulator"),
+        "wallet_reputation_memory": _table_rows(conn, "wallet_reputation_memory"),
         "data_quality_report": _table_rows(conn, "data_quality_report"),
     }
 
@@ -408,6 +423,357 @@ def _refresh_ten_x_failure_review(conn: sqlite3.Connection, created_at: str) -> 
     return inserted
 
 
+def _refresh_winner_survival_lab(conn: sqlite3.Connection, created_at: str) -> int:
+    _clear(conn, "winner_survival_lab")
+    grouped: dict[tuple[str, str, str], list[sqlite3.Row]] = defaultdict(list)
+    for row in _outcome_rows(conn):
+        if row["return_pct"] is None:
+            continue
+        grouped[(row["pair_id"], row["scan_time"], row["token_address"])].append(row)
+
+    inserted = 0
+    for rows in grouped.values():
+        rows.sort(key=lambda row: _horizon_rank(row["horizon"]))
+        first = rows[0]
+        latest = rows[-1]
+        metrics = _loads(first["raw_metrics"], {})
+        returns = [_num(row["return_pct"]) for row in rows]
+        returns = [value for value in returns if value is not None]
+        if not returns:
+            continue
+
+        liquidity_retention = _retention_pct(latest["liquidity_at_scan"], latest["liquidity_at_horizon"])
+        volume_retention = _retention_pct(latest["volume_at_scan"], latest["volume_at_horizon"])
+        pump_strength = _pump_strength_score(metrics, first)
+        trap_risk = _trap_risk_score(metrics, first, rows, liquidity_retention, volume_retention)
+        survival_score = _survival_score(rows, liquidity_retention, volume_retention, trap_risk)
+        latest_return = _num(latest["return_pct"])
+        best_return = max(returns)
+        worst_return = min(returns)
+        matured_horizons = [row["horizon"] for row in rows if row["return_pct"] is not None]
+        survival_label = _survival_label(survival_score, latest["horizon"], latest_return)
+        setup_type = _survival_setup_type(
+            first["label_at_scan"],
+            pump_strength,
+            trap_risk,
+            survival_score,
+            best_return,
+        )
+        learning_note = _survival_learning_note(
+            first["label_at_scan"],
+            setup_type,
+            pump_strength,
+            trap_risk,
+            survival_score,
+            best_return,
+            worst_return,
+        )
+        next_rule = _survival_next_rule(setup_type, trap_risk, survival_score, liquidity_retention, volume_retention)
+        conn.execute(
+            """
+            INSERT INTO winner_survival_lab (
+              token_address, symbol, pair_id, original_label, scan_time,
+              setup_type, pump_strength_score, trap_risk_score, survival_score,
+              survival_label, matured_horizons, latest_horizon, latest_return_pct,
+              best_return_pct, worst_return_pct, liquidity_retention_pct,
+              volume_retention_pct, buy_ratio_at_scan, pair_age_hours_at_scan,
+              price_change_1h_at_scan, ten_x_score, learning_note,
+              next_rule_to_test, created_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                first["token_address"],
+                metrics.get("base_symbol") or "UNKNOWN",
+                first["pair_id"],
+                first["label_at_scan"],
+                first["scan_time"],
+                setup_type,
+                pump_strength,
+                trap_risk,
+                survival_score,
+                survival_label,
+                db.to_json(matured_horizons),
+                latest["horizon"],
+                latest_return,
+                best_return,
+                worst_return,
+                liquidity_retention,
+                volume_retention,
+                _buy_ratio(metrics),
+                metrics.get("pair_age_hours"),
+                metrics.get("price_change_h1_pct"),
+                first["ten_x_score"],
+                learning_note,
+                next_rule,
+                created_at,
+            ),
+        )
+        inserted += 1
+    return inserted
+
+
+def _refresh_tradable_candidates(conn: sqlite3.Connection, created_at: str) -> int:
+    _clear(conn, "tradable_candidates")
+    rows = conn.execute(
+        """
+        SELECT w.*, f.risk_score, f.opportunity_score, f.ten_x_score,
+               f.reject_reasons, c.raw_metrics
+        FROM winner_survival_lab w
+        LEFT JOIN filter_results f
+          ON f.pair_id = w.pair_id
+         AND f.scan_time = w.scan_time
+         AND f.token_address = w.token_address
+        LEFT JOIN candidate_evaluations c
+          ON c.token_address = w.token_address
+         AND c.observed_at = w.scan_time
+         AND w.pair_id = c.chain_id || ':' || c.pair_address
+        """
+    ).fetchall()
+
+    prepared: list[dict[str, Any]] = []
+    for row in rows:
+        metrics = _loads(row["raw_metrics"], {})
+        assessment = _tradable_assessment(row, metrics)
+        if not assessment:
+            continue
+        prepared.append(assessment)
+    prepared.sort(key=lambda item: (item["tradable_score"], item["survival_score"]), reverse=True)
+
+    for item in prepared[:80]:
+        conn.execute(
+            """
+            INSERT INTO tradable_candidates (
+              token_address, symbol, pair_id, source_label, scan_time,
+              tradable_score, tradable_tier, research_window, latest_horizon,
+              latest_return_pct, best_return_pct, worst_return_pct,
+              liquidity_usd, volume_24h_usd, buy_ratio, pair_age_hours,
+              price_change_1h_pct, risk_score, opportunity_score, ten_x_score,
+              pump_strength_score, trap_risk_score, survival_score,
+              liquidity_retention_pct, volume_retention_pct, reasons,
+              risk_notes, action_note, created_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                item["token_address"],
+                item["symbol"],
+                item["pair_id"],
+                item["source_label"],
+                item["scan_time"],
+                item["tradable_score"],
+                item["tradable_tier"],
+                item["research_window"],
+                item["latest_horizon"],
+                item["latest_return_pct"],
+                item["best_return_pct"],
+                item["worst_return_pct"],
+                item["liquidity_usd"],
+                item["volume_24h_usd"],
+                item["buy_ratio"],
+                item["pair_age_hours"],
+                item["price_change_1h_pct"],
+                item["risk_score"],
+                item["opportunity_score"],
+                item["ten_x_score"],
+                item["pump_strength_score"],
+                item["trap_risk_score"],
+                item["survival_score"],
+                item["liquidity_retention_pct"],
+                item["volume_retention_pct"],
+                db.to_json(item["reasons"]),
+                db.to_json(item["risk_notes"]),
+                item["action_note"],
+                created_at,
+            ),
+        )
+    return len(prepared[:80])
+
+
+def _refresh_winner_loser_dna(conn: sqlite3.Connection, created_at: str) -> int:
+    _clear(conn, "winner_loser_dna")
+    rows = conn.execute(
+        """
+        SELECT w.*, c.raw_metrics
+        FROM winner_survival_lab w
+        LEFT JOIN candidate_evaluations c
+          ON c.token_address = w.token_address
+         AND c.observed_at = w.scan_time
+         AND w.pair_id = c.chain_id || ':' || c.pair_address
+        """
+    ).fetchall()
+    winner_rows = [
+        row
+        for row in rows
+        if (_num(row["best_return_pct"]) or 0) >= 50 and (_num(row["survival_score"]) or 0) >= 50
+    ]
+    loser_rows = [
+        row
+        for row in rows
+        if (_num(row["worst_return_pct"]) or 0) <= -25
+        or (_num(row["survival_score"]) or 0) < 35
+        or row["setup_type"] in {"Accepted Failure", "Dangerous Momentum Trap"}
+    ]
+    profiles = [
+        _dna_profile("Winner DNA", winner_rows, created_at),
+        _dna_profile("Loser DNA", loser_rows, created_at),
+    ]
+    inserted = 0
+    for profile in profiles:
+        conn.execute(
+            """
+            INSERT INTO winner_loser_dna (
+              dna_type, sample_count, median_liquidity_usd,
+              median_volume_24h_usd, median_pair_age_hours,
+              median_price_change_1h_pct, median_buy_ratio,
+              median_pump_strength_score, median_trap_risk_score,
+              median_survival_score, median_best_return_pct,
+              median_worst_return_pct, common_source_labels,
+              pattern_summary, rule_implication, created_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                profile["dna_type"],
+                profile["sample_count"],
+                profile["median_liquidity_usd"],
+                profile["median_volume_24h_usd"],
+                profile["median_pair_age_hours"],
+                profile["median_price_change_1h_pct"],
+                profile["median_buy_ratio"],
+                profile["median_pump_strength_score"],
+                profile["median_trap_risk_score"],
+                profile["median_survival_score"],
+                profile["median_best_return_pct"],
+                profile["median_worst_return_pct"],
+                profile["common_source_labels"],
+                profile["pattern_summary"],
+                profile["rule_implication"],
+                created_at,
+            ),
+        )
+        inserted += 1
+    return inserted
+
+
+def _refresh_delayed_entry_simulator(conn: sqlite3.Connection, created_at: str) -> int:
+    _clear(conn, "delayed_entry_simulator")
+    rows = _outcome_rows(conn)
+    grouped: dict[tuple[str, str, str], list[sqlite3.Row]] = defaultdict(list)
+    for row in rows:
+        if row["price_at_horizon"] is None:
+            continue
+        grouped[(row["pair_id"], row["scan_time"], row["token_address"])].append(row)
+
+    simulated: dict[tuple[str, str, str], list[float]] = defaultdict(list)
+    entry_delays = {"15m", "30m", "1h"}
+    for candidate_rows in grouped.values():
+        by_horizon = {row["horizon"]: row for row in candidate_rows}
+        label = candidate_rows[0]["label_at_scan"] or "Unknown"
+        for entry_delay in entry_delays:
+            entry_row = by_horizon.get(entry_delay)
+            entry_price = _num(entry_row["price_at_horizon"] if entry_row else None)
+            if entry_price is None or entry_price <= 0:
+                continue
+            for exit_horizon in HORIZONS:
+                if _horizon_rank(exit_horizon) <= _horizon_rank(entry_delay):
+                    continue
+                exit_row = by_horizon.get(exit_horizon)
+                exit_price = _num(exit_row["price_at_horizon"] if exit_row else None)
+                if exit_price is None:
+                    continue
+                simulated[(label, entry_delay, exit_horizon)].append((exit_price / entry_price - 1) * 100)
+
+    inserted = 0
+    for (label, entry_delay, exit_horizon), values in sorted(simulated.items()):
+        if not values:
+            continue
+        med = median(values)
+        avg = mean(values)
+        positive_rate = sum(1 for value in values if value > 0) / len(values)
+        verdict = _delayed_entry_verdict(len(values), med, positive_rate, min(values))
+        lesson = _delayed_entry_lesson(label, entry_delay, exit_horizon, verdict)
+        conn.execute(
+            """
+            INSERT INTO delayed_entry_simulator (
+              source_label, entry_delay, exit_horizon, sample_count,
+              median_return_pct, average_return_pct, positive_rate,
+              best_return_pct, worst_return_pct, verdict, lesson, created_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                label,
+                entry_delay,
+                exit_horizon,
+                len(values),
+                med,
+                avg,
+                positive_rate,
+                max(values),
+                min(values),
+                verdict,
+                lesson,
+                created_at,
+            ),
+        )
+        inserted += 1
+    return inserted
+
+
+def _refresh_wallet_reputation_memory(conn: sqlite3.Connection, created_at: str) -> int:
+    _clear(conn, "wallet_reputation_memory")
+    rows = conn.execute(
+        """
+        SELECT *
+        FROM wallets
+        ORDER BY wallet_quality_score DESC, wallet_risk_score ASC, tokens_traded DESC
+        LIMIT 300
+        """
+    ).fetchall()
+    inserted = 0
+    for row in rows:
+        tier = _wallet_memory_tier(row)
+        note = _wallet_reputation_note(row, tier)
+        caution = _wallet_caution_note(row)
+        conn.execute(
+            """
+            INSERT INTO wallet_reputation_memory (
+              wallet_address, chain, wallet_label, memory_tier,
+              wallet_quality_score, wallet_risk_score, tokens_traded,
+              realized_exits, win_rate, median_realized_return_pct,
+              avg_realized_return_pct, rug_exposure_rate, quick_dump_rate,
+              first_minute_entry_rate, avg_hold_time_minutes,
+              reputation_note, caution_note, last_seen_at, created_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                row["wallet_address"],
+                row["chain"],
+                row["wallet_label"],
+                tier,
+                row["wallet_quality_score"],
+                row["wallet_risk_score"],
+                row["tokens_traded"],
+                row["realized_exits"],
+                row["win_rate"],
+                row["median_realized_return_pct"],
+                row["avg_realized_return_pct"],
+                row["rug_exposure_rate"],
+                row["quick_dump_rate"],
+                row["first_minute_entry_rate"],
+                row["avg_hold_time_minutes"],
+                note,
+                caution,
+                row["last_seen_at"],
+                created_at,
+            ),
+        )
+        inserted += 1
+    return inserted
+
+
 def _refresh_data_quality_report(conn: sqlite3.Connection, updated_at: str, settings: Settings) -> int:
     _clear(conn, "data_quality_report")
     rows: list[dict[str, str]] = []
@@ -606,6 +972,586 @@ def _manipulation_risk_score(metrics: dict[str, Any], row: sqlite3.Row) -> float
     if row["rugged"] or row["became_illiquid"]:
         score += 25
     return min(score, 100)
+
+
+def _pump_strength_score(metrics: dict[str, Any], row: sqlite3.Row | None = None) -> float:
+    score = 0.0
+    liquidity = _num(metrics.get("liquidity_usd")) or _num(row["liquidity_at_scan"] if row else None) or 0
+    volume = _num(metrics.get("volume_h24_usd")) or _num(row["volume_at_scan"] if row else None) or 0
+    volume_liquidity_ratio = _num(metrics.get("volume_liquidity_ratio"))
+    if volume_liquidity_ratio is None and liquidity > 0:
+        volume_liquidity_ratio = volume / liquidity
+    age = _num(metrics.get("pair_age_hours")) or 0
+    move = _num(metrics.get("price_change_h1_pct")) or 0
+    buy_ratio = _buy_ratio(metrics)
+    buyers = _num(metrics.get("unique_buyers_1h") or metrics.get("buys_h1") or metrics.get("txns_1h_buys")) or 0
+    ten_x = _num(row["ten_x_score"] if row else None)
+
+    if 50_000 <= liquidity <= 500_000:
+        score += 20
+    elif 25_000 <= liquidity < 50_000 or 500_000 < liquidity <= 1_000_000:
+        score += 12
+    elif liquidity > 0:
+        score += 4
+
+    if volume_liquidity_ratio is not None:
+        if 1 <= volume_liquidity_ratio <= 8:
+            score += 20
+        elif 8 < volume_liquidity_ratio <= 15:
+            score += 12
+        elif 0.4 <= volume_liquidity_ratio < 1:
+            score += 8
+        elif volume_liquidity_ratio > 15:
+            score += 5
+
+    if buy_ratio is not None:
+        if buy_ratio >= 0.55:
+            score += 15
+        elif buy_ratio >= 0.45:
+            score += 10
+        elif buy_ratio >= 0.35:
+            score += 4
+
+    if buyers >= 100:
+        score += 10
+    elif buyers >= 50:
+        score += 7
+    elif buyers >= 20:
+        score += 4
+
+    if 20 <= age * 60 <= 360:
+        score += 20
+    elif 6 < age <= 24:
+        score += 10
+    elif 10 <= age * 60 < 20:
+        score += 5
+
+    if 20 <= move <= 180:
+        score += 15
+    elif 5 <= move < 20:
+        score += 8
+    elif 180 < move <= 700:
+        score += 8
+
+    if ten_x is not None:
+        if ten_x >= 75:
+            score += 10
+        elif ten_x >= 60:
+            score += 5
+    return min(score, 100.0)
+
+
+def _trap_risk_score(
+    metrics: dict[str, Any],
+    row: sqlite3.Row,
+    rows: list[sqlite3.Row],
+    liquidity_retention_pct: float | None,
+    volume_retention_pct: float | None,
+) -> float:
+    score = 0.0
+    liquidity = _num(metrics.get("liquidity_usd")) or _num(row["liquidity_at_scan"]) or 0
+    volume = _num(metrics.get("volume_h24_usd")) or _num(row["volume_at_scan"]) or 0
+    volume_liquidity_ratio = _num(metrics.get("volume_liquidity_ratio"))
+    if volume_liquidity_ratio is None and liquidity > 0:
+        volume_liquidity_ratio = volume / liquidity
+    age = _num(metrics.get("pair_age_hours")) or 0
+    move = _num(metrics.get("price_change_h1_pct")) or 0
+    buy_ratio = _buy_ratio(metrics)
+    security_score = _num(row["security_score"])
+    flags = _loads(row["security_risk_flags"], [])
+    worst_return = min((_num(item["return_pct"]) or 0) for item in rows)
+
+    if move > 700:
+        score += 25
+    elif move > 250:
+        score += 18
+    elif move > 150:
+        score += 12
+    elif move > 80:
+        score += 7
+    if age < 0.75 and move >= 80:
+        score += 15
+    if age < 0.33:
+        score += 10
+    if buy_ratio is None and move >= 80:
+        score += 5
+    elif buy_ratio is not None and buy_ratio < 0.35:
+        score += 18
+    elif buy_ratio is not None and buy_ratio < 0.45:
+        score += 10
+    if volume_liquidity_ratio is not None:
+        if volume_liquidity_ratio > 20:
+            score += 15
+        elif volume_liquidity_ratio > 12:
+            score += 10
+    if liquidity < 25_000:
+        score += 12
+    elif liquidity < 50_000:
+        score += 6
+    if security_score is None:
+        score += 5
+    elif security_score < 60:
+        score += 20
+    elif security_score < 80:
+        score += 8
+    if flags:
+        score += 15
+    if any(item["rugged"] or item["became_illiquid"] or item["volume_disappeared"] for item in rows):
+        score += 20
+    if worst_return <= -80:
+        score += 25
+    elif worst_return <= -50:
+        score += 15
+    elif worst_return <= -25:
+        score += 8
+    if liquidity_retention_pct is not None:
+        if liquidity_retention_pct < 50:
+            score += 20
+        elif liquidity_retention_pct < 70:
+            score += 12
+    if volume_retention_pct is not None and volume_retention_pct < 30:
+        score += 10
+    return min(score, 100.0)
+
+
+def _survival_score(
+    rows: list[sqlite3.Row],
+    liquidity_retention_pct: float | None,
+    volume_retention_pct: float | None,
+    trap_risk_score: float,
+) -> float:
+    values = [_num(row["return_pct"]) for row in rows]
+    returns = [value for value in values if value is not None]
+    if not returns:
+        return 0.0
+    horizon_scores = []
+    for value in returns:
+        if value >= 50:
+            horizon_scores.append(100)
+        elif value >= 15:
+            horizon_scores.append(80)
+        elif value >= 0:
+            horizon_scores.append(65)
+        elif value >= -10:
+            horizon_scores.append(45)
+        elif value >= -25:
+            horizon_scores.append(25)
+        else:
+            horizon_scores.append(0)
+    score = mean(horizon_scores) * 0.45
+    best = max(returns)
+    worst = min(returns)
+    if best >= 100:
+        score += 20
+    elif best >= 50:
+        score += 15
+    elif best >= 15:
+        score += 8
+    if worst >= -10:
+        score += 15
+    elif worst >= -25:
+        score += 8
+    if liquidity_retention_pct is not None:
+        if liquidity_retention_pct >= 80:
+            score += 10
+        elif liquidity_retention_pct >= 60:
+            score += 5
+    if volume_retention_pct is not None and volume_retention_pct >= 40:
+        score += 5
+    score -= trap_risk_score * 0.18
+    return max(0.0, min(score, 100.0))
+
+
+def _survival_label(score: float, latest_horizon: str, latest_return_pct: float | None) -> str:
+    if latest_return_pct is None:
+        return "Waiting For Outcome"
+    if latest_horizon != "24h":
+        if score >= 70:
+            return "Surviving So Far"
+        if score < 30:
+            return "Fading Early"
+        return "Still Testing"
+    if score >= 75:
+        return "24h Winner Survivor"
+    if score >= 55:
+        return "24h Survived"
+    if score >= 35:
+        return "Weak 24h Survival"
+    return "Failed Survival"
+
+
+def _survival_setup_type(
+    original_label: str | None,
+    pump_strength_score: float,
+    trap_risk_score: float,
+    survival_score: float,
+    best_return_pct: float,
+) -> str:
+    label = original_label or ""
+    accepted = label in {"Research Candidate", "Pending Paper Candidate", "Paper Trade Candidate"}
+    rejected_or_watched = label in {"Reject", "Watchlist", "Momentum Trap", "Weak Overextended Pump"}
+    if label == "Paper Trade Candidate" and survival_score >= 55:
+        return "Paper Candidate Survivor"
+    if accepted and survival_score < 35:
+        return "Accepted Failure"
+    if rejected_or_watched and best_return_pct >= 50 and trap_risk_score < 65 and pump_strength_score >= 55:
+        return "Missed Winner Study"
+    if trap_risk_score >= 70:
+        return "Dangerous Momentum Trap"
+    if pump_strength_score >= 65 and trap_risk_score < 55:
+        return "Healthy High-Risk Momentum"
+    if pump_strength_score >= 50 and trap_risk_score >= 55:
+        return "Weak Overextended Pump"
+    if accepted and trap_risk_score < 50:
+        return "Clean Research Candidate"
+    return "Needs More Evidence"
+
+
+def _survival_learning_note(
+    original_label: str | None,
+    setup_type: str,
+    pump_strength_score: float,
+    trap_risk_score: float,
+    survival_score: float,
+    best_return_pct: float,
+    worst_return_pct: float,
+) -> str:
+    if setup_type == "Missed Winner Study":
+        return "Rejected or watched token later pumped; study whether the strict filters blocked tradable early momentum."
+    if setup_type == "Accepted Failure":
+        return "Accepted/research token failed after detection; promotion rules need more post-detection survival evidence."
+    if setup_type == "Paper Candidate Survivor":
+        return "Paper candidate survived after detection; keep tracking against baselines before trusting the label."
+    if setup_type == "Dangerous Momentum Trap":
+        return "Trap risk dominated the setup; do not loosen filters from this row unless survival improves across horizons."
+    if survival_score >= 60 and best_return_pct >= 50:
+        return "Strong pump plus survival appeared together; compare this pattern against future winners."
+    if worst_return_pct <= -50:
+        return "Large adverse move appeared after detection; check liquidity fade, buyer continuation, and timing."
+    if pump_strength_score >= 65 and trap_risk_score < 55:
+        return "Early momentum looks healthy so far, but sample size and delayed-entry survival still matter."
+    return f"{original_label or 'Token'} needs more evidence before changing filters."
+
+
+def _survival_next_rule(
+    setup_type: str,
+    trap_risk_score: float,
+    survival_score: float,
+    liquidity_retention_pct: float | None,
+    volume_retention_pct: float | None,
+) -> str:
+    if liquidity_retention_pct is not None and liquidity_retention_pct < 70:
+        return "Require stronger liquidity retention before promotion."
+    if volume_retention_pct is not None and volume_retention_pct < 30:
+        return "Require volume continuation after detection."
+    if setup_type == "Missed Winner Study":
+        return "Test a separate high-risk momentum route instead of weakening clean filters."
+    if setup_type == "Accepted Failure":
+        return "Delay promotion until 30m and 1h survival checks pass."
+    if trap_risk_score >= 70:
+        return "Keep trap guard strict; review only after repeated survivor examples."
+    if survival_score >= 60:
+        return "Compare against same-age and same-liquidity baselines before extending."
+    return "Keep research-only until more horizons mature."
+
+
+def _retention_pct(start: Any, end: Any) -> float | None:
+    start_number = _num(start)
+    end_number = _num(end)
+    if start_number is None or end_number is None or start_number <= 0:
+        return None
+    return (end_number / start_number) * 100
+
+
+def _horizon_rank(horizon: str) -> int:
+    try:
+        return list(HORIZONS).index(horizon)
+    except ValueError:
+        return 999
+
+
+def _tradable_assessment(row: sqlite3.Row, metrics: dict[str, Any]) -> dict[str, Any] | None:
+    source_label = row["original_label"] or ""
+    setup_type = row["setup_type"] or ""
+    if source_label in {"Reject", "Momentum Trap", "Weak Overextended Pump"}:
+        return None
+    if setup_type in {"Accepted Failure", "Dangerous Momentum Trap", "Weak Overextended Pump"}:
+        return None
+
+    liquidity = _num(metrics.get("liquidity_usd"))
+    volume = _num(metrics.get("volume_h24_usd"))
+    age = _num(row["pair_age_hours_at_scan"]) or _num(metrics.get("pair_age_hours"))
+    move = _num(row["price_change_1h_at_scan"]) or _num(metrics.get("price_change_h1_pct"))
+    buy_ratio = _num(row["buy_ratio_at_scan"]) or _buy_ratio(metrics)
+    risk_score = _num(row["risk_score"])
+    opportunity_score = _num(row["opportunity_score"])
+    ten_x_score = _num(row["ten_x_score"])
+    pump_strength = _num(row["pump_strength_score"]) or 0
+    trap_risk = _num(row["trap_risk_score"]) or 0
+    survival = _num(row["survival_score"]) or 0
+    latest_return = _num(row["latest_return_pct"])
+    best_return = _num(row["best_return_pct"])
+    worst_return = _num(row["worst_return_pct"])
+    liquidity_retention = _num(row["liquidity_retention_pct"])
+    volume_retention = _num(row["volume_retention_pct"])
+
+    if liquidity is None or volume is None or age is None or move is None:
+        return None
+    if liquidity < 75_000 or volume < 75_000 or age < 1:
+        return None
+    if trap_risk > 60 or survival < 35:
+        return None
+    if risk_score is not None and risk_score > 55:
+        return None
+    if worst_return is not None and worst_return <= -35:
+        return None
+
+    score = 0.0
+    reasons: list[str] = []
+    risk_notes: list[str] = []
+
+    if liquidity >= 250_000:
+        score += 25
+        reasons.append("deep_liquidity")
+    elif liquidity >= 100_000:
+        score += 20
+        reasons.append("enough_liquidity")
+    else:
+        score += 10
+        risk_notes.append("liquidity_is_only_moderate")
+
+    if volume >= 500_000:
+        score += 20
+        reasons.append("strong_real_volume")
+    elif volume >= 100_000:
+        score += 15
+        reasons.append("enough_real_volume")
+    else:
+        score += 8
+        risk_notes.append("volume_is_only_moderate")
+
+    if buy_ratio is not None:
+        if 0.48 <= buy_ratio <= 0.65:
+            score += 15
+            reasons.append("balanced_buy_pressure")
+        elif 0.45 <= buy_ratio <= 0.72:
+            score += 10
+            reasons.append("acceptable_buy_pressure")
+        else:
+            risk_notes.append("buy_pressure_is_not_balanced")
+    else:
+        risk_notes.append("buy_ratio_missing")
+
+    if survival >= 70:
+        score += 20
+        reasons.append("strong_post_detection_survival")
+    elif survival >= 55:
+        score += 15
+        reasons.append("survived_after_detection")
+    elif survival >= 40:
+        score += 8
+        risk_notes.append("survival_still_weak")
+
+    if trap_risk <= 25:
+        score += 15
+        reasons.append("low_trap_risk")
+    elif trap_risk <= 45:
+        score += 8
+        reasons.append("manageable_trap_risk")
+    else:
+        risk_notes.append("trap_risk_needs_attention")
+
+    if -5 <= move <= 50:
+        score += 10
+        reasons.append("not_overextended")
+    elif 50 < move <= 80:
+        score += 5
+        risk_notes.append("momentum_is_hot")
+    elif move > 80:
+        score -= 12
+        risk_notes.append("already_strongly_pumped")
+    elif move < -15:
+        score -= 8
+        risk_notes.append("falling_at_detection")
+
+    if 3 <= age <= 168:
+        score += 10
+        reasons.append("old_enough_to_observe")
+    elif 1 <= age < 3:
+        score += 5
+        risk_notes.append("still_young")
+
+    if risk_score is not None:
+        if risk_score <= 30:
+            score += 10
+            reasons.append("lower_model_risk")
+        elif risk_score <= 45:
+            score += 6
+            reasons.append("acceptable_model_risk")
+    if opportunity_score is not None and opportunity_score >= 55:
+        score += 5
+        reasons.append("good_opportunity_score")
+    if pump_strength >= 65 and trap_risk <= 45:
+        score += 5
+        reasons.append("healthy_momentum_pattern")
+
+    if liquidity_retention is not None and liquidity_retention < 75:
+        score -= 15
+        risk_notes.append("liquidity_retention_weak")
+    if volume_retention is not None and volume_retention < 30:
+        score -= 8
+        risk_notes.append("volume_retention_weak")
+    if latest_return is not None and latest_return < -10:
+        score -= 10
+        risk_notes.append("latest_return_is_negative")
+
+    score = max(0.0, min(score, 100.0))
+    if score >= 78:
+        tier = "Tradable Research Candidate"
+    elif score >= 65:
+        tier = "Cautious Tradable Watch"
+    else:
+        return None
+
+    return {
+        "token_address": row["token_address"],
+        "symbol": row["symbol"] or metrics.get("base_symbol") or "UNKNOWN",
+        "pair_id": row["pair_id"],
+        "source_label": source_label,
+        "scan_time": row["scan_time"],
+        "tradable_score": score,
+        "tradable_tier": tier,
+        "research_window": "Small-move research: 5-30% possible range, not promised.",
+        "latest_horizon": row["latest_horizon"],
+        "latest_return_pct": latest_return,
+        "best_return_pct": best_return,
+        "worst_return_pct": worst_return,
+        "liquidity_usd": liquidity,
+        "volume_24h_usd": volume,
+        "buy_ratio": buy_ratio,
+        "pair_age_hours": age,
+        "price_change_1h_pct": move,
+        "risk_score": risk_score,
+        "opportunity_score": opportunity_score,
+        "ten_x_score": ten_x_score,
+        "pump_strength_score": pump_strength,
+        "trap_risk_score": trap_risk,
+        "survival_score": survival,
+        "liquidity_retention_pct": liquidity_retention,
+        "volume_retention_pct": volume_retention,
+        "reasons": reasons,
+        "risk_notes": risk_notes or ["risk_still_exists"],
+        "action_note": "Research only. If traded manually, use strict risk management; this is not a buy signal.",
+    }
+
+
+def _dna_profile(dna_type: str, rows: list[sqlite3.Row], created_at: str) -> dict[str, Any]:
+    del created_at
+    labels = Counter(row["original_label"] or "Unknown" for row in rows)
+    common_labels = ", ".join(f"{label}: {count}" for label, count in labels.most_common(4))
+    sample_count = len(rows)
+    profile = {
+        "dna_type": dna_type,
+        "sample_count": sample_count,
+        "median_liquidity_usd": _median_metric_from_rows(rows, "liquidity_usd"),
+        "median_volume_24h_usd": _median_metric_from_rows(rows, "volume_h24_usd"),
+        "median_pair_age_hours": _median_from_rows(rows, "pair_age_hours_at_scan"),
+        "median_price_change_1h_pct": _median_from_rows(rows, "price_change_1h_at_scan"),
+        "median_buy_ratio": _median_from_rows(rows, "buy_ratio_at_scan"),
+        "median_pump_strength_score": _median_from_rows(rows, "pump_strength_score"),
+        "median_trap_risk_score": _median_from_rows(rows, "trap_risk_score"),
+        "median_survival_score": _median_from_rows(rows, "survival_score"),
+        "median_best_return_pct": _median_from_rows(rows, "best_return_pct"),
+        "median_worst_return_pct": _median_from_rows(rows, "worst_return_pct"),
+        "common_source_labels": common_labels or "No sample yet",
+    }
+    if dna_type == "Winner DNA":
+        profile["pattern_summary"] = (
+            "Winners are rows with +50% or better upside and enough survival after detection."
+            if sample_count
+            else "Waiting for enough winner samples."
+        )
+        profile["rule_implication"] = "Look for survival plus low trap risk before loosening strict filters."
+    else:
+        profile["pattern_summary"] = (
+            "Losers are rows with large drawdown, weak survival, accepted failure, or trap behavior."
+            if sample_count
+            else "Waiting for enough loser samples."
+        )
+        profile["rule_implication"] = "Delay promotion when liquidity fades, trap risk rises, or survival stays weak."
+    return profile
+
+
+def _median_from_rows(rows: list[sqlite3.Row], key: str) -> float | None:
+    values = [_num(row[key]) for row in rows]
+    values = [value for value in values if value is not None]
+    return median(values) if values else None
+
+
+def _median_metric_from_rows(rows: list[sqlite3.Row], key: str) -> float | None:
+    values = []
+    for row in rows:
+        metrics = _loads(row["raw_metrics"], {})
+        values.append(_num(metrics.get(key)))
+    values = [value for value in values if value is not None]
+    return median(values) if values else None
+
+
+def _delayed_entry_verdict(count: int, median_return: float, positive_rate: float, worst_return: float) -> str:
+    if count < 10:
+        return "Too Small Sample"
+    if median_return >= 5 and positive_rate >= 0.55 and worst_return > -35:
+        return "Promising Delay"
+    if median_return <= -5 or worst_return <= -50:
+        return "Delay Fails"
+    return "Mixed Delay"
+
+
+def _delayed_entry_lesson(label: str, entry_delay: str, exit_horizon: str, verdict: str) -> str:
+    if verdict == "Promising Delay":
+        return f"{label}: waiting {entry_delay} still held up into {exit_horizon}; compare with baselines."
+    if verdict == "Delay Fails":
+        return f"{label}: waiting {entry_delay} did not protect the setup by {exit_horizon}; keep stricter survival rules."
+    return f"{label}: {entry_delay} to {exit_horizon} needs more samples before changing rules."
+
+
+def _wallet_memory_tier(row: sqlite3.Row) -> str:
+    quality = _num(row["wallet_quality_score"]) or 0
+    risk = _num(row["wallet_risk_score"]) or 0
+    tokens = int(row["tokens_traded"] or 0)
+    realized = int(row["realized_exits"] or 0)
+    win_rate = _num(row["win_rate"]) or 0
+    rug = _num(row["rug_exposure_rate"]) or 0
+    if quality >= 70 and risk <= 35 and tokens >= 10 and realized >= 5 and win_rate >= 0.50 and rug <= 0.10:
+        return "Useful Wallet Memory"
+    if quality >= 50 and risk <= 50 and tokens >= 5:
+        return "Watch Wallet Memory"
+    if risk >= 65 or rug >= 0.25 or (_num(row["quick_dump_rate"]) or 0) >= 0.35:
+        return "Avoid / Suspicious Memory"
+    return "Unproven Memory"
+
+
+def _wallet_reputation_note(row: sqlite3.Row, tier: str) -> str:
+    if tier == "Useful Wallet Memory":
+        return "Wallet has useful historical behavior, but it is still not a copy-trade signal."
+    if tier == "Watch Wallet Memory":
+        return "Wallet has some useful history; keep observing before trusting it."
+    if tier == "Avoid / Suspicious Memory":
+        return "Wallet behavior is risky or dump-heavy; treat token activity around it carefully."
+    return "Wallet does not have enough proven history yet."
+
+
+def _wallet_caution_note(row: sqlite3.Row) -> str:
+    notes: list[str] = []
+    if (_num(row["rug_exposure_rate"]) or 0) > 0.10:
+        notes.append("rug_exposure")
+    if (_num(row["quick_dump_rate"]) or 0) > 0.20:
+        notes.append("quick_dump_behavior")
+    if int(row["realized_exits"] or 0) < 5:
+        notes.append("low_realized_exit_history")
+    if (_num(row["wallet_risk_score"]) or 0) > 50:
+        notes.append("high_wallet_risk")
+    return ", ".join(notes) if notes else "normal_caution"
 
 
 def _baseline_verdict(excess_all: float | None, excess_liq: float | None) -> str:

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+from collections import Counter
 from html import escape
 import sqlite3
 from pathlib import Path
@@ -11,6 +12,7 @@ import streamlit as st
 from crypto_signal_autopsy.analysis_tables import build_analysis_payload
 from crypto_signal_autopsy.config import Settings, load_settings
 from crypto_signal_autopsy.db import active_api_error_count, connect, init_db
+from crypto_signal_autopsy.quant_analytics import build_quant_payload, refresh_quant_analytics
 from crypto_signal_autopsy.review import (
     build_rejection_record,
     build_requirement_rows,
@@ -74,10 +76,13 @@ def main() -> None:
     col4.metric("Active API Errors", active_api_errors)
     st.markdown("</div>", unsafe_allow_html=True)
 
-    tab_start, tab_v2, tab_wallets, tab_overview, tab_analysis, tab_manual, tab_signals, tab_outcomes, tab_rejected_audit, tab_raw, tab_config = st.tabs(
+    tab_start, tab_v2, tab_tradable, tab_dna_delay, tab_survival, tab_wallets, tab_overview, tab_analysis, tab_manual, tab_signals, tab_outcomes, tab_rejected_audit, tab_raw, tab_config = st.tabs(
         [
             "Start Here",
             "Token Buckets",
+            "Tradable Coins",
+            "DNA / Delay",
+            "Survival Lab",
             "Smart Wallets",
             "Overview",
             "Analysis",
@@ -94,6 +99,12 @@ def main() -> None:
         _start_here(conn, settings)
     with tab_v2:
         _v2_lab(conn)
+    with tab_tradable:
+        _tradable_lab(conn, settings)
+    with tab_dna_delay:
+        _dna_delay_lab(conn, settings)
+    with tab_survival:
+        _survival_lab(conn, settings)
     with tab_wallets:
         _wallet_lab(conn, settings)
     with tab_overview:
@@ -373,6 +384,147 @@ def _v2_lab(conn: sqlite3.Connection) -> None:
         _render_simple_table(payload["review_notes"], "No manual review notes yet.")
 
 
+def _tradable_lab(conn: sqlite3.Connection, settings: Settings) -> None:
+    refresh_quant_analytics(conn, settings)
+    rows = build_quant_payload(conn)["tradable_candidates"]
+    st.markdown('<div class="section-title">Tradable Coins</div>', unsafe_allow_html=True)
+    st.caption(
+        "Research-only list for cautious small-move candidates. It does not say buy now and does not promise 5%, 10%, or 30%."
+    )
+    strong = sum(1 for row in rows if row.get("tradable_tier") == "Tradable Research Candidate")
+    avg_score = sum(float(row.get("tradable_score") or 0) for row in rows) / len(rows) if rows else None
+    cols = st.columns(4)
+    cols[0].metric("Tradable Rows", len(rows))
+    cols[1].metric("Strong Candidates", strong)
+    cols[2].metric("Cautious Watch", len(rows) - strong)
+    cols[3].metric("Avg Score", f"{avg_score:.1f}" if avg_score is not None else "No data")
+    _render_simple_table(
+        [
+            {
+                "Token": row.get("symbol") or "UNKNOWN",
+                "Tier": row.get("tradable_tier") or "",
+                "Score": f"{float(row.get('tradable_score') or 0):.0f}",
+                "Latest": f"{row.get('latest_horizon') or ''} {pct(row.get('latest_return_pct'))}",
+                "Best": pct(row.get("best_return_pct")),
+                "Worst": pct(row.get("worst_return_pct")),
+                "Liquidity": money(row.get("liquidity_usd")),
+                "Volume": money(row.get("volume_24h_usd")),
+                "Risk": f"{float(row.get('risk_score') or 0):.0f}",
+                "Survival": f"{float(row.get('survival_score') or 0):.0f}",
+                "Why": row.get("reasons") or "",
+                "Caution": row.get("risk_notes") or "",
+            }
+            for row in rows[:80]
+        ],
+        "No tradable candidates yet. This section stays empty unless stricter liquidity, risk, and survival checks pass.",
+    )
+    st.info("Manual risk management is still required. This section is a research shortlist, not a trading command.")
+
+
+def _dna_delay_lab(conn: sqlite3.Connection, settings: Settings) -> None:
+    refresh_quant_analytics(conn, settings)
+    payload = build_quant_payload(conn)
+    st.markdown('<div class="section-title">Winner DNA vs Loser DNA + Delayed Entry</div>', unsafe_allow_html=True)
+    st.caption("These tables study what actually happened after detection so the filters can improve for free.")
+    left, right = st.columns(2)
+    with left:
+        st.subheader("Winner DNA vs Loser DNA")
+        _render_simple_table(
+            [
+                {
+                    "DNA": row.get("dna_type") or "",
+                    "Samples": str(row.get("sample_count") or 0),
+                    "Median liquidity": money(row.get("median_liquidity_usd")),
+                    "Median volume": money(row.get("median_volume_24h_usd")),
+                    "Median age": f"{float(row.get('median_pair_age_hours') or 0):.1f}h",
+                    "Median 1h move": pct(row.get("median_price_change_1h_pct")),
+                    "Median survival": f"{float(row.get('median_survival_score') or 0):.0f}",
+                    "Rule": row.get("rule_implication") or "",
+                }
+                for row in payload["winner_loser_dna"]
+            ],
+            "No DNA profiles yet.",
+        )
+    with right:
+        st.subheader("Delayed Entry Simulator")
+        _render_simple_table(
+            [
+                {
+                    "Label": row.get("source_label") or "",
+                    "Entry": row.get("entry_delay") or "",
+                    "Exit": row.get("exit_horizon") or "",
+                    "Rows": str(row.get("sample_count") or 0),
+                    "Median": pct(row.get("median_return_pct")),
+                    "Average": pct(row.get("average_return_pct")),
+                    "Positive": f"{float(row.get('positive_rate') or 0) * 100:.1f}%",
+                    "Verdict": row.get("verdict") or "",
+                }
+                for row in payload["delayed_entry_simulator"][:80]
+            ],
+            "No delayed entry simulation rows yet.",
+        )
+
+
+def _survival_lab(conn: sqlite3.Connection, settings: Settings) -> None:
+    refresh_quant_analytics(conn, settings)
+    rows = build_quant_payload(conn)["winner_survival_lab"]
+    st.markdown('<div class="section-title">Early Winner Survival Lab</div>', unsafe_allow_html=True)
+    st.caption(
+        "This studies whether early momentum survived after detection. Pump strength, trap risk, "
+        "and survival score are research metrics only, not buy or sell signals."
+    )
+
+    setup_counts = Counter(row.get("setup_type") or "Needs More Evidence" for row in rows)
+    winner_survivors = sum(
+        1
+        for row in rows
+        if float(row.get("best_return_pct") or 0) >= 50 and float(row.get("survival_score") or 0) >= 50
+    )
+    accepted_failures = setup_counts.get("Accepted Failure", 0)
+    average_survival = (
+        sum(float(row.get("survival_score") or 0) for row in rows) / len(rows)
+        if rows
+        else None
+    )
+    cols = st.columns(4)
+    cols[0].metric("Rows Studied", len(rows))
+    cols[1].metric("Winner Survivors", winner_survivors)
+    cols[2].metric("Accepted Failures", accepted_failures)
+    cols[3].metric("Avg Survival", f"{average_survival:.1f}" if average_survival is not None else "No data")
+
+    st.subheader("Survival Pattern Engine")
+    _render_simple_table(
+        [
+            {
+                "Token": row.get("symbol") or "UNKNOWN",
+                "Setup": row.get("setup_type") or "",
+                "Original label": row.get("original_label") or "",
+                "Latest": f"{row.get('latest_horizon') or ''} {pct(row.get('latest_return_pct'))}",
+                "Best": pct(row.get("best_return_pct")),
+                "Worst": pct(row.get("worst_return_pct")),
+                "Pump": f"{float(row.get('pump_strength_score') or 0):.0f}",
+                "Trap": f"{float(row.get('trap_risk_score') or 0):.0f}",
+                "Survival": f"{float(row.get('survival_score') or 0):.0f}",
+                "Survival label": row.get("survival_label") or "",
+                "Lesson": row.get("learning_note") or "",
+            }
+            for row in rows[:80]
+        ],
+        "No survival rows yet. It fills when tracked candidates have post-detection outcomes.",
+    )
+
+    st.subheader("Rules To Test Next")
+    rule_counts = Counter(row.get("next_rule_to_test") or "Keep research-only until more horizons mature." for row in rows)
+    _render_simple_table(
+        [{"Rule experiment": rule, "Rows": str(count)} for rule, count in rule_counts.most_common(12)],
+        "No rule experiments yet.",
+    )
+    st.info(
+        "Best current use: compare Missed Winner Study rows against Accepted Failure rows. "
+        "The goal is to improve filters without weakening safety."
+    )
+
+
 def _wallet_lab(conn: sqlite3.Connection, settings: Settings) -> None:
     payload = build_wallet_dashboard_payload(conn, settings)
     status = payload["status"]
@@ -445,6 +597,26 @@ def _wallet_lab(conn: sqlite3.Connection, settings: Settings) -> None:
     st.divider()
     st.subheader("Smart Wallet Cluster Detection")
     _render_simple_table(payload["clusters"], "No wallet clusters detected yet.")
+    st.subheader("Wallet Memory / Reputation")
+    quant_payload = build_quant_payload(conn)
+    _render_simple_table(
+        [
+            {
+                "Wallet": f"{str(row.get('wallet_address') or '')[:10]}...",
+                "Tier": row.get("memory_tier") or "",
+                "Label": row.get("wallet_label") or "",
+                "Quality": f"{float(row.get('wallet_quality_score') or 0):.0f}",
+                "Risk": f"{float(row.get('wallet_risk_score') or 0):.0f}",
+                "Tokens": str(row.get("tokens_traded") or 0),
+                "Exits": str(row.get("realized_exits") or 0),
+                "Win rate": f"{float(row.get('win_rate') or 0) * 100:.1f}%",
+                "Note": row.get("reputation_note") or "",
+                "Caution": row.get("caution_note") or "",
+            }
+            for row in quant_payload["wallet_reputation_memory"][:80]
+        ],
+        "No wallet memory yet. The wallet module needs tracked wallet history first.",
+    )
     st.info(
         "A wallet buying a token does not make the token safe. Hard security filters always override wallet activity. "
         "Smart wallet labels require enough historical evidence and may still be wrong."

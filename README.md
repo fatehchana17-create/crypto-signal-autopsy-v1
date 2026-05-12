@@ -44,6 +44,11 @@ The public dashboard now includes a quant-style research layer:
 - accepted failure diagnosis for weak research and paper candidates,
 - missed-winner review for rejected/watchlisted tokens that later pumped,
 - high-risk momentum routing for risky explosive setups,
+- Early Winner Survival Lab that scores pump strength, trap risk, and post-detection survival,
+- Tradable Coins shortlist for research-only small-move candidates,
+- Winner DNA vs Loser DNA summaries,
+- Delayed Entry Simulator for 15m, 30m, and 1h wait tests,
+- Wallet Memory / Reputation from already observed wallet behavior,
 - baseline comparisons against BTC, ETH, all-scanned tokens, same-liquidity buckets, and same-age buckets,
 - 10x score failure review,
 - wallet module status and recovery guidance,
@@ -55,6 +60,10 @@ The current purpose is to answer:
 - Are paper candidates actually better than rejected tokens?
 - Which filters block winners?
 - Which failed candidates reveal weak scoring rules?
+- Did early momentum survive after 15m, 30m, 1h, 2h, 4h, 8h, and 24h?
+- Which candidates are cleaner for small-move manual research?
+- Did waiting before entry improve or destroy the result?
+- Which wallets have useful history and which wallets add risk?
 - Do candidates beat BTC, ETH, and similar-token baselines?
 - Is there enough evidence to improve the model?
 
