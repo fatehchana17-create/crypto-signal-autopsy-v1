@@ -1,4 +1,11 @@
 lesson_type,token_address,pair_id,label_at_scan,horizon,return_pct,reject_reasons,became_illiquid,rugged,volume_disappeared
+blocked_or_watchlisted_winner,0xb77c45c2A8C29323061Aa0273A46283F1530eB5E,base:0x1e30475ed99bc21c6792c9c4f4f1224229b2c3e3b7b9c8723a8661b6f9923443,Watchlist,15m,470.5760,[],0,0,0
+blocked_or_watchlisted_winner,0xb77c45c2A8C29323061Aa0273A46283F1530eB5E,base:0x1e30475ed99bc21c6792c9c4f4f1224229b2c3e3b7b9c8723a8661b6f9923443,Watchlist,1h,470.5760,[],0,0,0
+blocked_or_watchlisted_winner,0xb77c45c2A8C29323061Aa0273A46283F1530eB5E,base:0x1e30475ed99bc21c6792c9c4f4f1224229b2c3e3b7b9c8723a8661b6f9923443,Watchlist,2h,470.5760,[],0,0,0
+blocked_or_watchlisted_winner,0xb77c45c2A8C29323061Aa0273A46283F1530eB5E,base:0x1e30475ed99bc21c6792c9c4f4f1224229b2c3e3b7b9c8723a8661b6f9923443,Watchlist,30m,470.5760,[],0,0,0
+blocked_or_watchlisted_winner,0xb77c45c2A8C29323061Aa0273A46283F1530eB5E,base:0x1e30475ed99bc21c6792c9c4f4f1224229b2c3e3b7b9c8723a8661b6f9923443,Watchlist,4h,470.5760,[],0,0,0
+blocked_or_watchlisted_winner,0xF233Cb02e6944aF84a9DFFEaf11B88ea5B4fEb2e,base:0xbebfc588032de43a8c5d37737a29fd2950dea1fc76bdf0e3ff15f4d2229ab3b9,Momentum Trap,2h,388.2764,"[""early_extreme_overextension"",""too_early_after_large_pump""]",0,0,0
+blocked_or_watchlisted_winner,0xF233Cb02e6944aF84a9DFFEaf11B88ea5B4fEb2e,base:0xbebfc588032de43a8c5d37737a29fd2950dea1fc76bdf0e3ff15f4d2229ab3b9,Momentum Trap,4h,388.2764,"[""early_extreme_overextension"",""too_early_after_large_pump""]",0,0,0
 blocked_or_watchlisted_winner,0xA74f7dad0b4c603adA798E2FeE76bD8D6aDfe8ee,base:0x039b7089b25349f52fe75bd32db237b4c237fa7347c0cbedb494d507b7da9727,Watchlist,15m,152.9155,[],0,0,0
 blocked_or_watchlisted_winner,0xA74f7dad0b4c603adA798E2FeE76bD8D6aDfe8ee,base:0x039b7089b25349f52fe75bd32db237b4c237fa7347c0cbedb494d507b7da9727,Watchlist,1h,152.9155,[],0,0,0
 blocked_or_watchlisted_winner,0xA74f7dad0b4c603adA798E2FeE76bD8D6aDfe8ee,base:0x039b7089b25349f52fe75bd32db237b4c237fa7347c0cbedb494d507b7da9727,Watchlist,4h,152.9155,[],0,0,0
@@ -43,8 +50,10 @@ blocked_or_watchlisted_winner_archived_24h,0x0678488FfCF367e8593708462c95c7e1108
 blocked_or_watchlisted_winner_archived_24h,0x0678488FfCF367e8593708462c95c7e110875e34,base:0xdA1Cf50f7345Ba725e7c01640c5a1C5904617ecD,Reject,24h,28.1504,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0x0678488FfCF367e8593708462c95c7e110875e34,base:0xdA1Cf50f7345Ba725e7c01640c5a1C5904617ecD,Reject,24h,28.1504,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0x0678488FfCF367e8593708462c95c7e110875e34,base:0xdA1Cf50f7345Ba725e7c01640c5a1C5904617ecD,Reject,24h,28.1504,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
+blocked_or_watchlisted_winner_archived_24h,0x0678488FfCF367e8593708462c95c7e110875e34,base:0xdA1Cf50f7345Ba725e7c01640c5a1C5904617ecD,Reject,24h,9.0834,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed,base:0xc9034c3E7F58003E6ae0C8438e7c8f4598d5ACAA,Reject,24h,6.7193,"[""buy_pressure_below_30_percent""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed,base:0xc9034c3E7F58003E6ae0C8438e7c8f4598d5ACAA,Reject,24h,6.5092,"[""unique_buyers_below_10""]",0,0,0
+blocked_or_watchlisted_winner_archived_24h,0xd07379a755A8f11B57610154861D694b2A0f615a,base:0x5554419CCd0293d9383901F461C7C3E0c66E925F,Reject,24h,6.4947,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0x2598c30330D5771AE9F983979209486aE26dE875,base:0x2E9313991fa984Da0bD9569B68fC620fcCe7377D,Reject,24h,5.8128,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0x2598c30330D5771AE9F983979209486aE26dE875,base:0x2E9313991fa984Da0bD9569B68fC620fcCe7377D,Reject,24h,5.8128,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0x2598c30330D5771AE9F983979209486aE26dE875,base:0x2E9313991fa984Da0bD9569B68fC620fcCe7377D,Reject,24h,5.8128,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
@@ -60,6 +69,7 @@ blocked_or_watchlisted_winner_archived_24h,0xF5Bc3439f53A45607cCaD667AbC7DAF5A58
 blocked_or_watchlisted_winner_archived_24h,0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed,base:0xc9034c3E7F58003E6ae0C8438e7c8f4598d5ACAA,Reject,24h,3.7281,"[""unique_buyers_below_10""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0x2598c30330D5771AE9F983979209486aE26dE875,base:0x2E9313991fa984Da0bD9569B68fC620fcCe7377D,Reject,24h,3.6489,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0x698DC45e4F10966f6D1D98e3bFd7071d8144C233,base:0x76Fc8DbF2022EE75612cb74ec80caF6b3ccFfb23,Reject,24h,3.5174,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
+blocked_or_watchlisted_winner_archived_24h,0x2598c30330D5771AE9F983979209486aE26dE875,base:0x2E9313991fa984Da0bD9569B68fC620fcCe7377D,Reject,24h,2.9163,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0xdc0b77886c39aD66E0766Ef9E6d88762CFD22B07,base:0x56bbef0508c7b839d4fdc5e61bd17589c39391745158b75ef2112407e0807147,Reject,24h,2.7151,"[""score_below_v2_thresholds""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0x2598c30330D5771AE9F983979209486aE26dE875,base:0x2E9313991fa984Da0bD9569B68fC620fcCe7377D,Reject,24h,2.3901,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0x2598c30330D5771AE9F983979209486aE26dE875,base:0x2E9313991fa984Da0bD9569B68fC620fcCe7377D,Reject,24h,2.3901,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
@@ -107,6 +117,7 @@ blocked_or_watchlisted_winner_archived_24h,0x2598c30330D5771AE9F983979209486aE26
 blocked_or_watchlisted_winner_archived_24h,0x561CabF17BC4F9eb946D2921276B6Ac8C4906564,base:0xbea805e6afa13c7025f8dde10518a26b1a7aba6f8cbfea95df5342eedbd13b19,Reject,24h,0.6438,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0x78cdbef65Ede022351F2DD635abc41Ac74788CbD,base:0x51d62ad6f6baa03dd2375c75980dece34bcb46c31acbfbcb536bdd94ac1b5051,Reject,24h,0.5149,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0x78cdbef65Ede022351F2DD635abc41Ac74788CbD,base:0x51d62ad6f6baa03dd2375c75980dece34bcb46c31acbfbcb536bdd94ac1b5051,Reject,24h,0.5149,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
+blocked_or_watchlisted_winner_archived_24h,0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed,base:0xc9034c3E7F58003E6ae0C8438e7c8f4598d5ACAA,Reject,24h,0.5062,"[""unique_buyers_below_10""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0x31d553822B37BDA67126D5ea9d165B9456f72b07,base:0x4cbc2fda128b81d36f462d0846392f28bea7770079085d833e3bab4aec190353,Reject,24h,0.4608,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0x31d553822B37BDA67126D5ea9d165B9456f72b07,base:0x4cbc2fda128b81d36f462d0846392f28bea7770079085d833e3bab4aec190353,Reject,24h,0.4608,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0x31d553822B37BDA67126D5ea9d165B9456f72b07,base:0x4cbc2fda128b81d36f462d0846392f28bea7770079085d833e3bab4aec190353,Reject,24h,0.4608,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
