@@ -135,3 +135,4 @@ token_address,chain,symbol,name,decimals,created_at_scan,first_seen_at,source
 0x19a5f1b9ffDaCafc80ffF6eC676839C5F0ca090D,base,Plague,Rat,,2026-05-13T20:56:48+00:00,2026-05-13T20:56:48+00:00,profile_latest
 0xd8Db4C337d09Da8d7ceb7d87ADFE224D17785ba3,base,CoP,Clash of Perps,,2026-05-13T20:56:48+00:00,2026-05-13T20:56:48+00:00,profile_latest
 0x7F84067564bc87c68e7Fac0F7C94B31dCBd62F80,base,AGENT,Agent Layer,,2026-05-13T20:56:48+00:00,2026-05-13T20:56:48+00:00,search_agent
+0xE33392984756f5dB1b5FFA846a924b89dDd04ba3,base,AGENT,AGENT,,2026-05-13T22:40:10+00:00,2026-05-13T22:40:10+00:00,search_agent
