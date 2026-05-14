@@ -1,15 +1,15 @@
 id,metric,value,status,detail,updated_at
-1610,Timing precision,Approximate,Review,Short-horizon results may be approximate because GitHub Actions runs roughly hourly.,2026-05-14T15:35:07+00:00
-1609,24h horizon coverage,12.8%,OK,72 outcome rows from 563 scan rows.,2026-05-14T15:35:07+00:00
-1608,8h horizon coverage,66.1%,OK,372 outcome rows from 563 scan rows.,2026-05-14T15:35:07+00:00
-1607,4h horizon coverage,77.6%,OK,437 outcome rows from 563 scan rows.,2026-05-14T15:35:07+00:00
-1606,2h horizon coverage,86.1%,OK,485 outcome rows from 563 scan rows.,2026-05-14T15:35:07+00:00
-1605,1h horizon coverage,87.6%,OK,493 outcome rows from 563 scan rows.,2026-05-14T15:35:07+00:00
-1604,30m horizon coverage,87.6%,OK,493 outcome rows from 563 scan rows.,2026-05-14T15:35:07+00:00
-1603,15m horizon coverage,87.7%,OK,494 outcome rows from 563 scan rows.,2026-05-14T15:35:07+00:00
-1602,Missing security score count,0,OK,GoPlus/security can be absent on free or unauthenticated runs.,2026-05-14T15:35:07+00:00
-1601,Missing liquidity count,41,Review,,2026-05-14T15:35:07+00:00
-1600,Missing 1h move count,348,Review,,2026-05-14T15:35:07+00:00
-1599,Active API errors,0,OK,,2026-05-14T15:35:07+00:00
-1598,Last successful outcome update,2026-05-14T15:35:05+00:00,OK,,2026-05-14T15:35:07+00:00
-1597,Last successful scan,2026-05-14T15:35:03+00:00,OK,,2026-05-14T15:35:07+00:00
+1652,Timing precision,Approximate,Review,Short-horizon results may be approximate because GitHub Actions runs roughly hourly.,2026-05-14T18:09:52+00:00
+1651,24h horizon coverage,13.4%,OK,74 outcome rows from 553 scan rows.,2026-05-14T18:09:52+00:00
+1650,8h horizon coverage,61.5%,OK,340 outcome rows from 553 scan rows.,2026-05-14T18:09:52+00:00
+1649,4h horizon coverage,78.1%,OK,432 outcome rows from 553 scan rows.,2026-05-14T18:09:52+00:00
+1648,2h horizon coverage,86.8%,OK,480 outcome rows from 553 scan rows.,2026-05-14T18:09:52+00:00
+1647,1h horizon coverage,87.9%,OK,486 outcome rows from 553 scan rows.,2026-05-14T18:09:52+00:00
+1646,30m horizon coverage,87.9%,OK,486 outcome rows from 553 scan rows.,2026-05-14T18:09:52+00:00
+1645,15m horizon coverage,88.1%,OK,487 outcome rows from 553 scan rows.,2026-05-14T18:09:52+00:00
+1644,Missing security score count,0,OK,GoPlus/security can be absent on free or unauthenticated runs.,2026-05-14T18:09:52+00:00
+1643,Missing liquidity count,43,Review,,2026-05-14T18:09:52+00:00
+1642,Missing 1h move count,339,Review,,2026-05-14T18:09:52+00:00
+1641,Active API errors,0,OK,,2026-05-14T18:09:52+00:00
+1640,Last successful outcome update,2026-05-14T18:09:49+00:00,OK,,2026-05-14T18:09:52+00:00
+1639,Last successful scan,2026-05-14T18:09:46+00:00,OK,,2026-05-14T18:09:52+00:00
