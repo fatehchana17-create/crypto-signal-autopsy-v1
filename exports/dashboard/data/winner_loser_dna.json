@@ -1,9 +1,9 @@
 [
   {
     "common_source_labels": "Watchlist: 16, Reject: 10, Research Candidate: 4, Momentum Trap: 2",
-    "created_at": "2026-05-14T10:36:06+00:00",
+    "created_at": "2026-05-14T13:06:33+00:00",
     "dna_type": "Loser DNA",
-    "id": 106,
+    "id": 112,
     "median_best_return_pct": -20.462724935732645,
     "median_buy_ratio": 0.46143790849673205,
     "median_liquidity_usd": 94035.97,
@@ -19,22 +19,22 @@
     "sample_count": 35
   },
   {
-    "common_source_labels": "Watchlist: 7, Momentum Trap: 1, High-Risk Momentum Watchlist: 1",
-    "created_at": "2026-05-14T10:36:06+00:00",
+    "common_source_labels": "Watchlist: 8, Momentum Trap: 1, High-Risk Momentum Watchlist: 1",
+    "created_at": "2026-05-14T13:06:33+00:00",
     "dna_type": "Winner DNA",
-    "id": 105,
-    "median_best_return_pct": 88.0323054331865,
-    "median_buy_ratio": 0.5579584775086506,
-    "median_liquidity_usd": 84115.43,
-    "median_pair_age_hours": 1.1183388027777779,
-    "median_price_change_1h_pct": 68.58,
-    "median_pump_strength_score": 85.0,
-    "median_survival_score": 73.3,
+    "id": 111,
+    "median_best_return_pct": 86.69209379678966,
+    "median_buy_ratio": 0.5689899798928859,
+    "median_liquidity_usd": 86821.93,
+    "median_pair_age_hours": 1.5707313829166667,
+    "median_price_change_1h_pct": 35.26,
+    "median_pump_strength_score": 86.0,
+    "median_survival_score": 77.54857142857142,
     "median_trap_risk_score": 17.0,
-    "median_volume_24h_usd": 554636.79,
-    "median_worst_return_pct": 14.158239143367046,
+    "median_volume_24h_usd": 567143.7,
+    "median_worst_return_pct": 14.788370673005101,
     "pattern_summary": "Winners are rows with +50% or better upside and enough survival after detection.",
     "rule_implication": "Look for survival plus low trap risk before loosening strict filters.",
-    "sample_count": 9
+    "sample_count": 10
   }
 ]
