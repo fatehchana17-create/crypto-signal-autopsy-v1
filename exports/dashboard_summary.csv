@@ -1,2 +1,2 @@
 total_tokens_scanned,rejected_tokens,watchlist_tokens,high_risk_momentum_tokens,momentum_trap_tokens,weak_overextended_pump_tokens,research_candidates,pending_paper_candidates,paper_trade_candidates,api_errors,completed_rejected_audits,last_scan_time,model_version
-486,405,57,2,4,1,15,0,2,0,644,2026-05-13T22:40:10+00:00,V2
+493,412,57,2,4,1,15,0,2,0,661,2026-05-14T00:16:42+00:00,V2
