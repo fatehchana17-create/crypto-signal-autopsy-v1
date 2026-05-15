@@ -32,6 +32,8 @@ blocked_or_watchlisted_winner,0x840942F13A6AaBB4a533aE348E9CB00E1F689d36,base:0x
 blocked_or_watchlisted_winner,0x840942F13A6AaBB4a533aE348E9CB00E1F689d36,base:0xdab4e9f0024f414d3b86cfd17025541787cbd636ef235d683386d879e9f6977f,Watchlist,1h,72.8195,[],0,0,0
 blocked_or_watchlisted_winner,0x840942F13A6AaBB4a533aE348E9CB00E1F689d36,base:0xdab4e9f0024f414d3b86cfd17025541787cbd636ef235d683386d879e9f6977f,Watchlist,2h,72.8195,[],0,0,0
 blocked_or_watchlisted_winner,0x840942F13A6AaBB4a533aE348E9CB00E1F689d36,base:0xdab4e9f0024f414d3b86cfd17025541787cbd636ef235d683386d879e9f6977f,Watchlist,30m,72.8195,[],0,0,0
+blocked_or_watchlisted_winner,0xFa507Bf8dfb7649F3c567901215b224e77f4163E,base:0x7e8cfb89dac73a43f69c4343bb85da23158115664f6a749d6bdda056f9d84f3f,Momentum Trap,15m,67.1975,"[""early_extreme_overextension"",""too_early_after_large_pump""]",0,0,0
+blocked_or_watchlisted_winner,0xFa507Bf8dfb7649F3c567901215b224e77f4163E,base:0x7e8cfb89dac73a43f69c4343bb85da23158115664f6a749d6bdda056f9d84f3f,Momentum Trap,30m,67.1975,"[""early_extreme_overextension"",""too_early_after_large_pump""]",0,0,0
 blocked_or_watchlisted_winner,0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed,base:0xc9034c3E7F58003E6ae0C8438e7c8f4598d5ACAA,Watchlist,15m,67.1355,[],0,0,0
 blocked_or_watchlisted_winner,0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed,base:0xc9034c3E7F58003E6ae0C8438e7c8f4598d5ACAA,Watchlist,1h,67.1355,[],0,0,0
 blocked_or_watchlisted_winner,0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed,base:0xc9034c3E7F58003E6ae0C8438e7c8f4598d5ACAA,Watchlist,2h,67.1355,[],0,0,0
