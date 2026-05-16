@@ -201,3 +201,5 @@ token_address,chain,symbol,name,decimals,created_at_scan,first_seen_at,source
 0x7F6a506325d71F84Cb67cABA352682bB896eEd6c,base,agent,agent,,2026-05-16T09:02:02+00:00,2026-05-16T09:02:02+00:00,search_agent
 0xC0d1e717ec2a7D71000f939b44C5b87c52B8ED6C,base,agent,agent,,2026-05-16T09:02:02+00:00,2026-05-16T09:02:02+00:00,search_agent
 0x6FE3aed6CaBe7351cD02998fAE5Edd629E85ED6c,base,agent,agent,,2026-05-16T09:02:02+00:00,2026-05-16T09:02:02+00:00,search_agent
+0x2709ae85d9c4e9E36A9F4Dd7Aff664Be1B5E4a3C,base,BiomeAI,Biome AI,,2026-05-16T10:39:28+00:00,2026-05-16T10:39:28+00:00,profile_latest
+0xADFf928b0323952C8385A2BcdD2654cAAa518736,base,BASE,BASE github.com/typicms/BASE,,2026-05-16T10:39:28+00:00,2026-05-16T10:39:28+00:00,search_base
