@@ -1,10 +1,10 @@
 [
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": null,
     "fdv_liquidity_ratio": null,
     "horizon": "4h",
-    "id": 8854,
+    "id": 9124,
     "liquidity_at_scan": 80392.58,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 65.20223152022318,
@@ -23,11 +23,11 @@
     "volume_at_scan": 985608.11
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": null,
     "fdv_liquidity_ratio": null,
     "horizon": "1h",
-    "id": 8853,
+    "id": 9123,
     "liquidity_at_scan": 80392.58,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 65.20223152022318,
@@ -46,11 +46,11 @@
     "volume_at_scan": 985608.11
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": null,
     "fdv_liquidity_ratio": null,
     "horizon": "15m",
-    "id": 8852,
+    "id": 9122,
     "liquidity_at_scan": 80392.58,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 65.20223152022318,
@@ -69,11 +69,11 @@
     "volume_at_scan": 985608.11
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": null,
     "fdv_liquidity_ratio": null,
     "horizon": "4h",
-    "id": 8851,
+    "id": 9121,
     "liquidity_at_scan": 89528.43,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 152.91545189504373,
@@ -92,11 +92,11 @@
     "volume_at_scan": 401263.44
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": null,
     "fdv_liquidity_ratio": null,
     "horizon": "1h",
-    "id": 8850,
+    "id": 9120,
     "liquidity_at_scan": 89528.43,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 152.91545189504373,
@@ -115,11 +115,11 @@
     "volume_at_scan": 401263.44
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": null,
     "fdv_liquidity_ratio": null,
     "horizon": "15m",
-    "id": 8849,
+    "id": 9119,
     "liquidity_at_scan": 89528.43,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 152.91545189504373,
@@ -138,11 +138,11 @@
     "volume_at_scan": 401263.44
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": null,
     "fdv_liquidity_ratio": null,
     "horizon": "24h",
-    "id": 8848,
+    "id": 9118,
     "liquidity_at_scan": 89528.43,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 148.61516034985422,
@@ -161,11 +161,11 @@
     "volume_at_scan": 401263.44
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": null,
     "fdv_liquidity_ratio": null,
     "horizon": "8h",
-    "id": 8847,
+    "id": 9117,
     "liquidity_at_scan": 89528.43,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 53.134110787172006,
@@ -184,11 +184,11 @@
     "volume_at_scan": 401263.44
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": null,
     "fdv_liquidity_ratio": null,
     "horizon": "2h",
-    "id": 8846,
+    "id": 9116,
     "liquidity_at_scan": 89528.43,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 53.134110787172006,
@@ -207,11 +207,11 @@
     "volume_at_scan": 401263.44
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": null,
     "fdv_liquidity_ratio": null,
     "horizon": "30m",
-    "id": 8845,
+    "id": 9115,
     "liquidity_at_scan": 89528.43,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 53.134110787172006,
@@ -230,11 +230,11 @@
     "volume_at_scan": 401263.44
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": null,
     "fdv_liquidity_ratio": null,
     "horizon": "8h",
-    "id": 8844,
+    "id": 9114,
     "liquidity_at_scan": 242285.65,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 56.55363870711878,
@@ -253,11 +253,11 @@
     "volume_at_scan": 579650.61
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": null,
     "fdv_liquidity_ratio": null,
     "horizon": "2h",
-    "id": 8843,
+    "id": 9113,
     "liquidity_at_scan": 242285.65,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 56.55363870711878,
@@ -276,11 +276,11 @@
     "volume_at_scan": 579650.61
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": null,
     "fdv_liquidity_ratio": null,
     "horizon": "30m",
-    "id": 8842,
+    "id": 9112,
     "liquidity_at_scan": 242285.65,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 56.55363870711878,
@@ -299,11 +299,11 @@
     "volume_at_scan": 579650.61
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": null,
     "fdv_liquidity_ratio": null,
     "horizon": "8h",
-    "id": 8841,
+    "id": 9111,
     "liquidity_at_scan": 240436.13,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 53.2117213273821,
@@ -322,11 +322,11 @@
     "volume_at_scan": 656701.52
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": null,
     "fdv_liquidity_ratio": null,
     "horizon": "2h",
-    "id": 8840,
+    "id": 9110,
     "liquidity_at_scan": 240436.13,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 53.2117213273821,
@@ -345,11 +345,11 @@
     "volume_at_scan": 656701.52
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": null,
     "fdv_liquidity_ratio": null,
     "horizon": "30m",
-    "id": 8839,
+    "id": 9109,
     "liquidity_at_scan": 240436.13,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 53.2117213273821,
@@ -368,11 +368,11 @@
     "volume_at_scan": 656701.52
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 100647.0,
     "fdv_liquidity_ratio": 2.2046873949237447,
     "horizon": "2h",
-    "id": 8838,
+    "id": 9108,
     "liquidity_at_scan": 45651.37,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 64.41351888667992,
@@ -391,11 +391,11 @@
     "volume_at_scan": 554636.79
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 122300.0,
     "fdv_liquidity_ratio": 1.4539544052738007,
     "horizon": "15m",
-    "id": 8837,
+    "id": 9107,
     "liquidity_at_scan": 84115.43,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 60.22913256955811,
@@ -414,11 +414,11 @@
     "volume_at_scan": 600156.3
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 122300.0,
     "fdv_liquidity_ratio": 1.4539544052738007,
     "horizon": "1h",
-    "id": 8836,
+    "id": 9106,
     "liquidity_at_scan": 84115.43,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 85.35188216039282,
@@ -437,11 +437,11 @@
     "volume_at_scan": 600156.3
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 122300.0,
     "fdv_liquidity_ratio": 1.4539544052738007,
     "horizon": "30m",
-    "id": 8835,
+    "id": 9105,
     "liquidity_at_scan": 84115.43,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 85.35188216039282,
@@ -460,11 +460,11 @@
     "volume_at_scan": 600156.3
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 100647.0,
     "fdv_liquidity_ratio": 2.2046873949237447,
     "horizon": "4h",
-    "id": 8834,
+    "id": 9104,
     "liquidity_at_scan": 45651.37,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 57.45526838966204,
@@ -483,11 +483,11 @@
     "volume_at_scan": 554636.79
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 122300.0,
     "fdv_liquidity_ratio": 1.4539544052738007,
     "horizon": "4h",
-    "id": 8833,
+    "id": 9103,
     "liquidity_at_scan": 84115.43,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 55.48281505728316,
@@ -506,11 +506,11 @@
     "volume_at_scan": 600156.3
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 62951.0,
     "fdv_liquidity_ratio": 1.033321843042629,
     "horizon": "8h",
-    "id": 8832,
+    "id": 9102,
     "liquidity_at_scan": 60921.0,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 100.47656870532168,
@@ -529,11 +529,11 @@
     "volume_at_scan": 988516.67
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 128836.0,
     "fdv_liquidity_ratio": 1.971527045909207,
     "horizon": "1h",
-    "id": 8831,
+    "id": 9101,
     "liquidity_at_scan": 65348.33,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 129.5807453416149,
@@ -552,11 +552,11 @@
     "volume_at_scan": 345887.63
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 128836.0,
     "fdv_liquidity_ratio": 1.971527045909207,
     "horizon": "30m",
-    "id": 8830,
+    "id": 9100,
     "liquidity_at_scan": 65348.33,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 129.5807453416149,
@@ -575,11 +575,11 @@
     "volume_at_scan": 345887.63
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 128836.0,
     "fdv_liquidity_ratio": 1.971527045909207,
     "horizon": "15m",
-    "id": 8829,
+    "id": 9099,
     "liquidity_at_scan": 65348.33,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 129.5807453416149,
@@ -598,11 +598,11 @@
     "volume_at_scan": 345887.63
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 38543.0,
     "fdv_liquidity_ratio": 1.0561986003032429,
     "horizon": "4h",
-    "id": 8828,
+    "id": 9098,
     "liquidity_at_scan": 36492.19,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 470.57602490918526,
@@ -621,11 +621,11 @@
     "volume_at_scan": 115284.72
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 38543.0,
     "fdv_liquidity_ratio": 1.0561986003032429,
     "horizon": "2h",
-    "id": 8827,
+    "id": 9097,
     "liquidity_at_scan": 36492.19,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 470.57602490918526,
@@ -644,11 +644,11 @@
     "volume_at_scan": 115284.72
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 38543.0,
     "fdv_liquidity_ratio": 1.0561986003032429,
     "horizon": "1h",
-    "id": 8826,
+    "id": 9096,
     "liquidity_at_scan": 36492.19,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 470.57602490918526,
@@ -667,11 +667,11 @@
     "volume_at_scan": 115284.72
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 38543.0,
     "fdv_liquidity_ratio": 1.0561986003032429,
     "horizon": "30m",
-    "id": 8825,
+    "id": 9095,
     "liquidity_at_scan": 36492.19,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 470.57602490918526,
@@ -690,11 +690,11 @@
     "volume_at_scan": 115284.72
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 38543.0,
     "fdv_liquidity_ratio": 1.0561986003032429,
     "horizon": "15m",
-    "id": 8824,
+    "id": 9094,
     "liquidity_at_scan": 36492.19,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 470.57602490918526,
@@ -713,11 +713,11 @@
     "volume_at_scan": 115284.72
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 128836.0,
     "fdv_liquidity_ratio": 1.971527045909207,
     "horizon": "4h",
-    "id": 8823,
+    "id": 9093,
     "liquidity_at_scan": 65348.33,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 388.276397515528,
@@ -736,11 +736,11 @@
     "volume_at_scan": 345887.63
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 128836.0,
     "fdv_liquidity_ratio": 1.971527045909207,
     "horizon": "2h",
-    "id": 8822,
+    "id": 9092,
     "liquidity_at_scan": 65348.33,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 388.276397515528,
@@ -759,11 +759,11 @@
     "volume_at_scan": 345887.63
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 128836.0,
     "fdv_liquidity_ratio": 1.971527045909207,
     "horizon": "8h",
-    "id": 8821,
+    "id": 9091,
     "liquidity_at_scan": 65348.33,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 123.60248447204967,
@@ -782,11 +782,11 @@
     "volume_at_scan": 345887.63
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 128836.0,
     "fdv_liquidity_ratio": 1.971527045909207,
     "horizon": "24h",
-    "id": 8820,
+    "id": 9090,
     "liquidity_at_scan": 65348.33,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 120.26397515527951,
@@ -805,11 +805,11 @@
     "volume_at_scan": 345887.63
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 38543.0,
     "fdv_liquidity_ratio": 1.0561986003032429,
     "horizon": "24h",
-    "id": 8819,
+    "id": 9089,
     "liquidity_at_scan": 36492.19,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 87.18214841722885,
@@ -828,11 +828,11 @@
     "volume_at_scan": 115284.72
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 679905.0,
     "fdv_liquidity_ratio": 3.0111845706602325,
     "horizon": "2h",
-    "id": 8818,
+    "id": 9088,
     "liquidity_at_scan": 225793.2,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 72.81953228415942,
@@ -851,11 +851,11 @@
     "volume_at_scan": 3126953.77
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 679905.0,
     "fdv_liquidity_ratio": 3.0111845706602325,
     "horizon": "1h",
-    "id": 8817,
+    "id": 9087,
     "liquidity_at_scan": 225793.2,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 72.81953228415942,
@@ -874,11 +874,11 @@
     "volume_at_scan": 3126953.77
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 679905.0,
     "fdv_liquidity_ratio": 3.0111845706602325,
     "horizon": "30m",
-    "id": 8816,
+    "id": 9086,
     "liquidity_at_scan": 225793.2,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 72.81953228415942,
@@ -897,11 +897,11 @@
     "volume_at_scan": 3126953.77
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 679905.0,
     "fdv_liquidity_ratio": 3.0111845706602325,
     "horizon": "15m",
-    "id": 8815,
+    "id": 9085,
     "liquidity_at_scan": 225793.2,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 72.81953228415942,
@@ -920,11 +920,11 @@
     "volume_at_scan": 3126953.77
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 28804506.0,
     "fdv_liquidity_ratio": 32.62422755535839,
     "horizon": "2h",
-    "id": 8814,
+    "id": 9084,
     "liquidity_at_scan": 882917.64,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 67.13554987212275,
@@ -943,11 +943,11 @@
     "volume_at_scan": 110786.47
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 28804506.0,
     "fdv_liquidity_ratio": 32.62422755535839,
     "horizon": "1h",
-    "id": 8813,
+    "id": 9083,
     "liquidity_at_scan": 882917.64,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 67.13554987212275,
@@ -966,11 +966,11 @@
     "volume_at_scan": 110786.47
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 28804506.0,
     "fdv_liquidity_ratio": 32.62422755535839,
     "horizon": "30m",
-    "id": 8812,
+    "id": 9082,
     "liquidity_at_scan": 882917.64,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 67.13554987212275,
@@ -989,11 +989,11 @@
     "volume_at_scan": 110786.47
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 28804506.0,
     "fdv_liquidity_ratio": 32.62422755535839,
     "horizon": "15m",
-    "id": 8811,
+    "id": 9081,
     "liquidity_at_scan": 882917.64,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 67.13554987212275,
@@ -1012,11 +1012,11 @@
     "volume_at_scan": 110786.47
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 510643.0,
     "fdv_liquidity_ratio": 3.0336756575158095,
     "horizon": "2h",
-    "id": 8810,
+    "id": 9080,
     "liquidity_at_scan": 168324.85,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 120.13317665491576,
@@ -1035,11 +1035,11 @@
     "volume_at_scan": 488223.89
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 510643.0,
     "fdv_liquidity_ratio": 3.0336756575158095,
     "horizon": "1h",
-    "id": 8809,
+    "id": 9079,
     "liquidity_at_scan": 168324.85,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 120.13317665491576,
@@ -1058,11 +1058,11 @@
     "volume_at_scan": 488223.89
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 510643.0,
     "fdv_liquidity_ratio": 3.0336756575158095,
     "horizon": "30m",
-    "id": 8808,
+    "id": 9078,
     "liquidity_at_scan": 168324.85,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 120.13317665491576,
@@ -1081,11 +1081,11 @@
     "volume_at_scan": 488223.89
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 510643.0,
     "fdv_liquidity_ratio": 3.0336756575158095,
     "horizon": "15m",
-    "id": 8807,
+    "id": 9077,
     "liquidity_at_scan": 168324.85,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 120.13317665491576,
@@ -1104,11 +1104,11 @@
     "volume_at_scan": 488223.89
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 27545115.0,
     "fdv_liquidity_ratio": 32.39616197232421,
     "horizon": "4h",
-    "id": 8806,
+    "id": 9076,
     "liquidity_at_scan": 850258.59,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 74.75598342024334,
@@ -1127,11 +1127,11 @@
     "volume_at_scan": 108920.61
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 26910730.0,
     "fdv_liquidity_ratio": 32.29983273797511,
     "horizon": "24h",
-    "id": 8805,
+    "id": 9075,
     "liquidity_at_scan": 833153.85,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 78.91854893908281,
@@ -1150,11 +1150,11 @@
     "volume_at_scan": 194849.87
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 28804506.0,
     "fdv_liquidity_ratio": 32.62422755535839,
     "horizon": "4h",
-    "id": 8804,
+    "id": 9074,
     "liquidity_at_scan": 882917.64,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 50.76726342710995,
@@ -1173,11 +1173,11 @@
     "volume_at_scan": 110786.47
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 510643.0,
     "fdv_liquidity_ratio": 3.0336756575158095,
     "horizon": "4h",
-    "id": 8803,
+    "id": 9073,
     "liquidity_at_scan": 168324.85,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 55.81668625146885,
@@ -1196,11 +1196,11 @@
     "volume_at_scan": 488223.89
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 26872015.0,
     "fdv_liquidity_ratio": 32.257646112428226,
     "horizon": "24h",
-    "id": 8802,
+    "id": 9072,
     "liquidity_at_scan": 833043.27,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 61.5953947368421,
@@ -1219,11 +1219,11 @@
     "volume_at_scan": 203294.36
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 27545115.0,
     "fdv_liquidity_ratio": 32.39616197232421,
     "horizon": "8h",
-    "id": 8801,
+    "id": 9071,
     "liquidity_at_scan": 850258.59,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 54.83353389490573,
@@ -1242,11 +1242,11 @@
     "volume_at_scan": 108920.61
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 157022.0,
     "fdv_liquidity_ratio": 1.8608201962428075,
     "horizon": "30m",
-    "id": 8800,
+    "id": 9070,
     "liquidity_at_scan": 84383.22,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 67.19745222929936,
@@ -1265,11 +1265,11 @@
     "volume_at_scan": 189104.6
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 157022.0,
     "fdv_liquidity_ratio": 1.8608201962428075,
     "horizon": "15m",
-    "id": 8799,
+    "id": 9069,
     "liquidity_at_scan": 84383.22,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 67.19745222929936,
@@ -1288,11 +1288,11 @@
     "volume_at_scan": 189104.6
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 67795.0,
     "fdv_liquidity_ratio": 1.3992689415751811,
     "horizon": "2h",
-    "id": 8798,
+    "id": 9068,
     "liquidity_at_scan": 48450.3,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 53.562472341053265,
@@ -1311,11 +1311,11 @@
     "volume_at_scan": 183305.06
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 67795.0,
     "fdv_liquidity_ratio": 1.3992689415751811,
     "horizon": "1h",
-    "id": 8797,
+    "id": 9067,
     "liquidity_at_scan": 48450.3,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 53.562472341053265,
@@ -1334,11 +1334,11 @@
     "volume_at_scan": 183305.06
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 67795.0,
     "fdv_liquidity_ratio": 1.3992689415751811,
     "horizon": "30m",
-    "id": 8796,
+    "id": 9066,
     "liquidity_at_scan": 48450.3,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 53.562472341053265,
@@ -1357,11 +1357,11 @@
     "volume_at_scan": 183305.06
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 67795.0,
     "fdv_liquidity_ratio": 1.3992689415751811,
     "horizon": "15m",
-    "id": 8795,
+    "id": 9065,
     "liquidity_at_scan": 48450.3,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 53.562472341053265,
@@ -1380,11 +1380,11 @@
     "volume_at_scan": 183305.06
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 67795.0,
     "fdv_liquidity_ratio": 1.3992689415751811,
     "horizon": "4h",
-    "id": 8794,
+    "id": 9064,
     "liquidity_at_scan": 48450.3,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 270.2611004572946,
@@ -1403,11 +1403,11 @@
     "volume_at_scan": 183305.06
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 94855.0,
     "fdv_liquidity_ratio": 1.5495676223599726,
     "horizon": "2h",
-    "id": 8793,
+    "id": 9063,
     "liquidity_at_scan": 61213.85,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 233.2630469161834,
@@ -1426,11 +1426,11 @@
     "volume_at_scan": 110419.81
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 94855.0,
     "fdv_liquidity_ratio": 1.5495676223599726,
     "horizon": "1h",
-    "id": 8792,
+    "id": 9062,
     "liquidity_at_scan": 61213.85,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 233.2630469161834,
@@ -1449,11 +1449,11 @@
     "volume_at_scan": 110419.81
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 94855.0,
     "fdv_liquidity_ratio": 1.5495676223599726,
     "horizon": "30m",
-    "id": 8791,
+    "id": 9061,
     "liquidity_at_scan": 61213.85,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 233.2630469161834,
@@ -1472,11 +1472,11 @@
     "volume_at_scan": 110419.81
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 94855.0,
     "fdv_liquidity_ratio": 1.5495676223599726,
     "horizon": "15m",
-    "id": 8790,
+    "id": 9060,
     "liquidity_at_scan": 61213.85,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 233.2630469161834,
@@ -1495,11 +1495,11 @@
     "volume_at_scan": 110419.81
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 67795.0,
     "fdv_liquidity_ratio": 1.3992689415751811,
     "horizon": "8h",
-    "id": 8789,
+    "id": 9059,
     "liquidity_at_scan": 48450.3,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 199.89673993214336,
@@ -1518,11 +1518,11 @@
     "volume_at_scan": 183305.06
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 28944.0,
     "fdv_liquidity_ratio": 0.9838613293957126,
     "horizon": "24h",
-    "id": 8788,
+    "id": 9058,
     "liquidity_at_scan": 29418.78,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 602.4879060124396,
@@ -1541,11 +1541,11 @@
     "volume_at_scan": 123780.62
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 94855.0,
     "fdv_liquidity_ratio": 1.5495676223599726,
     "horizon": "8h",
-    "id": 8787,
+    "id": 9057,
     "liquidity_at_scan": 61213.85,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 392.5672113863996,
@@ -1564,11 +1564,11 @@
     "volume_at_scan": 110419.81
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 22995.0,
     "fdv_liquidity_ratio": 1.1294093378257581,
     "horizon": "30m",
-    "id": 8786,
+    "id": 9056,
     "liquidity_at_scan": 20360.2,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 50.717703349282296,
@@ -1587,11 +1587,11 @@
     "volume_at_scan": 43048.7
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 22995.0,
     "fdv_liquidity_ratio": 1.1294093378257581,
     "horizon": "15m",
-    "id": 8785,
+    "id": 9055,
     "liquidity_at_scan": 20360.2,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 50.717703349282296,
@@ -1610,11 +1610,11 @@
     "volume_at_scan": 43048.7
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 257636.0,
     "fdv_liquidity_ratio": 10.292841561928201,
     "horizon": "2h",
-    "id": 8784,
+    "id": 9054,
     "liquidity_at_scan": 25030.6,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 111.60714285714289,
@@ -1633,11 +1633,11 @@
     "volume_at_scan": 182122.43
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 257636.0,
     "fdv_liquidity_ratio": 10.292841561928201,
     "horizon": "1h",
-    "id": 8783,
+    "id": 9053,
     "liquidity_at_scan": 25030.6,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 111.60714285714289,
@@ -1656,11 +1656,11 @@
     "volume_at_scan": 182122.43
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 257636.0,
     "fdv_liquidity_ratio": 10.292841561928201,
     "horizon": "30m",
-    "id": 8782,
+    "id": 9052,
     "liquidity_at_scan": 25030.6,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 111.60714285714289,
@@ -1679,11 +1679,11 @@
     "volume_at_scan": 182122.43
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 257636.0,
     "fdv_liquidity_ratio": 10.292841561928201,
     "horizon": "15m",
-    "id": 8781,
+    "id": 9051,
     "liquidity_at_scan": 25030.6,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 111.60714285714289,
@@ -1702,11 +1702,11 @@
     "volume_at_scan": 182122.43
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 281475.0,
     "fdv_liquidity_ratio": 10.761203924384263,
     "horizon": "4h",
-    "id": 8780,
+    "id": 9050,
     "liquidity_at_scan": 26156.46,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 93.7100213219616,
@@ -1725,11 +1725,11 @@
     "volume_at_scan": 179372.86
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 281475.0,
     "fdv_liquidity_ratio": 10.761203924384263,
     "horizon": "2h",
-    "id": 8779,
+    "id": 9049,
     "liquidity_at_scan": 26156.46,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 93.7100213219616,
@@ -1748,11 +1748,11 @@
     "volume_at_scan": 179372.86
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 281475.0,
     "fdv_liquidity_ratio": 10.761203924384263,
     "horizon": "1h",
-    "id": 8778,
+    "id": 9048,
     "liquidity_at_scan": 26156.46,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 93.7100213219616,
@@ -1771,11 +1771,11 @@
     "volume_at_scan": 179372.86
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 159723.0,
     "fdv_liquidity_ratio": 1.5700199836631341,
     "horizon": "8h",
-    "id": 8777,
+    "id": 9047,
     "liquidity_at_scan": 101733.1,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 75.3913587977458,
@@ -1794,11 +1794,11 @@
     "volume_at_scan": 306465.46
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 257636.0,
     "fdv_liquidity_ratio": 10.292841561928201,
     "horizon": "4h",
-    "id": 8776,
+    "id": 9046,
     "liquidity_at_scan": 25030.6,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 53.881987577639755,
@@ -1817,11 +1817,11 @@
     "volume_at_scan": 182122.43
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 67795.0,
     "fdv_liquidity_ratio": 1.3992689415751811,
     "horizon": "24h",
-    "id": 8775,
+    "id": 9045,
     "liquidity_at_scan": 48450.3,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 600.3982888331612,
@@ -1840,11 +1840,11 @@
     "volume_at_scan": 183305.06
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 35268.0,
     "fdv_liquidity_ratio": 2.2190957505713222,
     "horizon": "4h",
-    "id": 8774,
+    "id": 9044,
     "liquidity_at_scan": 15892.96,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 50.22688598979013,
@@ -1863,11 +1863,11 @@
     "volume_at_scan": 31905.53
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 170288.0,
     "fdv_liquidity_ratio": 1.5868492644160457,
     "horizon": "8h",
-    "id": 8773,
+    "id": 9043,
     "liquidity_at_scan": 107312.02,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 57.4030552291422,
@@ -1886,11 +1886,11 @@
     "volume_at_scan": 709120.68
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 159723.0,
     "fdv_liquidity_ratio": 1.5700199836631341,
     "horizon": "24h",
-    "id": 8772,
+    "id": 9042,
     "liquidity_at_scan": 101733.1,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 67.75203506574829,
@@ -1909,11 +1909,11 @@
     "volume_at_scan": 306465.46
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 35268.0,
     "fdv_liquidity_ratio": 2.2190957505713222,
     "horizon": "8h",
-    "id": 8771,
+    "id": 9041,
     "liquidity_at_scan": 15892.96,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 75.12762336925694,
@@ -1932,11 +1932,11 @@
     "volume_at_scan": 31905.53
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 9144.0,
     "fdv_liquidity_ratio": 1.3927771769759187,
     "horizon": "1h",
-    "id": 8770,
+    "id": 9040,
     "liquidity_at_scan": 6565.3,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 150.21872265966758,
@@ -1955,11 +1955,11 @@
     "volume_at_scan": 3230.75
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 9144.0,
     "fdv_liquidity_ratio": 1.3927771769759187,
     "horizon": "30m",
-    "id": 8769,
+    "id": 9039,
     "liquidity_at_scan": 6565.3,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 150.21872265966758,
@@ -1978,11 +1978,11 @@
     "volume_at_scan": 3230.75
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 9144.0,
     "fdv_liquidity_ratio": 1.3927771769759187,
     "horizon": "15m",
-    "id": 8768,
+    "id": 9038,
     "liquidity_at_scan": 6565.3,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 150.21872265966758,
@@ -2001,11 +2001,11 @@
     "volume_at_scan": 3230.75
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 9422.0,
     "fdv_liquidity_ratio": 1.4079497907949792,
     "horizon": "2h",
-    "id": 8767,
+    "id": 9037,
     "liquidity_at_scan": 6692.0,
     "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
     "max_future_return_pct": 142.8616919647596,
@@ -2024,11 +2024,11 @@
     "volume_at_scan": 3146.33
   },
   {
-    "created_at": "2026-05-16T22:06:58+00:00",
+    "created_at": "2026-05-16T23:10:32+00:00",
     "fdv": 81215.0,
     "fdv_liquidity_ratio": 1.294940444538553,
     "horizon": "2h",
-    "id": 8766,
+    "id": 9036,
     "liquidity_at_scan": 62717.17,
     "main_lesson": "Clean missed winner candidate: review whether thresholds were too strict.",
     "max_future_return_pct": 85.56827976850141,
@@ -2045,5 +2045,28 @@
     "tradability_label": "Possibly Tradable",
     "tradability_score": 75.0,
     "volume_at_scan": 209612.07
+  },
+  {
+    "created_at": "2026-05-16T23:10:32+00:00",
+    "fdv": 9144.0,
+    "fdv_liquidity_ratio": 1.3927771769759187,
+    "horizon": "2h",
+    "id": 9035,
+    "liquidity_at_scan": 6565.3,
+    "main_lesson": "Pump was not clearly tradable; do not loosen clean filters from this row alone.",
+    "max_future_return_pct": 145.2974628171479,
+    "original_label": "Reject",
+    "pair_age_hours_at_scan": 5838.5252019936115,
+    "pair_id": "base:0xdA1Cf50f7345Ba725e7c01640c5a1C5904617ecD",
+    "price_change_1h_at_scan": 0.52,
+    "reject_reasons": "[\"liquidity_below_10000\",\"unique_buyers_below_10\",\"volume_24h_below_15000\"]",
+    "return_at_horizon_pct": 145.2974628171479,
+    "security_score": null,
+    "should_be_high_risk_momentum": 0,
+    "symbol": "BASE",
+    "token_address": "0x0678488FfCF367e8593708462c95c7e110875e34",
+    "tradability_label": "Likely Not Tradable",
+    "tradability_score": 40.0,
+    "volume_at_scan": 3230.75
   }
 ]
