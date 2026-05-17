@@ -1,114 +1,114 @@
 [
   {
     "detail": "Short-horizon results may be approximate because GitHub Actions runs roughly hourly.",
-    "id": 3220,
+    "id": 3262,
     "metric": "Timing precision",
     "status": "Review",
-    "updated_at": "2026-05-17T19:39:56+00:00",
+    "updated_at": "2026-05-17T21:09:58+00:00",
     "value": "Approximate"
   },
   {
-    "detail": "165 outcome rows from 1019 scan rows.",
-    "id": 3219,
+    "detail": "167 outcome rows from 1023 scan rows.",
+    "id": 3261,
     "metric": "24h horizon coverage",
     "status": "OK",
-    "updated_at": "2026-05-17T19:39:56+00:00",
-    "value": "16.2%"
+    "updated_at": "2026-05-17T21:09:58+00:00",
+    "value": "16.3%"
   },
   {
-    "detail": "651 outcome rows from 1019 scan rows.",
-    "id": 3218,
+    "detail": "627 outcome rows from 1023 scan rows.",
+    "id": 3260,
     "metric": "8h horizon coverage",
     "status": "OK",
-    "updated_at": "2026-05-17T19:39:56+00:00",
-    "value": "63.9%"
+    "updated_at": "2026-05-17T21:09:58+00:00",
+    "value": "61.3%"
   },
   {
-    "detail": "782 outcome rows from 1019 scan rows.",
-    "id": 3217,
+    "detail": "757 outcome rows from 1023 scan rows.",
+    "id": 3259,
     "metric": "4h horizon coverage",
     "status": "OK",
-    "updated_at": "2026-05-17T19:39:56+00:00",
-    "value": "76.7%"
+    "updated_at": "2026-05-17T21:09:58+00:00",
+    "value": "74.0%"
   },
   {
-    "detail": "860 outcome rows from 1019 scan rows.",
-    "id": 3216,
+    "detail": "862 outcome rows from 1023 scan rows.",
+    "id": 3258,
     "metric": "2h horizon coverage",
     "status": "OK",
-    "updated_at": "2026-05-17T19:39:56+00:00",
-    "value": "84.4%"
+    "updated_at": "2026-05-17T21:09:58+00:00",
+    "value": "84.3%"
   },
   {
-    "detail": "908 outcome rows from 1019 scan rows.",
-    "id": 3215,
+    "detail": "912 outcome rows from 1023 scan rows.",
+    "id": 3257,
     "metric": "1h horizon coverage",
     "status": "OK",
-    "updated_at": "2026-05-17T19:39:56+00:00",
+    "updated_at": "2026-05-17T21:09:58+00:00",
     "value": "89.1%"
   },
   {
-    "detail": "916 outcome rows from 1019 scan rows.",
-    "id": 3214,
+    "detail": "919 outcome rows from 1023 scan rows.",
+    "id": 3256,
     "metric": "30m horizon coverage",
     "status": "OK",
-    "updated_at": "2026-05-17T19:39:56+00:00",
+    "updated_at": "2026-05-17T21:09:58+00:00",
+    "value": "89.8%"
+  },
+  {
+    "detail": "920 outcome rows from 1023 scan rows.",
+    "id": 3255,
+    "metric": "15m horizon coverage",
+    "status": "OK",
+    "updated_at": "2026-05-17T21:09:58+00:00",
     "value": "89.9%"
   },
   {
-    "detail": "917 outcome rows from 1019 scan rows.",
-    "id": 3213,
-    "metric": "15m horizon coverage",
-    "status": "OK",
-    "updated_at": "2026-05-17T19:39:56+00:00",
-    "value": "90.0%"
-  },
-  {
     "detail": "GoPlus/security can be absent on free or unauthenticated runs.",
-    "id": 3212,
+    "id": 3254,
     "metric": "Missing security score count",
     "status": "OK",
-    "updated_at": "2026-05-17T19:39:56+00:00",
+    "updated_at": "2026-05-17T21:09:58+00:00",
     "value": "0"
   },
   {
     "detail": "",
-    "id": 3211,
+    "id": 3253,
     "metric": "Missing liquidity count",
     "status": "Review",
-    "updated_at": "2026-05-17T19:39:56+00:00",
+    "updated_at": "2026-05-17T21:09:58+00:00",
     "value": "18"
   },
   {
     "detail": "",
-    "id": 3210,
+    "id": 3252,
     "metric": "Missing 1h move count",
     "status": "Review",
-    "updated_at": "2026-05-17T19:39:56+00:00",
+    "updated_at": "2026-05-17T21:09:58+00:00",
     "value": "344"
   },
   {
     "detail": "",
-    "id": 3209,
+    "id": 3251,
     "metric": "Active API errors",
     "status": "OK",
-    "updated_at": "2026-05-17T19:39:56+00:00",
+    "updated_at": "2026-05-17T21:09:58+00:00",
     "value": "0"
   },
   {
     "detail": "",
-    "id": 3208,
+    "id": 3250,
     "metric": "Last successful outcome update",
     "status": "OK",
-    "updated_at": "2026-05-17T19:39:56+00:00",
-    "value": "2026-05-17T19:39:49+00:00"
+    "updated_at": "2026-05-17T21:09:58+00:00",
+    "value": "2026-05-17T21:09:53+00:00"
   },
   {
     "detail": "",
-    "id": 3207,
+    "id": 3249,
     "metric": "Last successful scan",
     "status": "OK",
-    "updated_at": "2026-05-17T19:39:56+00:00",
-    "value": "2026-05-17T19:39:45+00:00"
+    "updated_at": "2026-05-17T21:09:58+00:00",
+    "value": "2026-05-17T21:09:51+00:00"
   }
 ]
