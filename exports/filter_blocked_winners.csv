@@ -48,6 +48,7 @@ blocked_or_watchlisted_winner,0xe996BC8c627F448C02045eEEE1636437f3F5De46,base:0x
 blocked_or_watchlisted_winner,0xe996BC8c627F448C02045eEEE1636437f3F5De46,base:0x048b53cd77801e54c551ceb26b806e4003c1b85344dc724fc9ce2b30d2a53185,Momentum Trap,30m,120.1332,"[""early_extreme_overextension"",""too_early_after_large_pump""]",0,0,0
 blocked_or_watchlisted_winner,0xf74D524bb35cb312d9d871601208Ca5483817bA3,base:0x64d6a72e95de6306d60a9c43889a922e08f628d56df3511a66922e13c722ba11,Weak Overextended Pump,4h,116.3062,"[""hot_launch_buy_pressure_below_45_percent"",""hot_momentum_weak_buy_pressure"",""weak_overextended_pump""]",0,0,0
 blocked_or_watchlisted_winner,0x0678488FfCF367e8593708462c95c7e110875e34,base:0xdA1Cf50f7345Ba725e7c01640c5a1C5904617ecD,Reject,8h,114.6269,"[""liquidity_below_10000"",""volume_24h_below_15000""]",0,0,0
+blocked_or_watchlisted_winner,0xb66e76F9Ed3e13F24C5b68F68BE631CD82AffbA3,base:0xef9d90806b051a68d8ffbdfdceb6acdd7491180562651dd2bcaf0c4d2fe550da,Watchlist,24h,109.4595,[],0,0,0
 blocked_or_watchlisted_winner,0xf41FaaCdD6b1D0Db127Ec16572B1CAC861F75544,base:0xad69cf15d7b9645ed79c87434e33b81a81b27ee6bece8c813ada2fbd39bc0824,Watchlist,8h,100.4766,[],0,0,0
 blocked_or_watchlisted_winner,0xcD961b347C3Fac12F7057A1Dc03a55616Adc9CdC,base:0xe22BD5Bd5056C3E309E1bd4549b5c14Bbe6BFfa4,Watchlist,1h,93.7100,[],0,0,0
 blocked_or_watchlisted_winner,0xcD961b347C3Fac12F7057A1Dc03a55616Adc9CdC,base:0xe22BD5Bd5056C3E309E1bd4549b5c14Bbe6BFfa4,Watchlist,2h,93.7100,[],0,0,0
@@ -216,6 +217,7 @@ blocked_or_watchlisted_winner_archived_24h,0x4ed4E862860beD51a9570b96d89aF5E1B0E
 blocked_or_watchlisted_winner_archived_24h,0x2598c30330D5771AE9F983979209486aE26dE875,base:0x2E9313991fa984Da0bD9569B68fC620fcCe7377D,Reject,24h,3.6489,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0x0b3e328455c4059EEb9e3f84b5543F74E24e7E1b,base:0x3f0296BF652e19bca772EC3dF08b32732F93014A,Reject,24h,3.6143,"[""fdv_liquidity_ratio_above_200""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0x698DC45e4F10966f6D1D98e3bFd7071d8144C233,base:0x76Fc8DbF2022EE75612cb74ec80caF6b3ccFfb23,Reject,24h,3.5174,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
+blocked_or_watchlisted_winner_archived_24h,0x8e16D46Cb2dA01cdD49601ec73d7B0344969Ae33,base:0x5122E02898Ece3BC62dF8c1efDb29A9e914244D3,Reject,24h,3.4357,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0x52b492a33E447Cdb854c7FC19F1e57E8BfA1777D,base:0x0FB597D6cFE5bE0d5258A7f017599C2A4Ece34c7,Reject,24h,3.3770,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0x0b3e328455c4059EEb9e3f84b5543F74E24e7E1b,base:0x3f0296BF652e19bca772EC3dF08b32732F93014A,Reject,24h,3.0697,"[""fdv_liquidity_ratio_above_200""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0x8e16D46Cb2dA01cdD49601ec73d7B0344969Ae33,base:0x5122E02898Ece3BC62dF8c1efDb29A9e914244D3,Reject,24h,2.9890,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
@@ -234,6 +236,7 @@ blocked_or_watchlisted_winner_archived_24h,0x25C6731a81a10Bf7e86a40835cB2F536Fee
 blocked_or_watchlisted_winner_archived_24h,0x25C6731a81a10Bf7e86a40835cB2F536Fee20944,base:0x02d1c525c0abfaff5c8c5715eac7516969ebe40c2e239be64d3ae7637e8798ea,Reject,24h,2.6139,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0x8e16D46Cb2dA01cdD49601ec73d7B0344969Ae33,base:0x5122E02898Ece3BC62dF8c1efDb29A9e914244D3,Reject,24h,2.6106,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0x2598c30330D5771AE9F983979209486aE26dE875,base:0x2E9313991fa984Da0bD9569B68fC620fcCe7377D,Reject,24h,2.5690,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
+blocked_or_watchlisted_winner_archived_24h,0x0b3e328455c4059EEb9e3f84b5543F74E24e7E1b,base:0x3f0296BF652e19bca772EC3dF08b32732F93014A,Reject,24h,2.5648,"[""fdv_liquidity_ratio_above_200""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0xd07379a755A8f11B57610154861D694b2A0f615a,base:0x5554419CCd0293d9383901F461C7C3E0c66E925F,Reject,24h,2.5195,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0x2598c30330D5771AE9F983979209486aE26dE875,base:0x2E9313991fa984Da0bD9569B68fC620fcCe7377D,Reject,24h,2.4715,"[""buy_pressure_below_30_percent"",""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0xF5Bc3439f53A45607cCaD667AbC7DAF5A583633F,base:0xF8bB13359C402F399b152Ca5df7a8B00eC2A6deE,Reject,24h,2.4280,"[""buy_pressure_below_30_percent"",""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
@@ -252,6 +255,7 @@ blocked_or_watchlisted_winner_archived_24h,0xF5Bc3439f53A45607cCaD667AbC7DAF5A58
 blocked_or_watchlisted_winner_archived_24h,0xF5Bc3439f53A45607cCaD667AbC7DAF5A583633F,base:0xF8bB13359C402F399b152Ca5df7a8B00eC2A6deE,Reject,24h,2.1900,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0x1c93d155bD388241F9AB5Df500D69eb529cE9583,base:0xf8f4afa64c443ff00630d089205140814c9c0ce79ff293d05913a161fcc7ec4a,Reject,24h,2.1739,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0x2598c30330D5771AE9F983979209486aE26dE875,base:0x2E9313991fa984Da0bD9569B68fC620fcCe7377D,Reject,24h,2.1339,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
+blocked_or_watchlisted_winner_archived_24h,0xD98832e8a59156AcBEe4744B9A94A9989a728f36,base:0x0162cCBE8961b9e33c788c463F4c9428333b2D6f,Reject,24h,2.1125,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0x0b3e328455c4059EEb9e3f84b5543F74E24e7E1b,base:0x3f0296BF652e19bca772EC3dF08b32732F93014A,Reject,24h,2.1115,"[""fdv_liquidity_ratio_above_200""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0x52b492a33E447Cdb854c7FC19F1e57E8BfA1777D,base:0x0FB597D6cFE5bE0d5258A7f017599C2A4Ece34c7,Reject,24h,2.1113,"[""unique_buyers_below_10""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0x0678488FfCF367e8593708462c95c7e110875e34,base:0xdA1Cf50f7345Ba725e7c01640c5a1C5904617ecD,Reject,24h,2.0399,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
@@ -304,6 +308,3 @@ blocked_or_watchlisted_winner_archived_24h,0x52b492a33E447Cdb854c7FC19F1e57E8BfA
 blocked_or_watchlisted_winner_archived_24h,0x52b492a33E447Cdb854c7FC19F1e57E8BfA1777D,base:0x0FB597D6cFE5bE0d5258A7f017599C2A4Ece34c7,Reject,24h,1.3666,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0xD98832e8a59156AcBEe4744B9A94A9989a728f36,base:0x0162cCBE8961b9e33c788c463F4c9428333b2D6f,Reject,24h,1.3643,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
 blocked_or_watchlisted_winner_archived_24h,0xD98832e8a59156AcBEe4744B9A94A9989a728f36,base:0x0162cCBE8961b9e33c788c463F4c9428333b2D6f,Reject,24h,1.3643,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
-blocked_or_watchlisted_winner_archived_24h,0xD98832e8a59156AcBEe4744B9A94A9989a728f36,base:0x0162cCBE8961b9e33c788c463F4c9428333b2D6f,Reject,24h,1.3438,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
-blocked_or_watchlisted_winner_archived_24h,0x0b3e328455c4059EEb9e3f84b5543F74E24e7E1b,base:0x3f0296BF652e19bca772EC3dF08b32732F93014A,Reject,24h,1.2849,"[""fdv_liquidity_ratio_above_200""]",0,0,0
-blocked_or_watchlisted_winner_archived_24h,0xF5Bc3439f53A45607cCaD667AbC7DAF5A583633F,base:0xF8bB13359C402F399b152Ca5df7a8B00eC2A6deE,Reject,24h,1.1265,"[""unique_buyers_below_10"",""volume_24h_below_15000""]",0,0,0
