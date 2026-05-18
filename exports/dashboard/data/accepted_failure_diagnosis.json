@@ -1,11 +1,11 @@
 [
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "bLend failed after being labeled Research Candidate. Main likely causes: overextension failure, liquidity drop failure, timing failure.",
     "failure_reasons": "[\"Overextension failure\",\"Liquidity drop failure\",\"Timing failure\"]",
     "fix_recommendation": "Require delayed-entry survival before promotion and reduce max allowed 1h move.",
     "horizon": "1h",
-    "id": 7460,
+    "id": 7603,
     "liquidity_at_horizon": 60908.98,
     "liquidity_at_scan": 162907.74,
     "max_adverse_excursion_pct": -74.25122749590834,
@@ -20,12 +20,12 @@
     "volume_at_scan": 832235.58
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "bLend failed after being labeled Research Candidate. Main likely causes: overextension failure, liquidity drop failure, timing failure.",
     "failure_reasons": "[\"Overextension failure\",\"Liquidity drop failure\",\"Timing failure\"]",
     "fix_recommendation": "Require delayed-entry survival before promotion and reduce max allowed 1h move.",
     "horizon": "30m",
-    "id": 7459,
+    "id": 7602,
     "liquidity_at_horizon": 60908.98,
     "liquidity_at_scan": 162907.74,
     "max_adverse_excursion_pct": -74.25122749590834,
@@ -40,12 +40,12 @@
     "volume_at_scan": 832235.58
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "bLend failed after being labeled Research Candidate. Main likely causes: overextension failure, liquidity drop failure, timing failure.",
     "failure_reasons": "[\"Overextension failure\",\"Liquidity drop failure\",\"Timing failure\"]",
     "fix_recommendation": "Require delayed-entry survival before promotion and reduce max allowed 1h move.",
     "horizon": "15m",
-    "id": 7458,
+    "id": 7601,
     "liquidity_at_horizon": 60908.98,
     "liquidity_at_scan": 162907.74,
     "max_adverse_excursion_pct": -74.25122749590834,
@@ -60,12 +60,12 @@
     "volume_at_scan": 832235.58
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "bLend failed after being labeled Research Candidate. Main likely causes: overextension failure, liquidity drop failure, timing failure.",
     "failure_reasons": "[\"Overextension failure\",\"Liquidity drop failure\",\"Timing failure\"]",
     "fix_recommendation": "Require delayed-entry survival before promotion and reduce max allowed 1h move.",
     "horizon": "2h",
-    "id": 7457,
+    "id": 7600,
     "liquidity_at_horizon": 58737.47,
     "liquidity_at_scan": 162907.74,
     "max_adverse_excursion_pct": -75.2986906710311,
@@ -80,12 +80,12 @@
     "volume_at_scan": 832235.58
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "LO0P failed after being labeled Paper Trade Candidate. Main likely causes: timing failure.",
     "failure_reasons": "[\"Timing failure\"]",
     "fix_recommendation": "Keep as research only until more stable post-detection evidence appears.",
     "horizon": "15m",
-    "id": 7456,
+    "id": 7599,
     "liquidity_at_horizon": 111886.47,
     "liquidity_at_scan": 147854.62,
     "max_adverse_excursion_pct": -37.69549952122566,
@@ -100,12 +100,12 @@
     "volume_at_scan": 1977867.47
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "LO0P failed after being labeled Paper Trade Candidate. Main likely causes: timing failure.",
     "failure_reasons": "[\"Timing failure\"]",
     "fix_recommendation": "Keep as research only until more stable post-detection evidence appears.",
     "horizon": "1h",
-    "id": 7455,
+    "id": 7598,
     "liquidity_at_horizon": 112184.83,
     "liquidity_at_scan": 147854.62,
     "max_adverse_excursion_pct": -37.631662942866264,
@@ -120,12 +120,12 @@
     "volume_at_scan": 1977867.47
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "LO0P failed after being labeled Paper Trade Candidate. Main likely causes: timing failure.",
     "failure_reasons": "[\"Timing failure\"]",
     "fix_recommendation": "Keep as research only until more stable post-detection evidence appears.",
     "horizon": "30m",
-    "id": 7454,
+    "id": 7597,
     "liquidity_at_horizon": 112184.83,
     "liquidity_at_scan": 147854.62,
     "max_adverse_excursion_pct": -37.631662942866264,
@@ -140,12 +140,12 @@
     "volume_at_scan": 1977867.47
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "bLend failed after being labeled Research Candidate. Main likely causes: overextension failure, liquidity drop failure, timing failure.",
     "failure_reasons": "[\"Overextension failure\",\"Liquidity drop failure\",\"Timing failure\"]",
     "fix_recommendation": "Require delayed-entry survival before promotion and reduce max allowed 1h move.",
     "horizon": "4h",
-    "id": 7453,
+    "id": 7596,
     "liquidity_at_horizon": 55199.56,
     "liquidity_at_scan": 162907.74,
     "max_adverse_excursion_pct": -76.96399345335516,
@@ -160,12 +160,12 @@
     "volume_at_scan": 832235.58
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "LO0P failed after being labeled Paper Trade Candidate. Main likely causes: timing failure.",
     "failure_reasons": "[\"Timing failure\"]",
     "fix_recommendation": "Keep as research only until more stable post-detection evidence appears.",
     "horizon": "2h",
-    "id": 7452,
+    "id": 7595,
     "liquidity_at_horizon": 103595.59,
     "liquidity_at_scan": 147854.62,
     "max_adverse_excursion_pct": -45.32397063517396,
@@ -180,12 +180,12 @@
     "volume_at_scan": 1977867.47
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "LO0P failed after being labeled Research Candidate. Main likely causes: overextension failure, timing failure.",
     "failure_reasons": "[\"Overextension failure\",\"Timing failure\"]",
     "fix_recommendation": "Require delayed-entry survival before promotion and reduce max allowed 1h move.",
     "horizon": "4h",
-    "id": 7451,
+    "id": 7594,
     "liquidity_at_horizon": 100545.5,
     "liquidity_at_scan": 131148.65,
     "max_adverse_excursion_pct": -36.42410015649453,
@@ -200,12 +200,12 @@
     "volume_at_scan": 1109338.23
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "LO0P failed after being labeled Paper Trade Candidate. Main likely causes: timing failure.",
     "failure_reasons": "[\"Timing failure\"]",
     "fix_recommendation": "Keep as research only until more stable post-detection evidence appears.",
     "horizon": "4h",
-    "id": 7450,
+    "id": 7593,
     "liquidity_at_horizon": 107785.1,
     "liquidity_at_scan": 147854.62,
     "max_adverse_excursion_pct": -41.94063198212575,
@@ -220,12 +220,12 @@
     "volume_at_scan": 1977867.47
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "bLend failed after being labeled Research Candidate. Main likely causes: overextension failure, liquidity drop failure, timing failure.",
     "failure_reasons": "[\"Overextension failure\",\"Liquidity drop failure\",\"Timing failure\"]",
     "fix_recommendation": "Require delayed-entry survival before promotion and reduce max allowed 1h move.",
     "horizon": "8h",
-    "id": 7449,
+    "id": 7592,
     "liquidity_at_horizon": 93556.17,
     "liquidity_at_scan": 162907.74,
     "max_adverse_excursion_pct": -74.2430441898527,
@@ -240,12 +240,12 @@
     "volume_at_scan": 832235.58
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "LO0P failed after being labeled Research Candidate. Main likely causes: overextension failure, timing failure.",
     "failure_reasons": "[\"Overextension failure\",\"Timing failure\"]",
     "fix_recommendation": "Require delayed-entry survival before promotion and reduce max allowed 1h move.",
     "horizon": "8h",
-    "id": 7448,
+    "id": 7591,
     "liquidity_at_horizon": 95792.78,
     "liquidity_at_scan": 131148.65,
     "max_adverse_excursion_pct": -40.76682316118936,
@@ -260,12 +260,12 @@
     "volume_at_scan": 1109338.23
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "LO0P failed after being labeled Paper Trade Candidate. Main likely causes: liquidity drop failure, timing failure.",
     "failure_reasons": "[\"Liquidity drop failure\",\"Timing failure\"]",
     "fix_recommendation": "Require stronger liquidity retention and reject fast liquidity fade.",
     "horizon": "8h",
-    "id": 7447,
+    "id": 7590,
     "liquidity_at_horizon": 46038.89,
     "liquidity_at_scan": 147854.62,
     "max_adverse_excursion_pct": -92.40983083306735,
@@ -280,12 +280,12 @@
     "volume_at_scan": 1977867.47
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "jo failed after being labeled Research Candidate. Main likely causes: liquidity drop failure, timing failure.",
     "failure_reasons": "[\"Liquidity drop failure\",\"Timing failure\"]",
     "fix_recommendation": "Require stronger liquidity retention and reject fast liquidity fade.",
     "horizon": "4h",
-    "id": 7446,
+    "id": 7589,
     "liquidity_at_horizon": 83131.58,
     "liquidity_at_scan": 136530.89,
     "max_adverse_excursion_pct": -56.59962287869264,
@@ -300,12 +300,12 @@
     "volume_at_scan": 946130.57
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "jo failed after being labeled Research Candidate. Main likely causes: liquidity drop failure, timing failure.",
     "failure_reasons": "[\"Liquidity drop failure\",\"Timing failure\"]",
     "fix_recommendation": "Require stronger liquidity retention and reject fast liquidity fade.",
     "horizon": "2h",
-    "id": 7445,
+    "id": 7588,
     "liquidity_at_horizon": 83131.58,
     "liquidity_at_scan": 136530.89,
     "max_adverse_excursion_pct": -56.59962287869264,
@@ -320,12 +320,12 @@
     "volume_at_scan": 946130.57
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "jo failed after being labeled Research Candidate. Main likely causes: liquidity drop failure, timing failure.",
     "failure_reasons": "[\"Liquidity drop failure\",\"Timing failure\"]",
     "fix_recommendation": "Require stronger liquidity retention and reject fast liquidity fade.",
     "horizon": "1h",
-    "id": 7444,
+    "id": 7587,
     "liquidity_at_horizon": 83131.58,
     "liquidity_at_scan": 136530.89,
     "max_adverse_excursion_pct": -56.59962287869264,
@@ -340,12 +340,12 @@
     "volume_at_scan": 946130.57
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "jo failed after being labeled Research Candidate. Main likely causes: liquidity drop failure, timing failure.",
     "failure_reasons": "[\"Liquidity drop failure\",\"Timing failure\"]",
     "fix_recommendation": "Require stronger liquidity retention and reject fast liquidity fade.",
     "horizon": "30m",
-    "id": 7443,
+    "id": 7586,
     "liquidity_at_horizon": 83131.58,
     "liquidity_at_scan": 136530.89,
     "max_adverse_excursion_pct": -56.59962287869264,
@@ -360,12 +360,12 @@
     "volume_at_scan": 946130.57
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "jo failed after being labeled Research Candidate. Main likely causes: liquidity drop failure, timing failure.",
     "failure_reasons": "[\"Liquidity drop failure\",\"Timing failure\"]",
     "fix_recommendation": "Require stronger liquidity retention and reject fast liquidity fade.",
     "horizon": "15m",
-    "id": 7442,
+    "id": 7585,
     "liquidity_at_horizon": 83131.58,
     "liquidity_at_scan": 136530.89,
     "max_adverse_excursion_pct": -56.59962287869264,
@@ -380,12 +380,12 @@
     "volume_at_scan": 946130.57
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "jo failed after being labeled Research Candidate. Main likely causes: liquidity drop failure, timing failure.",
     "failure_reasons": "[\"Liquidity drop failure\",\"Timing failure\"]",
     "fix_recommendation": "Require stronger liquidity retention and reject fast liquidity fade.",
     "horizon": "8h",
-    "id": 7441,
+    "id": 7584,
     "liquidity_at_horizon": 93386.0,
     "liquidity_at_scan": 136530.89,
     "max_adverse_excursion_pct": -47.39157762413577,
@@ -400,12 +400,12 @@
     "volume_at_scan": 946130.57
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "bLend failed after being labeled Research Candidate. Main likely causes: overextension failure, liquidity drop failure, volume fade failure, timing failure.",
     "failure_reasons": "[\"Overextension failure\",\"Liquidity drop failure\",\"Volume fade failure\",\"Timing failure\"]",
     "fix_recommendation": "Require delayed-entry survival before promotion and reduce max allowed 1h move.",
     "horizon": "24h",
-    "id": 7440,
+    "id": 7583,
     "liquidity_at_horizon": 65228.86,
     "liquidity_at_scan": 162907.74,
     "max_adverse_excursion_pct": -74.2430441898527,
@@ -420,12 +420,12 @@
     "volume_at_scan": 832235.58
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "LO0P failed after being labeled Paper Trade Candidate. Main likely causes: liquidity drop failure, volume fade failure, timing failure.",
     "failure_reasons": "[\"Liquidity drop failure\",\"Volume fade failure\",\"Timing failure\"]",
     "fix_recommendation": "Require stronger liquidity retention and reject fast liquidity fade.",
     "horizon": "24h",
-    "id": 7439,
+    "id": 7582,
     "liquidity_at_horizon": 46038.89,
     "liquidity_at_scan": 147854.62,
     "max_adverse_excursion_pct": -92.40983083306735,
@@ -440,12 +440,12 @@
     "volume_at_scan": 1977867.47
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "LO0P failed after being labeled Research Candidate. Main likely causes: overextension failure, liquidity drop failure, timing failure.",
     "failure_reasons": "[\"Overextension failure\",\"Liquidity drop failure\",\"Timing failure\"]",
     "fix_recommendation": "Require delayed-entry survival before promotion and reduce max allowed 1h move.",
     "horizon": "24h",
-    "id": 7438,
+    "id": 7581,
     "liquidity_at_horizon": 46038.89,
     "liquidity_at_scan": 131148.65,
     "max_adverse_excursion_pct": -90.69640062597809,
@@ -460,12 +460,12 @@
     "volume_at_scan": 1109338.23
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "jo failed after being labeled Research Candidate. Main likely causes: liquidity drop failure, timing failure.",
     "failure_reasons": "[\"Liquidity drop failure\",\"Timing failure\"]",
     "fix_recommendation": "Require stronger liquidity retention and reject fast liquidity fade.",
     "horizon": "24h",
-    "id": 7437,
+    "id": 7580,
     "liquidity_at_horizon": 21516.55,
     "liquidity_at_scan": 136530.89,
     "max_adverse_excursion_pct": -93.84978001257072,
@@ -480,12 +480,12 @@
     "volume_at_scan": 946130.57
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "ROO failed after being labeled Research Candidate. Main likely causes: timing failure.",
     "failure_reasons": "[\"Timing failure\"]",
     "fix_recommendation": "Keep as research only until more stable post-detection evidence appears.",
     "horizon": "24h",
-    "id": 7436,
+    "id": 7579,
     "liquidity_at_horizon": 197093.63,
     "liquidity_at_scan": 240798.35,
     "max_adverse_excursion_pct": -31.719334012911993,
@@ -500,12 +500,12 @@
     "volume_at_scan": 256045.59
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "PEPTAI failed after being labeled Research Candidate. Main likely causes: timing failure.",
     "failure_reasons": "[\"Timing failure\"]",
     "fix_recommendation": "Keep as research only until more stable post-detection evidence appears.",
     "horizon": "2h",
-    "id": 7435,
+    "id": 7578,
     "liquidity_at_horizon": 678900.26,
     "liquidity_at_scan": 818577.35,
     "max_adverse_excursion_pct": -29.813664596273306,
@@ -520,12 +520,12 @@
     "volume_at_scan": 6082950.5
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "PEPTAI failed after being labeled Research Candidate. Main likely causes: timing failure.",
     "failure_reasons": "[\"Timing failure\"]",
     "fix_recommendation": "Keep as research only until more stable post-detection evidence appears.",
     "horizon": "1h",
-    "id": 7434,
+    "id": 7577,
     "liquidity_at_horizon": 678900.26,
     "liquidity_at_scan": 818577.35,
     "max_adverse_excursion_pct": -29.813664596273306,
@@ -540,12 +540,12 @@
     "volume_at_scan": 6082950.5
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "PEPTAI failed after being labeled Research Candidate. Main likely causes: timing failure.",
     "failure_reasons": "[\"Timing failure\"]",
     "fix_recommendation": "Keep as research only until more stable post-detection evidence appears.",
     "horizon": "30m",
-    "id": 7433,
+    "id": 7576,
     "liquidity_at_horizon": 678900.26,
     "liquidity_at_scan": 818577.35,
     "max_adverse_excursion_pct": -29.813664596273306,
@@ -560,12 +560,12 @@
     "volume_at_scan": 6082950.5
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "PEPTAI failed after being labeled Research Candidate. Main likely causes: timing failure.",
     "failure_reasons": "[\"Timing failure\"]",
     "fix_recommendation": "Keep as research only until more stable post-detection evidence appears.",
     "horizon": "15m",
-    "id": 7432,
+    "id": 7575,
     "liquidity_at_horizon": 678900.26,
     "liquidity_at_scan": 818577.35,
     "max_adverse_excursion_pct": -29.813664596273306,
@@ -580,12 +580,12 @@
     "volume_at_scan": 6082950.5
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "PEPTAI failed after being labeled Research Candidate. Main likely causes: timing failure.",
     "failure_reasons": "[\"Timing failure\"]",
     "fix_recommendation": "Keep as research only until more stable post-detection evidence appears.",
     "horizon": "4h",
-    "id": 7431,
+    "id": 7574,
     "liquidity_at_horizon": 634109.34,
     "liquidity_at_scan": 818577.35,
     "max_adverse_excursion_pct": -38.75155279503106,
@@ -600,12 +600,12 @@
     "volume_at_scan": 6082950.5
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "PEPTAI failed after being labeled Research Candidate. Main likely causes: timing failure.",
     "failure_reasons": "[\"Timing failure\"]",
     "fix_recommendation": "Keep as research only until more stable post-detection evidence appears.",
     "horizon": "8h",
-    "id": 7430,
+    "id": 7573,
     "liquidity_at_horizon": 707452.61,
     "liquidity_at_scan": 818577.35,
     "max_adverse_excursion_pct": -26.708074534161497,
@@ -620,12 +620,12 @@
     "volume_at_scan": 6082950.5
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "AORA failed after being labeled Research Candidate. Main likely causes: timing failure, no-buyer-continuation failure.",
     "failure_reasons": "[\"Timing failure\",\"No-buyer-continuation failure\"]",
     "fix_recommendation": "Keep as research only until more stable post-detection evidence appears.",
     "horizon": "24h",
-    "id": 7429,
+    "id": 7572,
     "liquidity_at_horizon": 550240.16,
     "liquidity_at_scan": 614861.96,
     "max_adverse_excursion_pct": -37.49574105621806,
@@ -640,12 +640,12 @@
     "volume_at_scan": 786427.11
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "WAVE failed after being labeled Research Candidate. Main likely causes: timing failure.",
     "failure_reasons": "[\"Timing failure\"]",
     "fix_recommendation": "Keep as research only until more stable post-detection evidence appears.",
     "horizon": "8h",
-    "id": 7428,
+    "id": 7571,
     "liquidity_at_horizon": 89208.54,
     "liquidity_at_scan": 113775.28,
     "max_adverse_excursion_pct": -33.86666666666667,
@@ -660,12 +660,12 @@
     "volume_at_scan": 615226.09
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "PEPTAI failed after being labeled Research Candidate. Main likely causes: volume fade failure, timing failure.",
     "failure_reasons": "[\"Volume fade failure\",\"Timing failure\"]",
     "fix_recommendation": "Require volume continuation after detection before paper promotion.",
     "horizon": "24h",
-    "id": 7427,
+    "id": 7570,
     "liquidity_at_horizon": 639713.6,
     "liquidity_at_scan": 818577.35,
     "max_adverse_excursion_pct": -39.37888198757764,
@@ -680,12 +680,12 @@
     "volume_at_scan": 6082950.5
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "DEGEN failed after being labeled Research Candidate. Main likely causes: timing failure.",
     "failure_reasons": "[\"Timing failure\"]",
     "fix_recommendation": "Keep as research only until more stable post-detection evidence appears.",
     "horizon": "24h",
-    "id": 7426,
+    "id": 7569,
     "liquidity_at_horizon": 1014576.25,
     "liquidity_at_scan": 1283217.0,
     "max_adverse_excursion_pct": -27.475133894414693,
@@ -700,12 +700,12 @@
     "volume_at_scan": 2143664.94
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "WAVE failed after being labeled Research Candidate. Main likely causes: liquidity drop failure, timing failure.",
     "failure_reasons": "[\"Liquidity drop failure\",\"Timing failure\"]",
     "fix_recommendation": "Require stronger liquidity retention and reject fast liquidity fade.",
     "horizon": "24h",
-    "id": 7425,
+    "id": 7568,
     "liquidity_at_horizon": 33033.23,
     "liquidity_at_scan": 113775.28,
     "max_adverse_excursion_pct": -93.93523809523809,
@@ -720,12 +720,12 @@
     "volume_at_scan": 615226.09
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "RLV failed after being labeled Research Candidate. Main likely causes: timing failure.",
     "failure_reasons": "[\"Timing failure\"]",
     "fix_recommendation": "Keep as research only until more stable post-detection evidence appears.",
     "horizon": "1h",
-    "id": 7424,
+    "id": 7567,
     "liquidity_at_horizon": 60922.32,
     "liquidity_at_scan": 84285.93,
     "max_adverse_excursion_pct": -41.471215351812376,
@@ -740,12 +740,12 @@
     "volume_at_scan": 1018050.5
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "RLV failed after being labeled Research Candidate. Main likely causes: timing failure.",
     "failure_reasons": "[\"Timing failure\"]",
     "fix_recommendation": "Keep as research only until more stable post-detection evidence appears.",
     "horizon": "30m",
-    "id": 7423,
+    "id": 7566,
     "liquidity_at_horizon": 60922.32,
     "liquidity_at_scan": 84285.93,
     "max_adverse_excursion_pct": -41.471215351812376,
@@ -760,12 +760,12 @@
     "volume_at_scan": 1018050.5
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "RLV failed after being labeled Research Candidate. Main likely causes: timing failure.",
     "failure_reasons": "[\"Timing failure\"]",
     "fix_recommendation": "Keep as research only until more stable post-detection evidence appears.",
     "horizon": "15m",
-    "id": 7422,
+    "id": 7565,
     "liquidity_at_horizon": 60922.32,
     "liquidity_at_scan": 84285.93,
     "max_adverse_excursion_pct": -41.471215351812376,
@@ -780,12 +780,12 @@
     "volume_at_scan": 1018050.5
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "RLV failed after being labeled Research Candidate. Main likely causes: timing failure.",
     "failure_reasons": "[\"Timing failure\"]",
     "fix_recommendation": "Keep as research only until more stable post-detection evidence appears.",
     "horizon": "2h",
-    "id": 7421,
+    "id": 7564,
     "liquidity_at_horizon": 60922.32,
     "liquidity_at_scan": 84285.93,
     "max_adverse_excursion_pct": -41.471215351812376,
@@ -800,12 +800,12 @@
     "volume_at_scan": 1018050.5
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "RLV failed after being labeled Research Candidate. Main likely causes: timing failure.",
     "failure_reasons": "[\"Timing failure\"]",
     "fix_recommendation": "Keep as research only until more stable post-detection evidence appears.",
     "horizon": "4h",
-    "id": 7420,
+    "id": 7563,
     "liquidity_at_horizon": 60922.32,
     "liquidity_at_scan": 84285.93,
     "max_adverse_excursion_pct": -41.471215351812376,
@@ -820,12 +820,12 @@
     "volume_at_scan": 1018050.5
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "RLV failed after being labeled Research Candidate. Main likely causes: timing failure.",
     "failure_reasons": "[\"Timing failure\"]",
     "fix_recommendation": "Keep as research only until more stable post-detection evidence appears.",
     "horizon": "8h",
-    "id": 7419,
+    "id": 7562,
     "liquidity_at_horizon": 60922.32,
     "liquidity_at_scan": 84285.93,
     "max_adverse_excursion_pct": -41.471215351812376,
@@ -840,12 +840,12 @@
     "volume_at_scan": 1018050.5
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "BUGZ failed after being labeled Research Candidate. Main likely causes: timing failure.",
     "failure_reasons": "[\"Timing failure\"]",
     "fix_recommendation": "Keep as research only until more stable post-detection evidence appears.",
     "horizon": "2h",
-    "id": 7418,
+    "id": 7561,
     "liquidity_at_horizon": 106154.45,
     "liquidity_at_scan": 151115.23,
     "max_adverse_excursion_pct": -45.34543325526932,
@@ -860,12 +860,12 @@
     "volume_at_scan": 1313545.04
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "BUGZ failed after being labeled Research Candidate. Main likely causes: timing failure.",
     "failure_reasons": "[\"Timing failure\"]",
     "fix_recommendation": "Keep as research only until more stable post-detection evidence appears.",
     "horizon": "1h",
-    "id": 7417,
+    "id": 7560,
     "liquidity_at_horizon": 106154.45,
     "liquidity_at_scan": 151115.23,
     "max_adverse_excursion_pct": -45.34543325526932,
@@ -880,12 +880,12 @@
     "volume_at_scan": 1313545.04
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "BUGZ failed after being labeled Research Candidate. Main likely causes: timing failure.",
     "failure_reasons": "[\"Timing failure\"]",
     "fix_recommendation": "Keep as research only until more stable post-detection evidence appears.",
     "horizon": "30m",
-    "id": 7416,
+    "id": 7559,
     "liquidity_at_horizon": 106154.45,
     "liquidity_at_scan": 151115.23,
     "max_adverse_excursion_pct": -45.34543325526932,
@@ -900,12 +900,12 @@
     "volume_at_scan": 1313545.04
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "BUGZ failed after being labeled Research Candidate. Main likely causes: timing failure.",
     "failure_reasons": "[\"Timing failure\"]",
     "fix_recommendation": "Keep as research only until more stable post-detection evidence appears.",
     "horizon": "15m",
-    "id": 7415,
+    "id": 7558,
     "liquidity_at_horizon": 106154.45,
     "liquidity_at_scan": 151115.23,
     "max_adverse_excursion_pct": -45.34543325526932,
@@ -920,12 +920,12 @@
     "volume_at_scan": 1313545.04
   },
   {
-    "created_at": "2026-05-18T00:12:22+00:00",
+    "created_at": "2026-05-18T04:43:51+00:00",
     "diagnosis_text": "BUGZ failed after being labeled Research Candidate. Main likely causes: timing failure.",
     "failure_reasons": "[\"Timing failure\"]",
     "fix_recommendation": "Keep as research only until more stable post-detection evidence appears.",
     "horizon": "4h",
-    "id": 7414,
+    "id": 7557,
     "liquidity_at_horizon": 111186.77,
     "liquidity_at_scan": 151115.23,
     "max_adverse_excursion_pct": -41.10070257611241,
@@ -937,6 +937,26 @@
     "symbol": "BUGZ",
     "token_address": "0x0Dd88a00F80c5ad71B24D4928d7c959D616b52af",
     "volume_at_horizon": 3137015.67,
+    "volume_at_scan": 1313545.04
+  },
+  {
+    "created_at": "2026-05-18T04:43:51+00:00",
+    "diagnosis_text": "BUGZ failed after being labeled Research Candidate. Main likely causes: timing failure.",
+    "failure_reasons": "[\"Timing failure\"]",
+    "fix_recommendation": "Keep as research only until more stable post-detection evidence appears.",
+    "horizon": "24h",
+    "id": 7556,
+    "liquidity_at_horizon": 116412.29,
+    "liquidity_at_scan": 151115.23,
+    "max_adverse_excursion_pct": -35.245901639344254,
+    "max_favorable_excursion_pct": 0.0,
+    "original_label": "Research Candidate",
+    "pair_id": "base:0x281aa43060db814830c140704327e0f20d5599c7ade66ef9c6bf3418c8c7206b",
+    "price_change_1h_at_scan": 73.13,
+    "return_pct": -35.245901639344254,
+    "symbol": "BUGZ",
+    "token_address": "0x0Dd88a00F80c5ad71B24D4928d7c959D616b52af",
+    "volume_at_horizon": 3563974.94,
     "volume_at_scan": 1313545.04
   }
 ]
